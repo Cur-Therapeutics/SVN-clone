@@ -1,0 +1,53 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Engineer-Apps\\CUR\\TargetDiagnostics\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur\\targetdiagnostics\\commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur\\targetdiagnostics\\guiform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:guiform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Commands.cs",
+              "DocumentMoniker": "C:\\Engineer-Apps\\CUR\\TargetDiagnostics\\Commands.cs",
+              "RelativeDocumentMoniker": "Commands.cs",
+              "ToolTip": "C:\\Engineer-Apps\\CUR\\TargetDiagnostics\\Commands.cs*",
+              "RelativeToolTip": "Commands.cs*",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABYAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T12:42:57.8Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "GUIForm.Designer.cs",
+              "DocumentMoniker": "C:\\Engineer-Apps\\CUR\\TargetDiagnostics\\GUIForm.Designer.cs",
+              "RelativeDocumentMoniker": "GUIForm.Designer.cs",
+              "ToolTip": "C:\\Engineer-Apps\\CUR\\TargetDiagnostics\\GUIForm.Designer.cs",
+              "RelativeToolTip": "GUIForm.Designer.cs",
+              "ViewState": "AgIAAGIAAAAAAAAAAADwv3MAAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T12:42:34.839Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
