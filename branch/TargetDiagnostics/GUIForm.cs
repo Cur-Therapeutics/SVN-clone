@@ -17,6 +17,8 @@
 
 using MeiraDiagnostics;
 using System.IO.Ports;
+using System.Windows.Forms;
+using Utilities;
 
 namespace CURDiags
 {
@@ -37,6 +39,9 @@ namespace CURDiags
         /// </summary>
         public bool IsCOMPortOpen => mSerialPort != null && mSerialPort.IsOpen;
 
+        private const string ConfigrationFileName = "Configuration.csv";
+
+        private readonly CsvFile _configrationFile = new CsvFile(ConfigrationFileName);
 
         /// <summary>
         /// Construct an instance of the GUIForm. Perform one-time initialization.
@@ -51,7 +56,12 @@ namespace CURDiags
 
             Logger.LoggedMessage += Logger_LoggedMessage;
             RefreshCOMPortList();
+
+            if (string.IsNullOrEmpty(comboBoxCOMPort.Text))
+                comboBoxCOMPort.Text = _configrationFile.GetValue("Port");
         }
+
+        private readonly Dictionary<string, string> _configurationData = new();
 
         /// <summary>
         /// Handle the Closing event of the main Form.
@@ -106,6 +116,9 @@ namespace CURDiags
 
             if (mSerialPort is not null)
                 mSerialPort.IncomingMessage += SerialPort_IncomingMessage;
+
+            _configrationFile.SetValues("Port", new string[] { comboBoxCOMPort.Text });
+            _configrationFile.Save();
         }
 
         /// <summary>
@@ -160,6 +173,17 @@ namespace CURDiags
         {
             labelCOMStatus.BackColor = IsCOMPortOpen ? Color.Green : Color.Red;
             buttonConnect.Text = IsCOMPortOpen ? "Disconnect" : "Connect";
+
+            toolStripStatusLabel1.Text = IsCOMPortOpen ? "Connected" : "Not Connected";
+
+            switch (tabControl1.SelectedTab.Name)
+            {
+                case "tabPageTesting":
+                    break;
+                case "tabPageDebug":
+                    TabDebug_Update();
+                    break;
+            }
         }
 
         /// <summary>
@@ -175,7 +199,6 @@ namespace CURDiags
 
         /// <summary>
         /// Update the list of COM ports found.  
-        /// Note, does not remove old items.
         /// </summary>
         private void RefreshCOMPortList()
         {

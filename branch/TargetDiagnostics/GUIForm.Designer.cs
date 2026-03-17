@@ -38,6 +38,9 @@ namespace CURDiags
             listBox1 = new ListBox();
             buttonHello = new Button();
             tabPageDebug = new TabPage();
+            dataGridViewDebugStats = new DataGridView();
+            NameCol = new DataGridViewTextBoxColumn();
+            Value = new DataGridViewTextBoxColumn();
             buttonDebugClearList = new Button();
             listBoxDebugLogList = new ListBox();
             labelCOMStatus = new Label();
@@ -45,9 +48,13 @@ namespace CURDiags
             comboBoxCOMPort = new ComboBox();
             timerOneSecond = new System.Windows.Forms.Timer(components);
             comboBoxBaudRate = new ComboBox();
+            statusStrip1 = new StatusStrip();
+            toolStripStatusLabel1 = new ToolStripStatusLabel();
             tabControl1.SuspendLayout();
             tabPageTesting.SuspendLayout();
             tabPageDebug.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewDebugStats).BeginInit();
+            statusStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // tabControl1
@@ -57,7 +64,7 @@ namespace CURDiags
             tabControl1.Location = new Point(12, 50);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(776, 377);
+            tabControl1.Size = new Size(1031, 377);
             tabControl1.TabIndex = 0;
             // 
             // tabPageTesting
@@ -68,7 +75,7 @@ namespace CURDiags
             tabPageTesting.Location = new Point(4, 24);
             tabPageTesting.Name = "tabPageTesting";
             tabPageTesting.Padding = new Padding(3);
-            tabPageTesting.Size = new Size(768, 349);
+            tabPageTesting.Size = new Size(1023, 349);
             tabPageTesting.TabIndex = 0;
             tabPageTesting.Text = "Testing";
             tabPageTesting.UseVisualStyleBackColor = true;
@@ -102,18 +109,40 @@ namespace CURDiags
             // 
             // tabPageDebug
             // 
+            tabPageDebug.Controls.Add(dataGridViewDebugStats);
             tabPageDebug.Controls.Add(buttonDebugClearList);
             tabPageDebug.Controls.Add(listBoxDebugLogList);
             tabPageDebug.Location = new Point(4, 24);
             tabPageDebug.Name = "tabPageDebug";
-            tabPageDebug.Size = new Size(768, 349);
+            tabPageDebug.Size = new Size(1023, 349);
             tabPageDebug.TabIndex = 1;
             tabPageDebug.Text = "Debug";
             tabPageDebug.UseVisualStyleBackColor = true;
             // 
+            // dataGridViewDebugStats
+            // 
+            dataGridViewDebugStats.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridViewDebugStats.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dataGridViewDebugStats.Columns.AddRange(new DataGridViewColumn[] { NameCol, Value });
+            dataGridViewDebugStats.Location = new Point(459, 8);
+            dataGridViewDebugStats.Name = "dataGridViewDebugStats";
+            dataGridViewDebugStats.RowHeadersVisible = false;
+            dataGridViewDebugStats.Size = new Size(451, 248);
+            dataGridViewDebugStats.TabIndex = 4;
+            // 
+            // NameCol
+            // 
+            NameCol.HeaderText = "Description";
+            NameCol.Name = "NameCol";
+            // 
+            // Value
+            // 
+            Value.HeaderText = "Value";
+            Value.Name = "Value";
+            // 
             // buttonDebugClearList
             // 
-            buttonDebugClearList.Location = new Point(515, 16);
+            buttonDebugClearList.Location = new Point(7, 321);
             buttonDebugClearList.Name = "buttonDebugClearList";
             buttonDebugClearList.Size = new Size(75, 23);
             buttonDebugClearList.TabIndex = 3;
@@ -126,14 +155,15 @@ namespace CURDiags
             listBoxDebugLogList.FormattingEnabled = true;
             listBoxDebugLogList.Location = new Point(7, 8);
             listBoxDebugLogList.Name = "listBoxDebugLogList";
-            listBoxDebugLogList.Size = new Size(490, 334);
+            listBoxDebugLogList.Size = new Size(443, 304);
             listBoxDebugLogList.TabIndex = 2;
             // 
             // labelCOMStatus
             // 
+            labelCOMStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             labelCOMStatus.BackColor = Color.White;
             labelCOMStatus.BorderStyle = BorderStyle.FixedSingle;
-            labelCOMStatus.Location = new Point(725, 7);
+            labelCOMStatus.Location = new Point(985, 7);
             labelCOMStatus.Name = "labelCOMStatus";
             labelCOMStatus.Size = new Size(63, 49);
             labelCOMStatus.TabIndex = 1;
@@ -142,7 +172,8 @@ namespace CURDiags
             // 
             // buttonConnect
             // 
-            buttonConnect.Location = new Point(615, 7);
+            buttonConnect.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            buttonConnect.Location = new Point(875, 7);
             buttonConnect.Name = "buttonConnect";
             buttonConnect.Size = new Size(100, 49);
             buttonConnect.TabIndex = 2;
@@ -152,8 +183,9 @@ namespace CURDiags
             // 
             // comboBoxCOMPort
             // 
+            comboBoxCOMPort.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             comboBoxCOMPort.FormattingEnabled = true;
-            comboBoxCOMPort.Location = new Point(503, 33);
+            comboBoxCOMPort.Location = new Point(763, 33);
             comboBoxCOMPort.Name = "comboBoxCOMPort";
             comboBoxCOMPort.Size = new Size(100, 23);
             comboBoxCOMPort.TabIndex = 3;
@@ -167,18 +199,35 @@ namespace CURDiags
             // 
             // comboBoxBaudRate
             // 
+            comboBoxBaudRate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             comboBoxBaudRate.FormattingEnabled = true;
             comboBoxBaudRate.Items.AddRange(new object[] { "115200", "230400", "460800", "921600" });
-            comboBoxBaudRate.Location = new Point(503, 7);
+            comboBoxBaudRate.Location = new Point(763, 7);
             comboBoxBaudRate.Name = "comboBoxBaudRate";
             comboBoxBaudRate.Size = new Size(100, 23);
             comboBoxBaudRate.TabIndex = 4;
+            // 
+            // statusStrip1
+            // 
+            statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1 });
+            statusStrip1.Location = new Point(0, 428);
+            statusStrip1.Name = "statusStrip1";
+            statusStrip1.Size = new Size(1055, 22);
+            statusStrip1.TabIndex = 5;
+            statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel1
+            // 
+            toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            toolStripStatusLabel1.Size = new Size(118, 17);
+            toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
             // GUIForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1055, 450);
+            Controls.Add(statusStrip1);
             Controls.Add(comboBoxBaudRate);
             Controls.Add(comboBoxCOMPort);
             Controls.Add(buttonConnect);
@@ -194,7 +243,11 @@ namespace CURDiags
             tabPageTesting.ResumeLayout(false);
             tabPageTesting.PerformLayout();
             tabPageDebug.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridViewDebugStats).EndInit();
+            statusStrip1.ResumeLayout(false);
+            statusStrip1.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
 
@@ -213,5 +266,10 @@ namespace CURDiags
         private TabPage tabPageDebug;
         private ListBox listBoxDebugLogList;
         private Button buttonDebugClearList;
+        private DataGridView dataGridViewDebugStats;
+        private DataGridViewTextBoxColumn NameCol;
+        private DataGridViewTextBoxColumn Value;
+        private StatusStrip statusStrip1;
+        private ToolStripStatusLabel toolStripStatusLabel1;
     }
 }

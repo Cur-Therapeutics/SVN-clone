@@ -43,11 +43,10 @@ namespace CURDiags
             IncomingMessage?.Invoke(this, ex);
         }
 
-        private int _inPortDataReceived;
 
         private const int MaxRememberedSentMessages = 100;
         private const int MaxIncomingMessageSize = 1000;
-        private const int IncomingMessageTimeoutMs = 300;
+        private const int IncomingMessageTimeoutMs = 500;
         private const int SerialResetDelayMs = 50;
 
         /// <summary>
@@ -61,6 +60,7 @@ namespace CURDiags
         private readonly List<byte> _rxBuffer = new List<byte>();
 
         private readonly object _SerialPortLock = new object();
+        private readonly object _rxLock = new object();
 
         public bool IsLoggingBuffers = false;
 
@@ -300,99 +300,87 @@ namespace CURDiags
         {
             CommsData._Port_DataReceivedEventCount++;
 
-            if (System.Threading.Interlocked.Exchange(ref _inPortDataReceived, 1) == 1)
+            lock (_rxLock)
             {
-                Logger.LogVerbose("Port_DataReceived() busy");
-                return;
-            }
-
-            try
-            {
-                SerialPort? port = _SerialPort;
-                if (port == null || !port.IsOpen || IsClosing)
+                try
                 {
-                    return;
-                }
-
-                //Logger.LogVerbose($"Port_DataReceived() ({port.BytesToRead})");
-
-                while (!IsClosing && port.IsOpen && port.BytesToRead > 0)
-                {
-                    int rb = port.ReadByte();
-                    if (rb < 0)
+                    SerialPort? port = _SerialPort;
+                    if (port == null || !port.IsOpen || IsClosing)
                     {
-                        break;
-                    }
-
-                    byte input = (byte)rb;
-
-                    if (_rxBuffer.Count == 0)
-                    {
-                        if (input != RX_START_BYTE)
-                        {
-                            CommsData._badStartByteCount++;
-                            continue;
-                        }
-
-                        LastDataTime = DateTime.Now;
-                    }
-                    else if (DateTime.Now > LastDataTime.AddMilliseconds(IncomingMessageTimeoutMs))
-                    {
-                        ResetSerialComms();
                         return;
                     }
 
-                    _rxBuffer.Add(input);
-
-                    if (_rxBuffer.Count >= Commands.MessageSizeIndex + sizeof(ushort))
+                    while (!IsClosing && port.IsOpen && port.BytesToRead > 0)
                     {
-                        // Read the bytes directly from the list at specific indices
-                        ushort size = (ushort)(_rxBuffer[Commands.MessageSizeIndex] | (_rxBuffer[Commands.MessageSizeIndex + 1] << 8));
+                        int rb = port.ReadByte();
+                        if (rb < 0)
+                        {
+                            break;
+                        }
 
-                        if (size < Commands.Sizeof_sCommandHeader || size > MaxIncomingMessageSize)
+                        byte input = (byte)rb;
+                        DateTime now = DateTime.Now;
+
+                        if (_rxBuffer.Count == 0)
+                        {
+                            if (input != RX_START_BYTE)
+                            {
+                                CommsData._badStartByteCount++;
+                                continue;
+                            }
+                        }
+                        else if (now > LastDataTime.AddMilliseconds(IncomingMessageTimeoutMs))
                         {
                             ResetSerialComms();
-                            Logger.LogError($"Bad incoming size {size}");
-                            CommsData._badIncomingSizeCount++;
                             return;
                         }
 
-                        if (_rxBuffer.Count == size)
+                        LastDataTime = now;
+                        _rxBuffer.Add(input);
+
+                        if (_rxBuffer.Count >= Commands.Sizeof_sCommandHeader)
                         {
-                            LastDataTime = DateTime.Now;
+                            ushort size = (ushort)(_rxBuffer[Commands.MessageSizeIndex] | (_rxBuffer[Commands.MessageSizeIndex + 1] << 8));
 
-                            byte checksum = Commands.ComputeChecksum(_rxBuffer, _rxBuffer.Count);
-                            byte expectedChecksum = _rxBuffer[Commands.MessageChecksumIndex];
-
-                            if (checksum == expectedChecksum)
+                            if (size < Commands.Sizeof_sCommandHeader || size > MaxIncomingMessageSize)
                             {
-                                CommsData._incomingMessageCount++;
+                                ResetSerialComms();
+                                Logger.LogError($"Bad incoming size {size}");
+                                CommsData._badIncomingSizeCount++;
+                                return;
+                            }
 
-                                if (IsLoggingBuffers)
+                            if (_rxBuffer.Count == size)
+                            {
+                                byte checksum = Commands.ComputeChecksum(_rxBuffer, _rxBuffer.Count);
+                                byte expectedChecksum = _rxBuffer[Commands.MessageChecksumIndex];
+
+                                if (checksum == expectedChecksum)
                                 {
-                                    Logger.LogBuffer(_rxBuffer.ToArray(), _rxBuffer.Count, $"RX {(eDiagnosticCommands)_rxBuffer[(int)Commands.MessageCommandIndex]}");
+                                    CommsData._incomingMessageCount++;
+
+                                    if (IsLoggingBuffers)
+                                    {
+                                        Logger.LogBuffer(_rxBuffer.ToArray(), _rxBuffer.Count, $"RX {(eDiagnosticCommands)_rxBuffer[(int)Commands.MessageCommandIndex]}");
+                                    }
+
+                                    ProcessIncomingMessage(_rxBuffer);
+                                }
+                                else
+                                {
+                                    Logger.LogError($"Checksum failed! [2] = {(eDiagnosticCommands)_rxBuffer[2]} ({checksum:X2} / {expectedChecksum:X2})");
+                                    CommsData._badIncomingCRCCount++;
                                 }
 
-                                ProcessIncomingMessage(_rxBuffer);
+                                _rxBuffer.Clear();
                             }
-                            else
-                            {
-                                Logger.LogError($"Checksum failed! [2] = {(eDiagnosticCommands)_rxBuffer[2]} ({checksum:X2} / {expectedChecksum:X2})");
-                                CommsData._badIncomingCRCCount++;
-                            }
-
-                            _rxBuffer.Clear();
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogMessage(ex, "Port_DataReceived()");
-            }
-            finally
-            {
-                System.Threading.Interlocked.Exchange(ref _inPortDataReceived, 0);
+                catch (Exception ex)
+                {
+                    Logger.LogMessage(ex, "Port_DataReceived()");
+                }
             }
         }
 
@@ -400,7 +388,8 @@ namespace CURDiags
         {
             try
             {
-                OnIncomingMessage(new IncomingMessageEventArgs(data.ToArray()));
+                if (OnIncomingMessage != null)
+                    OnIncomingMessage(new IncomingMessageEventArgs(data.ToArray()));
             }
             catch (Exception ex)
             {

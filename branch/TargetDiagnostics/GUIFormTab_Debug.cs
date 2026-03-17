@@ -23,5 +23,28 @@ namespace CURDiags
         {
             listBoxDebugLogList.Items.Clear();
         }
+
+        private void TabDebug_Update()
+        {
+            if (dataGridViewDebugStats.Rows.Count <= 1)
+            {
+                dataGridViewDebugStats.Rows.Add("_outgoingMessageCount", "0");
+                dataGridViewDebugStats.Rows.Add("_commsResetCount", "0");
+                dataGridViewDebugStats.Rows.Add("_Port_DataReceivedEventCount", "0");
+                dataGridViewDebugStats.Rows.Add("_badStartByteCount", "0");
+                dataGridViewDebugStats.Rows.Add("_badIncomingSizeCount", "0");
+                dataGridViewDebugStats.Rows.Add("_incomingMessageCount", "0");
+                dataGridViewDebugStats.Rows.Add("_badIncomingCRCCount", "0");
+            }
+
+            int r = 0;
+            dataGridViewDebugStats.Rows[r++].Cells[1].Value = CommsData._outgoingMessageCount.ToString();
+            dataGridViewDebugStats.Rows[r++].Cells[1].Value = CommsData._commsResetCount.ToString();
+            dataGridViewDebugStats.Rows[r++].Cells[1].Value = CommsData._Port_DataReceivedEventCount.ToString();
+            dataGridViewDebugStats.Rows[r++].Cells[1].Value = CommsData._badStartByteCount.ToString();
+            dataGridViewDebugStats.Rows[r++].Cells[1].Value = CommsData._badIncomingSizeCount.ToString();
+            dataGridViewDebugStats.Rows[r++].Cells[1].Value = CommsData._incomingMessageCount.ToString();
+            dataGridViewDebugStats.Rows[r++].Cells[1].Value = CommsData._badIncomingCRCCount.ToString();
+        }
     }
 }
