@@ -2,7 +2,7 @@
 *
 *   Version.cs
 *
-*   Description:
+*   Description: Version
 *
 *   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *

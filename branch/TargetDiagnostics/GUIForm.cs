@@ -2,9 +2,9 @@
 *
 *   GUIForm.cs
 *
-*   Description:
+*   Description: Main form for the application.
 *
-*   Copyright NextPhase Medical, Inc. 2025 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -15,6 +15,7 @@
 *
 ********************************************************************/
 
+using MeiraDiagnostics;
 using System.IO.Ports;
 
 namespace CURDiags
@@ -28,6 +29,8 @@ namespace CURDiags
     public partial class GUIForm : Form
     {
         private Serial? mSerialPort;
+
+        private FormResizer _resizer;
 
         /// <summary>
         /// Get a flag indiating whether the communication channel is usable.
@@ -48,6 +51,27 @@ namespace CURDiags
 
             Logger.LoggedMessage += Logger_LoggedMessage;
             RefreshCOMPortList();
+        }
+
+        /// <summary>
+        /// Handle the Closing event of the main Form.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GUIForm_FormClosing(object _, FormClosingEventArgs __)
+        {
+            Logger.LoggedMessage -= Logger_LoggedMessage;
+            ClosePort();
+        }
+
+        private void GUIForm_Load(object sender, EventArgs e)
+        {
+            _resizer = new FormResizer(this);
+        }
+
+        private void GUIForm_SizeChanged(object sender, EventArgs e)
+        {
+            _resizer?.ResizeControls();
         }
 
         /// <summary>
@@ -182,15 +206,5 @@ namespace CURDiags
             }
         }
 
-        /// <summary>
-        /// Handle the Closing event of the main Form.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void GUIForm_FormClosing(object _, FormClosingEventArgs __)
-        {
-            Logger.LoggedMessage -= Logger_LoggedMessage;
-            ClosePort();
-        }
     }
 }

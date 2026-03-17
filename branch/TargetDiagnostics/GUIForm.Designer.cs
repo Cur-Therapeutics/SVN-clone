@@ -31,19 +31,20 @@ namespace CURDiags
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GUIForm));
             tabControl1 = new TabControl();
             tabPageTesting = new TabPage();
             label1 = new Label();
             listBox1 = new ListBox();
             buttonHello = new Button();
             tabPageDebug = new TabPage();
+            buttonDebugClearList = new Button();
             listBoxDebugLogList = new ListBox();
             labelCOMStatus = new Label();
             buttonConnect = new Button();
             comboBoxCOMPort = new ComboBox();
             timerOneSecond = new System.Windows.Forms.Timer(components);
             comboBoxBaudRate = new ComboBox();
-            buttonDebugClearList = new Button();
             tabControl1.SuspendLayout();
             tabPageTesting.SuspendLayout();
             tabPageDebug.SuspendLayout();
@@ -86,7 +87,7 @@ namespace CURDiags
             listBox1.FormattingEnabled = true;
             listBox1.Location = new Point(147, 36);
             listBox1.Name = "listBox1";
-            listBox1.Size = new Size(490, 94);
+            listBox1.Size = new Size(490, 289);
             listBox1.TabIndex = 1;
             // 
             // buttonHello
@@ -110,11 +111,21 @@ namespace CURDiags
             tabPageDebug.Text = "Debug";
             tabPageDebug.UseVisualStyleBackColor = true;
             // 
-            // listBox2
+            // buttonDebugClearList
+            // 
+            buttonDebugClearList.Location = new Point(515, 16);
+            buttonDebugClearList.Name = "buttonDebugClearList";
+            buttonDebugClearList.Size = new Size(75, 23);
+            buttonDebugClearList.TabIndex = 3;
+            buttonDebugClearList.Text = "Clear";
+            buttonDebugClearList.UseVisualStyleBackColor = true;
+            buttonDebugClearList.Click += buttonDebugClearList_Click;
+            // 
+            // listBoxDebugLogList
             // 
             listBoxDebugLogList.FormattingEnabled = true;
             listBoxDebugLogList.Location = new Point(7, 8);
-            listBoxDebugLogList.Name = "listBox2";
+            listBoxDebugLogList.Name = "listBoxDebugLogList";
             listBoxDebugLogList.Size = new Size(490, 334);
             listBoxDebugLogList.TabIndex = 2;
             // 
@@ -163,16 +174,6 @@ namespace CURDiags
             comboBoxBaudRate.Size = new Size(100, 23);
             comboBoxBaudRate.TabIndex = 4;
             // 
-            // buttonDebugClearList
-            // 
-            buttonDebugClearList.Location = new Point(515, 16);
-            buttonDebugClearList.Name = "buttonDebugClearList";
-            buttonDebugClearList.Size = new Size(75, 23);
-            buttonDebugClearList.TabIndex = 3;
-            buttonDebugClearList.Text = "Clear";
-            buttonDebugClearList.UseVisualStyleBackColor = true;
-            buttonDebugClearList.Click += buttonDebugClearList_Click;
-            // 
             // GUIForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -183,9 +184,12 @@ namespace CURDiags
             Controls.Add(buttonConnect);
             Controls.Add(labelCOMStatus);
             Controls.Add(tabControl1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "GUIForm";
             Text = "CUR Diagnostics";
             FormClosing += GUIForm_FormClosing;
+            Load += GUIForm_Load;
+            SizeChanged += GUIForm_SizeChanged;
             tabControl1.ResumeLayout(false);
             tabPageTesting.ResumeLayout(false);
             tabPageTesting.PerformLayout();

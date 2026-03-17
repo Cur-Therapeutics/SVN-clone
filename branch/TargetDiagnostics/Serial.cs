@@ -2,9 +2,9 @@
 *
 *   Serial.cs
 *
-*   Description:
+*   Description: SerialPort wrapper.
 *
-*   Copyright NextPhase Medical, Inc. 2025 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *

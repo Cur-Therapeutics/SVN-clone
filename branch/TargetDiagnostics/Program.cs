@@ -2,9 +2,9 @@
 *
 *   Program.cs
 *
-*   Description:    
+*   Description: Main entry point for the application.
 *
-*   Copyright NextPhase Medical, Inc. 2025 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
