@@ -2,9 +2,9 @@
 *
 *   Logger.cs
 *
-*   Description:
+*   Description: Diagnostic logger
 *
-*   Copyright NextPhase Medical, Inc. 2025 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -23,16 +23,6 @@ namespace CURDiags
     internal static class Logger
     {
         private static readonly object _logLock = new object();
-
-        private static void _LogIt(string level, string message)
-        {
-            string line = $"{DateTime.Now:HH:mm:ss.fff} [{level}] {message}";
-
-            lock (_logLock)
-            {
-                Debug.WriteLine(line);
-            }
-        }
 
         internal static void LogBuffer(byte[] data, int count, string description = "")
         {
@@ -78,6 +68,16 @@ namespace CURDiags
         internal static void LogVerbose(string description)
         {
             _LogIt("VERBOSE", description);
+        }
+
+        private static void _LogIt(string level, string message)
+        {
+            string line = $"{DateTime.Now:HH:mm:ss.fff} [{level}] {message}";
+
+            lock (_logLock)
+            {
+                Debug.WriteLine(line);
+            }
         }
     }
 }

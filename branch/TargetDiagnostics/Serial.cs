@@ -25,6 +25,8 @@ namespace CURDiags
     /// </summary>
     public class Serial
     {
+        private int _inPortDataReceived;
+
         private const int MaxRememberedSentMessages = 100;
         private const int MaxIncomingMessageSize = 1000;
         private const int IncomingMessageTimeoutMs = 300;
@@ -183,7 +185,7 @@ namespace CURDiags
 
             lock (_sentMessages)
             {
-                _sentMessages.Insert(0, new Tuple<int, byte[], int, DateTime>(data[(int)Enums.sCommandHeaderIndicies.SeqId], data.Take(count).ToArray(), count, DateTime.Now));
+                _sentMessages.Insert(0, new Tuple<int, byte[], int, DateTime>(data[(int)Commands.MessageSeqIdIndex], data.Take(count).ToArray(), count, DateTime.Now));
                 while (_sentMessages.Count > MaxRememberedSentMessages)
                 {
                     _sentMessages.RemoveAt(_sentMessages.Count - 1);
@@ -223,8 +225,6 @@ namespace CURDiags
                 }
             }
         }
-
-        private int _inPortDataReceived;
 
         private void ResetSerialComms()
         {

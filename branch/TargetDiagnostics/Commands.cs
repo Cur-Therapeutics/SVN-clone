@@ -2,9 +2,10 @@
 *
 *   Commands.cs
 *
-*   Description:
+*   Description: Contains data structures and methods to communicate
+*   with the target instrument.
 *
-*   Copyright NextPhase Medical, Inc. 2025 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -20,79 +21,118 @@ using static CURDiags.Enums;
 
 namespace CURDiags
 {
+    /// <summary>
+    /// Commands contains the structures that define the messages exchanged with the
+    /// target instrument and variations on the SendCommand() method to send
+    /// messages to the instrument. (Don't call the Serial object from elsewhere in
+    /// the code)
+    /// </summary>
     public sealed class Commands
     {
-        public const byte START_BYTE = 0x46; // 43 Meira, 44 IPG, 45 CRYO, 46 CUR
+        public const byte START_BYTE = 0x43;
 
         public static readonly ushort Sizeof_sCommandHeader = (ushort)Marshal.SizeOf<sCommandHeader>();
-        public static readonly ushort MessageStartByteIndex = (ushort)sCommandHeaderIndicies.StartByte;
-        public static readonly ushort MessageCommandIndex = (ushort)sCommandHeaderIndicies.Command;
-        public static readonly ushort MessageSizeIndex = (ushort)sCommandHeaderIndicies.Size1;
-        public static readonly ushort MessageChecksumIndex = (ushort)sCommandHeaderIndicies.Checksum;
+        public static readonly ushort MessageStartByteIndex = 0;
+        public static readonly ushort MessageSeqIdIndex = 1;
+        public static readonly ushort MessageCommandIndex = 2;
+        public static readonly ushort MessageSizeIndex = 3;
+        public static readonly ushort MessageChecksumIndex = 5;
         public static readonly ushort MessagePayloadStartIndex = Sizeof_sCommandHeader;
 
-        private readonly Serial _serial;
-        private byte _nextSeqId = 1;
+        private static Serial? _serial { get; set; } = null;
+        private static byte _nextSeqId = 1;
 
-        public Commands(Serial serial)
+        public static bool IsOpen => _serial != null && _serial.IsOpen;
+
+        /// <summary>
+        /// Create an instance of the Commands class with the indicated
+        /// communications protocol.
+        /// </summary>
+        /// <param name="serial"></param>
+        public static void Init(Serial serial)
         {
-            _serial = serial ?? throw new ArgumentNullException(nameof(serial));
+            _serial = serial;
         }
 
         /// <summary>
         /// Send a command with no payload.
         /// </summary>
-        public bool SendCommand(eDiagnosticCommands cmdId)
+        public static bool SendCommand(eDiagnosticCommands cmdId)
         {
-            sCommandHeader cmd = CreateHeader((byte)cmdId);
+            sCommandHeader cmd = CreateHeader(cmdId);
             byte[] message = SerializeMessage(cmd, ReadOnlySpan<byte>.Empty);
-            return _serial.SendData(message, message.Length);
+            if (IsOpen)
+                return _serial.SendData(message, message.Length);
+            else
+                return false;
         }
 
         /// <summary>
         /// Send a request with payload.
         /// </summary>
-        public bool SendCommand(sRequest cmd)
+        public static bool SendCommand(sRequest cmd)
         {
             byte[] message = cmd.GetBytes();
             Logger.LogMessage($"Sending command: {(eDiagnosticCommands)cmd.header.command}");
-            return _serial.SendData(message, message.Length);
+            if (IsOpen)
+                return _serial.SendData(message, message.Length);
+            else
+                return false;
         }
 
-        internal sCommandHeader CreateHeader(byte command)
+        /// <summary>
+        /// Create a sCommandHeader instance with the indicated 
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        internal static sCommandHeader CreateHeader(eDiagnosticCommands command)
         {
             return new sCommandHeader
             {
                 startByte = START_BYTE,
                 seqId = _nextSeqId++,
-                command = command,
+                command = (byte) command,
                 size = Sizeof_sCommandHeader,
                 checksum = 0
             };
         }
 
+        /// <summary>
+        /// Return the indicated message as a byte array after appending the indicated
+        /// payload data to the sCommandHeader
+        /// </summary>
+        /// <param name="header"></param>
+        /// <param name="payload"></param>
+        /// <returns></returns>
         internal static byte[] SerializeMessage(sCommandHeader header, ReadOnlySpan<byte> payload)
         {
             ushort fullSize = checked((ushort)(Sizeof_sCommandHeader + payload.Length));
             byte[] sizeBytes = BitConverter.GetBytes(fullSize);
             byte[] message = new byte[fullSize];
 
-            message[(int)sCommandHeaderIndicies.StartByte] = header.startByte;
-            message[(int)sCommandHeaderIndicies.SeqId] = header.seqId;
-            message[(int)sCommandHeaderIndicies.Command] = header.command;
-            message[(int)sCommandHeaderIndicies.Size1] = sizeBytes[0];
-            message[(int)sCommandHeaderIndicies.Size2] = sizeBytes[1];
-            message[(int)sCommandHeaderIndicies.Checksum] = 0;
+            message[(int)MessageStartByteIndex] = header.startByte;
+            message[(int)MessageSeqIdIndex] = header.seqId;
+            message[(int)MessageCommandIndex] = header.command;
+            message[(int)MessageSizeIndex] = sizeBytes[0];
+            message[(int)MessageSizeIndex + 1] = sizeBytes[1];
+            message[(int)MessageChecksumIndex] = 0;
 
             for (int i = 0; i < payload.Length; i++)
             {
                 message[MessagePayloadStartIndex + i] = payload[i];
             }
 
-            message[(int)sCommandHeaderIndicies.Checksum] = ComputeChecksum(message, fullSize);
+            message[(int)MessageChecksumIndex] = ComputeChecksum(message, fullSize);
             return message;
         }
 
+        /// <summary>
+        /// Calculate the checksum of the indicated list of bytes, interpreted as
+        /// sCommandHeader instance.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         internal static byte ComputeChecksum(IReadOnlyList<byte> data, int count)
         {
             byte checksum = 0;
@@ -110,6 +150,13 @@ namespace CURDiags
             return checksum;
         }
 
+        //
+        /// ////////////////////////////////  Messages ////////////////////////////////////////////
+        // 
+
+        /// <summary>
+        /// sCommandHeader. Header for all messages
+        /// </summary>
         [Serializable, StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct sCommandHeader
         {
@@ -134,6 +181,9 @@ namespace CURDiags
             }
         }
 
+        /// <summary>
+        /// sRequest. sCommandHeader + payload data structure.
+        /// </summary>
         public struct sRequest
         {
             private const int InitialPayloadCapacity = 64;
@@ -141,19 +191,23 @@ namespace CURDiags
             public sCommandHeader header;
             private List<byte>? _data;
 
-            public sRequest(Commands commands, eDiagnosticCommands eType)
-            {
-                if (commands == null)
-                {
-                    throw new ArgumentNullException(nameof(commands));
-                }
+            public int PayloadLength => _data?.Count ?? 0;
 
-                header = commands.CreateHeader((byte)eType);
+            /// <summary>
+            /// Construct a sRequest for the indicated eDiagnosticCommands.
+            /// </summary>
+            /// <param name="eType"></param>
+            /// <exception cref="ArgumentNullException"></exception>
+            public sRequest(eDiagnosticCommands eType)
+            {
+                header = Commands.CreateHeader(eType);
                 _data = new List<byte>(InitialPayloadCapacity);
             }
 
-            public int PayloadLength => _data?.Count ?? 0;
-
+            /// <summary>
+            /// Add the indicated byte array to the header as payload.
+            /// </summary>
+            /// <param name="newData"></param>
             public void AddBytes(byte[] newData)
             {
                 ArgumentNullException.ThrowIfNull(newData);
@@ -161,18 +215,29 @@ namespace CURDiags
                 _data!.AddRange(newData);
             }
 
+            /// <summary>
+            /// Add the indicated byte to the header as payload.
+            /// </summary>
+            /// <param name="newData"></param>
             public void AddByte(byte newData)
             {
                 EnsurePayloadList();
                 _data!.Add(newData);
             }
 
+            /// <summary>
+            /// Get the bytes for the completed message. (header + payload)
+            /// </summary>
+            /// <returns></returns>
             public byte[] GetBytes()
             {
                 ReadOnlySpan<byte> payload = (_data ?? new List<byte>()).ToArray();
                 return SerializeMessage(header, payload);
             }
 
+            /// <summary>
+            /// Make sure _data is initialized.
+            /// </summary>
             private void EnsurePayloadList()
             {
                 _data ??= new List<byte>(InitialPayloadCapacity);

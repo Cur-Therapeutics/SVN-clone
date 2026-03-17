@@ -1,10 +1,11 @@
 ﻿/********************************************************************
 *
-*   GUIFOrm_ProcessMessage.cs
+*   GUIForm_ProcessMessage.cs
 *
-*   Description:    
+*   Description: Handles routing of individual incoming messages to
+*   the proper handler.
 *
-*   Copyright NextPhase Medical, Inc. 2025 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -15,14 +16,24 @@
 *
 ********************************************************************/
 
+using static CURDiags.Enums;
+
 namespace CURDiags
 {
     public partial class GUIForm : Form
     {
         internal void ProcessIncomingMessage(List<byte> data)
         {
-            AddToMessageListBox(data);
-          
+            eDiagnosticCommands command = (eDiagnosticCommands)data[(int)Commands.MessageCommandIndex];
+
+            switch (command)
+            {
+                case eDiagnosticCommands.Hello:
+                    AddToMessageListBox(data);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void AddToMessageListBox(List<byte> data)

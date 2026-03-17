@@ -19,11 +19,21 @@ using System.IO.Ports;
 
 namespace CURDiags
 {
+    /// <summary>
+    /// This is the main form of the Diags application. Form initialization and
+    /// shared functionality are in this source file.
+    /// Code for the individual tab pages of the main tab control are in their
+    /// own source file. (e.g. GUIFormTab_Testing.cs)
+    /// </summary>
     public partial class GUIForm : Form
     {
         private Serial? mSerialPort;
-        private Commands? mCommands;
 
+        public bool IsOpen => mSerialPort != null && mSerialPort.IsOpen;
+
+        /// <summary>
+        /// Construct an instance of the GUIForm. Perform one-time initialization.
+        /// </summary>
         public GUIForm()
         {
             InitializeComponent();
@@ -35,8 +45,16 @@ namespace CURDiags
             RefreshCOMPortList();
         }
 
+        /// <summary>
+        /// Get a flag indiating whether the communication channel is usable.
+        /// </summary>
         public bool IsCOMPortOpen => mSerialPort != null && mSerialPort.IsOpen;
 
+        /// <summary>
+        /// Handle the Click event for the Connect button on the main form.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void buttonConnect_Click(object sender, EventArgs e)
         {
             if (IsCOMPortOpen)
@@ -51,42 +69,54 @@ namespace CURDiags
                 return;
             }
 
-            Serial serial = new Serial(this);
+            mSerialPort = new Serial(this);
 
-            if (!serial.OpenPort(comboBoxCOMPort.Text, baudRate))
+            if (!mSerialPort.OpenPort(comboBoxCOMPort.Text, baudRate))
             {
                 Logger.LogMessage("Failed to open comm port!");
-                serial.Close();
-                return;
+                mSerialPort.Close();
+                mSerialPort = null;
             }
 
-            mSerialPort = serial;
-            mCommands = new Commands(serial);
+            Commands.Init(mSerialPort);
         }
 
+        /// <summary>
+        /// Close the communication port.
+        /// </summary>
         public void ClosePort()
         {
             mSerialPort?.Close();
             mSerialPort = null;
-            mCommands = null;
         }
 
-        internal Commands? GetCommands()
-        {
-            return mCommands;
-        }
-
+        /// <summary>
+        /// One-second timer.
+        /// Handle periodic operation of the form.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void timerOneSecond_Tick(object sender, EventArgs e)
         {
             labelCOMStatus.BackColor = IsCOMPortOpen ? Color.Green : Color.Red;
             buttonConnect.Text = IsCOMPortOpen ? "Disconnect" : "Connect";
         }
 
+        /// <summary>
+        /// Handle the DropDown event for the COM port combo box.
+        /// Populate the dropdown list.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void comboBoxCOMPort_DropDown(object sender, EventArgs e)
         {
             RefreshCOMPortList();
         }
 
+        /// <summary>
+        /// Update the list of COM ports found.  
+        /// Note, does not remove old items.
+        /// </summary>
         private void RefreshCOMPortList()
         {
             string? selectedPort = comboBoxCOMPort.SelectedItem as string;
@@ -116,7 +146,12 @@ namespace CURDiags
             }
         }
 
-        private void GUIForm_FormClosing(object sender, FormClosingEventArgs e)
+        /// <summary>
+        /// Handle the Closing event of the main Form.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GUIForm_FormClosing(object _, FormClosingEventArgs __)
         {
             ClosePort();
         }
