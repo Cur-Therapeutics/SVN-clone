@@ -49,7 +49,7 @@ namespace CURDiags
         /// communications protocol.
         /// </summary>
         /// <param name="serial"></param>
-        public static void Init(Serial serial)
+        public static void Init(Serial? serial)
         {
             _serial = serial;
         }
@@ -61,10 +61,8 @@ namespace CURDiags
         {
             sCommandHeader cmd = CreateHeader(cmdId);
             byte[] message = SerializeMessage(cmd, ReadOnlySpan<byte>.Empty);
-            if (IsOpen)
-                return _serial.SendData(message, message.Length);
-            else
-                return false;
+
+            return IsOpen ? _serial!.SendData(message, message.Length) : false;
         }
 
         /// <summary>
@@ -74,10 +72,8 @@ namespace CURDiags
         {
             byte[] message = cmd.GetBytes();
             Logger.LogMessage($"Sending command: {(eDiagnosticCommands)cmd.header.command}");
-            if (IsOpen)
-                return _serial.SendData(message, message.Length);
-            else
-                return false;
+
+            return IsOpen ? _serial!.SendData(message, message.Length) : false;
         }
 
         /// <summary>

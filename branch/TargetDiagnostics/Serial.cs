@@ -20,11 +20,29 @@ using static CURDiags.Enums;
 
 namespace CURDiags
 {
+    public class IncomingMessageEventArgs : EventArgs
+    {
+        public byte[] data;
+
+        public IncomingMessageEventArgs(byte[] data) { this.data = data; }
+    }
+
+
     /// <summary>
     /// Provides access to the serial port for diagnostics.
     /// </summary>
     public class Serial
     {
+        /// <summary>
+        /// Publish an event indicating a new message has been received.
+        /// </summary>
+        public event EventHandler<IncomingMessageEventArgs>? IncomingMessage;
+
+        protected virtual void OnIncomingMessage(IncomingMessageEventArgs ex)
+        {
+            IncomingMessage?.Invoke(this, ex);
+        }
+
         private int _inPortDataReceived;
 
         private const int MaxRememberedSentMessages = 100;
@@ -36,11 +54,6 @@ namespace CURDiags
         /// Our serial port object.
         /// </summary>
         private SerialPort? _SerialPort;
-
-        /// <summary>
-        /// A reference to the parent gui.
-        /// </summary>
-        private readonly GUIForm? _ParentGui;
 
         /// <summary>
         /// RX buffer.
@@ -61,9 +74,8 @@ namespace CURDiags
         /// </summary>
         public DateTime LastDataTime { get; private set; } = DateTime.MinValue;
 
-        public Serial(GUIForm? g)
+        public Serial()
         {
-            _ParentGui = g;
         }
 
         public bool IsOpen => _SerialPort != null && _SerialPort.IsOpen;
@@ -302,7 +314,7 @@ namespace CURDiags
                     return;
                 }
 
-                Logger.LogVerbose($"Port_DataReceived() ({port.BytesToRead})");
+                //Logger.LogVerbose($"Port_DataReceived() ({port.BytesToRead})");
 
                 while (!IsClosing && port.IsOpen && port.BytesToRead > 0)
                 {
@@ -334,7 +346,8 @@ namespace CURDiags
 
                     if (_rxBuffer.Count >= Commands.MessageSizeIndex + sizeof(ushort))
                     {
-                        ushort size = BitConverter.ToUInt16(_rxBuffer.ToArray(), Commands.MessageSizeIndex);
+                        // Read the bytes directly from the list at specific indices
+                        ushort size = (ushort)(_rxBuffer[Commands.MessageSizeIndex] | (_rxBuffer[Commands.MessageSizeIndex + 1] << 8));
 
                         if (size < Commands.Sizeof_sCommandHeader || size > MaxIncomingMessageSize)
                         {
@@ -387,7 +400,7 @@ namespace CURDiags
         {
             try
             {
-                _ParentGui?.ProcessIncomingMessage(data);
+                OnIncomingMessage(new IncomingMessageEventArgs(data.ToArray()));
             }
             catch (Exception ex)
             {

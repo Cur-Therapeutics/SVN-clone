@@ -27,7 +27,7 @@ namespace CURDiags
         private void buttonHello_Click(object sender, EventArgs e)
         {
 
-            if (!IsOpen)
+            if (!IsCOMPortOpen)
             {
                 MessageBox.Show("Connect to a COM port first.");
                 return;

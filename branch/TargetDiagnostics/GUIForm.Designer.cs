@@ -32,42 +32,45 @@ namespace CURDiags
         {
             components = new System.ComponentModel.Container();
             tabControl1 = new TabControl();
-            tabPage1 = new TabPage();
+            tabPageTesting = new TabPage();
             label1 = new Label();
-            listBox2 = new ListBox();
             listBox1 = new ListBox();
             buttonHello = new Button();
+            tabPageDebug = new TabPage();
+            listBoxDebugLogList = new ListBox();
             labelCOMStatus = new Label();
             buttonConnect = new Button();
             comboBoxCOMPort = new ComboBox();
             timerOneSecond = new System.Windows.Forms.Timer(components);
             comboBoxBaudRate = new ComboBox();
+            buttonDebugClearList = new Button();
             tabControl1.SuspendLayout();
-            tabPage1.SuspendLayout();
+            tabPageTesting.SuspendLayout();
+            tabPageDebug.SuspendLayout();
             SuspendLayout();
             // 
             // tabControl1
             // 
-            tabControl1.Controls.Add(tabPage1);
+            tabControl1.Controls.Add(tabPageTesting);
+            tabControl1.Controls.Add(tabPageDebug);
             tabControl1.Location = new Point(12, 50);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
             tabControl1.Size = new Size(776, 377);
             tabControl1.TabIndex = 0;
             // 
-            // tabPage1
+            // tabPageTesting
             // 
-            tabPage1.Controls.Add(label1);
-            tabPage1.Controls.Add(listBox2);
-            tabPage1.Controls.Add(listBox1);
-            tabPage1.Controls.Add(buttonHello);
-            tabPage1.Location = new Point(4, 24);
-            tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(768, 349);
-            tabPage1.TabIndex = 0;
-            tabPage1.Text = "Testing";
-            tabPage1.UseVisualStyleBackColor = true;
+            tabPageTesting.Controls.Add(label1);
+            tabPageTesting.Controls.Add(listBox1);
+            tabPageTesting.Controls.Add(buttonHello);
+            tabPageTesting.Location = new Point(4, 24);
+            tabPageTesting.Name = "tabPageTesting";
+            tabPageTesting.Padding = new Padding(3);
+            tabPageTesting.Size = new Size(768, 349);
+            tabPageTesting.TabIndex = 0;
+            tabPageTesting.Text = "Testing";
+            tabPageTesting.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
@@ -77,14 +80,6 @@ namespace CURDiags
             label1.Size = new Size(112, 15);
             label1.TabIndex = 2;
             label1.Text = "Incoming messages";
-            // 
-            // listBox2
-            // 
-            listBox2.FormattingEnabled = true;
-            listBox2.Location = new Point(147, 170);
-            listBox2.Name = "listBox2";
-            listBox2.Size = new Size(490, 94);
-            listBox2.TabIndex = 1;
             // 
             // listBox1
             // 
@@ -103,6 +98,25 @@ namespace CURDiags
             buttonHello.Text = "Hello";
             buttonHello.UseVisualStyleBackColor = true;
             buttonHello.Click += buttonHello_Click;
+            // 
+            // tabPageDebug
+            // 
+            tabPageDebug.Controls.Add(buttonDebugClearList);
+            tabPageDebug.Controls.Add(listBoxDebugLogList);
+            tabPageDebug.Location = new Point(4, 24);
+            tabPageDebug.Name = "tabPageDebug";
+            tabPageDebug.Size = new Size(768, 349);
+            tabPageDebug.TabIndex = 1;
+            tabPageDebug.Text = "Debug";
+            tabPageDebug.UseVisualStyleBackColor = true;
+            // 
+            // listBox2
+            // 
+            listBoxDebugLogList.FormattingEnabled = true;
+            listBoxDebugLogList.Location = new Point(7, 8);
+            listBoxDebugLogList.Name = "listBox2";
+            listBoxDebugLogList.Size = new Size(490, 334);
+            listBoxDebugLogList.TabIndex = 2;
             // 
             // labelCOMStatus
             // 
@@ -149,6 +163,16 @@ namespace CURDiags
             comboBoxBaudRate.Size = new Size(100, 23);
             comboBoxBaudRate.TabIndex = 4;
             // 
+            // buttonDebugClearList
+            // 
+            buttonDebugClearList.Location = new Point(515, 16);
+            buttonDebugClearList.Name = "buttonDebugClearList";
+            buttonDebugClearList.Size = new Size(75, 23);
+            buttonDebugClearList.TabIndex = 3;
+            buttonDebugClearList.Text = "Clear";
+            buttonDebugClearList.UseVisualStyleBackColor = true;
+            buttonDebugClearList.Click += buttonDebugClearList_Click;
+            // 
             // GUIForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -163,8 +187,9 @@ namespace CURDiags
             Text = "CUR Diagnostics";
             FormClosing += GUIForm_FormClosing;
             tabControl1.ResumeLayout(false);
-            tabPage1.ResumeLayout(false);
-            tabPage1.PerformLayout();
+            tabPageTesting.ResumeLayout(false);
+            tabPageTesting.PerformLayout();
+            tabPageDebug.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -172,7 +197,7 @@ namespace CURDiags
         #endregion
 
         private TabControl tabControl1;
-        private TabPage tabPage1;
+        private TabPage tabPageTesting;
         private Button buttonHello;
         private Label labelCOMStatus;
         private Button buttonConnect;
@@ -180,7 +205,9 @@ namespace CURDiags
         private System.Windows.Forms.Timer timerOneSecond;
         private ComboBox comboBoxBaudRate;
         private ListBox listBox1;
-        private ListBox listBox2;
         private Label label1;
+        private TabPage tabPageDebug;
+        private ListBox listBoxDebugLogList;
+        private Button buttonDebugClearList;
     }
 }

@@ -20,8 +20,26 @@ using System.Text;
 
 namespace CURDiags
 {
+    public class LoggerEventArgs : EventArgs
+    {
+        public readonly string Message;
+
+        public LoggerEventArgs(string message) { Message = message; }
+    }
+
+
     internal static class Logger
     {
+        /// <summary>
+        /// Publish an event indicating a new message should be logged.
+        /// </summary>
+        public static event EventHandler<LoggerEventArgs>? LoggedMessage;
+
+        private static void OnLoggedMessage(LoggerEventArgs ex)
+        {
+            LoggedMessage?.Invoke(null, ex);
+        }
+
         private static readonly object _logLock = new object();
 
         internal static void LogBuffer(byte[] data, int count, string description = "")
@@ -56,8 +74,8 @@ namespace CURDiags
 
         internal static void LogMessage(Exception e, string description = "")
         {
-            string suffix = string.IsNullOrWhiteSpace(description) ? string.Empty : $", {description}";
-            _LogIt("ERROR", $"{e.Message}{suffix}");
+            string suffix = string.IsNullOrWhiteSpace(description) ? string.Empty : $", {e.Message}";
+            _LogIt("ERROR", $"{description} {e.Message}{suffix}");
         }
 
         internal static void LogMessage(string description)
@@ -76,6 +94,7 @@ namespace CURDiags
 
             lock (_logLock)
             {
+                OnLoggedMessage(new LoggerEventArgs(line));
                 Debug.WriteLine(line);
             }
         }

@@ -29,7 +29,11 @@ namespace CURDiags
     {
         private Serial? mSerialPort;
 
-        public bool IsOpen => mSerialPort != null && mSerialPort.IsOpen;
+        /// <summary>
+        /// Get a flag indiating whether the communication channel is usable.
+        /// </summary>
+        public bool IsCOMPortOpen => mSerialPort != null && mSerialPort.IsOpen;
+
 
         /// <summary>
         /// Construct an instance of the GUIForm. Perform one-time initialization.
@@ -42,13 +46,9 @@ namespace CURDiags
 
             comboBoxBaudRate.SelectedIndex = 0;
 
+            Logger.LoggedMessage += Logger_LoggedMessage;
             RefreshCOMPortList();
         }
-
-        /// <summary>
-        /// Get a flag indiating whether the communication channel is usable.
-        /// </summary>
-        public bool IsCOMPortOpen => mSerialPort != null && mSerialPort.IsOpen;
 
         /// <summary>
         /// Handle the Click event for the Connect button on the main form.
@@ -69,7 +69,7 @@ namespace CURDiags
                 return;
             }
 
-            mSerialPort = new Serial(this);
+            mSerialPort = new Serial();
 
             if (!mSerialPort.OpenPort(comboBoxCOMPort.Text, baudRate))
             {
@@ -79,6 +79,39 @@ namespace CURDiags
             }
 
             Commands.Init(mSerialPort);
+
+            if (mSerialPort is not null)
+                mSerialPort.IncomingMessage += SerialPort_IncomingMessage;
+        }
+
+        /// <summary>
+        /// Handle the event indicating an imcoming message has been received.
+        /// Call ProcessIncomingMessage() on the GUI thread.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SerialPort_IncomingMessage(object? sender, IncomingMessageEventArgs e)
+        {
+            if (IsDisposed || !IsHandleCreated)
+                return;
+
+            if (InvokeRequired)
+                Invoke(new ThreadStart(delegate { SerialPort_IncomingMessage(sender, e); }));
+            else
+                ProcessIncomingMessage(e.data);
+        }
+
+        private void Logger_LoggedMessage(object? sender, LoggerEventArgs e)
+        {
+            if (IsDisposed || !IsHandleCreated)
+                return;
+
+            if (InvokeRequired)
+                Invoke(new ThreadStart(delegate { Logger_LoggedMessage(sender, e); }));
+            else
+            {
+                listBoxDebugLogList.Items.Insert(0, e.Message);
+            }
         }
 
         /// <summary>
@@ -86,8 +119,11 @@ namespace CURDiags
         /// </summary>
         public void ClosePort()
         {
+            if (mSerialPort != null)
+                mSerialPort.IncomingMessage -= SerialPort_IncomingMessage;
             mSerialPort?.Close();
             mSerialPort = null;
+            Commands.Init(null);
         }
 
         /// <summary>
@@ -153,6 +189,7 @@ namespace CURDiags
         /// <param name="e"></param>
         private void GUIForm_FormClosing(object _, FormClosingEventArgs __)
         {
+            Logger.LoggedMessage -= Logger_LoggedMessage;
             ClosePort();
         }
     }

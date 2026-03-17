@@ -4,7 +4,7 @@
 *
 *   Description:
 *
-*   Copyright NextPhase Medical, Inc. 2025 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -19,6 +19,6 @@ namespace CURDiags
 {
     internal class Version
     {
-        public static string Value => "0.0.2";
+        public static string Value => "0.0.3";
     }
 }

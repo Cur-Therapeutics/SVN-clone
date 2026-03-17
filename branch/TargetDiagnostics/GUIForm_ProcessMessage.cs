@@ -20,10 +20,21 @@ using static CURDiags.Enums;
 
 namespace CURDiags
 {
+    /// <summary>
+    /// This source file contains the ProcessIncomingMessage() method to handle
+    /// the routing of all incoming messages.
+    /// </summary>
     public partial class GUIForm : Form
     {
-        internal void ProcessIncomingMessage(List<byte> data)
+        internal void ProcessIncomingMessage(byte[] data)
         {
+            if (data.Length < Commands.Sizeof_sCommandHeader)
+            {
+                return;
+            }
+
+            Logger.LogMessage($"ProcessIncomingMessage() {(eDiagnosticCommands)data[Commands.MessageCommandIndex]}");
+
             eDiagnosticCommands command = (eDiagnosticCommands)data[(int)Commands.MessageCommandIndex];
 
             switch (command)
@@ -32,16 +43,14 @@ namespace CURDiags
                     AddToMessageListBox(data);
                     break;
                 default:
+                    Logger.LogError($"ProcessIncomingMessage() unhandled message {data[Commands.MessageCommandIndex]}");
                     break;
             }
         }
 
-        private void AddToMessageListBox(List<byte> data)
+        private void AddToMessageListBox(byte[] data)
         {
-            if (listBox1.InvokeRequired)
-                listBox1.Invoke(new ThreadStart(delegate { AddToMessageListBox(data); }));
-            else
-                listBox1.Items.Insert(0, BitConverter.ToString(data.ToArray(), 0, data.Count));
+            listBox1.Items.Insert(0, BitConverter.ToString(data.ToArray(), 0, data.Length));
         }
     }
 }

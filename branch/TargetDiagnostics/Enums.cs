@@ -18,8 +18,6 @@
 *
 ********************************************************************/
 
-using System.Collections.Generic;
-
 namespace CURDiags
 {
     public class Enums
