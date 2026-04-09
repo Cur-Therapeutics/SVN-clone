@@ -1,0 +1,408 @@
+/********************************************************************
+ *
+ *   ad7124.c
+ *
+ *   Description:    Manages the AD7124-4 ADC
+ *
+ *   Copyright NextPhase Medical, Inc. 2023 -- All rights reserved.
+ *
+ *--------------------------------------------------------------------
+ *
+ *   Revision History:
+ *
+ *   Rev.    | Date      | Name              | Description
+ *   1       | 01/02/24  | Brian Compter     | Created.
+ *
+ ********************************************************************/
+
+#include <string.h>
+#include "main.h"
+#include "diagnostics.h"
+#include "ad7124.h"
+#include "gpio.h"
+#include "spi.h"
+#include "string.h"
+
+/**
+ * AD7124 Device Instances
+ */
+sAd7124 ad7124A = {0,	&sSpiAdc1};
+
+/**
+ * Current state
+ */
+eAD7124_States mAD7124State = eAD7124_States_WAIT;
+
+/**
+ * Device registers
+ */
+sAD7124Register mRegisters [] =
+{
+		{AD7124_STATUS, 0, 1, AD7124READ},
+		{AD7124_ADC_CTRL, 0, 2, AD7124READWRITE},
+		{AD7124_DATA, 0, 3, AD7124READ},
+		{AD7124_IO_CTRL_1, 0, 3, AD7124READWRITE},
+		{AD7124_IO_CTRL_2, 0, 2, AD7124READWRITE},
+		{AD7124_ID, 0, 1, AD7124READ},
+		{AD7124_ERROR, 0, 3, AD7124READ},
+		{AD7124_ERROR_EN, 0, 3, AD7124WRITE},
+		{AD7124_MCLK_COUNT, 0, 1, AD7124WRITE},
+
+		{AD7124_CH_00, 0, 2, AD7124READWRITE},
+		{AD7124_CH_01, 0, 2, AD7124READWRITE},
+		{AD7124_CH_02, 0, 2, AD7124READWRITE},
+		{AD7124_CH_03, 0, 2, AD7124READWRITE},
+		{AD7124_CH_04, 0, 2, AD7124READWRITE},
+		{AD7124_CH_05, 0, 2, AD7124READWRITE},
+		{AD7124_CH_06, 0, 2, AD7124READWRITE},
+		{AD7124_CH_07, 0, 2, AD7124READWRITE},
+		{AD7124_CH_08, 0, 2, AD7124READWRITE},
+		{AD7124_CH_09, 0, 2, AD7124READWRITE},
+		{AD7124_CH_10, 0, 2, AD7124READWRITE},
+		{AD7124_CH_11, 0, 2, AD7124READWRITE},
+		{AD7124_CH_12, 0, 2, AD7124READWRITE},
+		{AD7124_CH_13, 0, 2, AD7124READWRITE},
+		{AD7124_CH_14, 0, 2, AD7124READWRITE},
+		{AD7124_CH_15, 0, 2, AD7124READWRITE},
+
+		{AD7124_CONFIG_00, 0, 2, AD7124READWRITE},
+		{AD7124_CONFIG_01, 0, 2, AD7124READWRITE},
+		{AD7124_CONFIG_02, 0, 2, AD7124READWRITE},
+		{AD7124_CONFIG_03, 0, 2, AD7124READWRITE},
+		{AD7124_CONFIG_04, 0, 2, AD7124READWRITE},
+		{AD7124_CONFIG_05, 0, 2, AD7124READWRITE},
+		{AD7124_CONFIG_06, 0, 2, AD7124READWRITE},
+		{AD7124_CONFIG_07, 0, 2, AD7124READWRITE},
+
+		{AD7124_FILTER_00, 0, 3, AD7124READWRITE},
+		{AD7124_FILTER_01, 0, 3, AD7124READWRITE},
+		{AD7124_FILTER_02, 0, 3, AD7124READWRITE},
+		{AD7124_FILTER_03, 0, 3, AD7124READWRITE},
+		{AD7124_FILTER_04, 0, 3, AD7124READWRITE},
+		{AD7124_FILTER_05, 0, 3, AD7124READWRITE},
+		{AD7124_FILTER_06, 0, 3, AD7124READWRITE},
+		{AD7124_FILTER_07, 0, 3, AD7124READWRITE},
+
+		{AD7124_OFFSET_00, 0, 3, AD7124READWRITE},
+		{AD7124_OFFSET_01, 0, 3, AD7124READWRITE},
+		{AD7124_OFFSET_02, 0, 3, AD7124READWRITE},
+		{AD7124_OFFSET_03, 0, 3, AD7124READWRITE},
+		{AD7124_OFFSET_04, 0, 3, AD7124READWRITE},
+		{AD7124_OFFSET_05, 0, 3, AD7124READWRITE},
+		{AD7124_OFFSET_06, 0, 3, AD7124READWRITE},
+		{AD7124_OFFSET_07, 0, 3, AD7124READWRITE},
+
+		{AD7124_GAIN_00, 0, 3, AD7124READWRITE},
+		{AD7124_GAIN_01, 0, 3, AD7124READWRITE},
+		{AD7124_GAIN_02, 0, 3, AD7124READWRITE},
+		{AD7124_GAIN_03, 0, 3, AD7124READWRITE},
+		{AD7124_GAIN_04, 0, 3, AD7124READWRITE},
+		{AD7124_GAIN_05, 0, 3, AD7124READWRITE},
+		{AD7124_GAIN_06, 0, 3, AD7124READWRITE},
+		{AD7124_GAIN_07, 0, 3, AD7124READWRITE},
+};
+
+/**
+ * Acquisition timer
+ */
+uint16_t mTimer = 0;
+
+/**
+ * Internal functions
+ */
+uint32_t AD7124_ReadRegister(sAd7124 * ad7124, sAD7124Register reg);
+void AD7124_WriteRegister(sAd7124 * ad7124, sAD7124Register reg, uint32_t val);
+void AD7124_InitInternal(sAd7124 * ad7124);
+void AD7124_Aquire(sAd7124 * ad7124);
+
+/**
+ * @brief Initialize our three AD7124s for use
+ * @return None
+ */
+void AD7124_Init()
+{
+	// Setup max channels per configuration
+	ad7124A.maxChannel = 1;
+
+	// Perform setup on each ADC
+	AD7124_InitInternal(&ad7124A);
+}
+
+/**
+ * @brief
+ * @param ad7124 The AD7124 to configure
+ * @return None
+ */
+void AD7124_InitInternal(sAd7124 * ad7124)
+{
+	// Check ID for communications check
+	uint32_t readback = AD7124_Read(ad7124, AD7124_ID);
+	if (readback != AD7124_DEVICE_ID && readback != AD7124_DEVICE_ID2)
+	{
+		//FaultHandler(ERR_AD7124);
+		return;
+	}
+
+	// Local variables
+	uint16_t setup;
+	uint32_t filter;
+
+	// Init according to chip id
+
+	// Two channels, differential, with current excitation, one setup
+	ad7124->channelConfig[0] = AD7124_CHANNEL_AIN_POS_02 | AD7124_CHANNEL_AIN_NEG_03 | AD7124_CHANNEL_SETUP_00 | AD7124_CHANNEL_ENABLE;
+	AD7124_Write(ad7124, AD7124_CH_00, ad7124->channelConfig[0]);
+
+	ad7124->channelConfig[1] = AD7124_CHANNEL_AIN_POS_04 | AD7124_CHANNEL_AIN_NEG_05 | AD7124_CHANNEL_SETUP_00 | AD7124_CHANNEL_ENABLE;
+	AD7124_Write(ad7124, AD7124_CH_01, ad7124->channelConfig[1]);
+
+	setup = AD7124_CONFIG_BIPOLOR | AD7124_CONFIG_REFSEL_1 | AD7124_CONFIG_GAIN_16 |
+			AD7124_CONFIG_AINP_BUF_EN | AD7124_CONFIG_AINN_BUF_EN |
+			AD7124_CONFIG_REFP_BUF_EN | AD7124_CONFIG_REFN_BUF_EN;
+	AD7124_Write(ad7124, AD7124_CONFIG_00, setup);
+
+	// Configure IOUT0 and IOUT1 for 500uA excitation
+	setup = AD7124_IOCTRL1_IOUT0_500UA | AD7124_IOCTRL1_IOUT1_500UA
+			| AD7124_IOCTRL1_IOUT0_CH0 | AD7124_IOCTRL1_IOUT1_CH1;
+	AD7124_Write(ad7124, AD7124_IO_CTRL_1, setup);
+
+	// Filter setting to FS 5, Sinc4
+	filter = AD7124_FILTER_SINC4_FAST + (1);
+	AD7124_Write(ad7124, AD7124_FILTER_00, filter);
+
+
+}
+
+/**
+ * @brief Perform periodic operations on the ADC
+ * @return None
+ */
+void AD7124_Drive()
+{
+	mTimer++;	// Increment our timer no matter what to keep the acquisition sequence on time
+	switch (mAD7124State)
+	{
+		case eAD7124_States_WAIT:
+
+			if (mTimer < 10)
+					return;
+
+				mAD7124State = eAD7124_States_ACQUIRE;
+				mTimer = 0;
+
+				AD7124_TriggerAcq(&ad7124A);
+			break;
+
+		case eAD7124_States_ACQUIRE:
+			AD7124_Aquire(&ad7124A);
+
+			// If all acquisition is complete, return to wait state
+			if (AD7124_IsAcqDone(&ad7124A))
+			{
+				mAD7124State = eAD7124_States_WAIT;
+			}
+			break;
+
+		default:
+			/* Should not get here, fault? todo */
+			break;
+	}
+}
+
+/**
+ * @brief Sample and process data from our pressure sensor
+ * @param ad7124 The AD7124 to drive
+ * @return None
+ */
+void AD7124_Aquire(sAd7124 * ad7124)
+{
+	// Check status register
+	uint32_t status = AD7124_Read(ad7124, AD7124_STATUS);
+	if ((status & AD7124_STATUS_NRDY) != AD7124_STATUS_NRDY)
+	{
+		// Grab Data, determine channel and convert
+		uint32_t counts = AD7124_Read(ad7124, AD7124_DATA);
+		status = AD7124_Read(ad7124, AD7124_STATUS);
+		uint16_t channel = status & AD7124_STATUS_CH_ACTIVE_MASK;
+
+		ad7124->lastCounts[channel] = counts;
+		ad7124->lastVoltage[channel] = (ad7124->lastCounts[channel] - AD7124_CONV_OFFSET_V) * AD7124_CONV_SCALE_BRIDGE;
+		ad7124->lastEng[channel] = ad7124->lastVoltage[channel] * AD7124_CONV_V_TO_LBS;
+
+		ad7124->lastChannel = channel;
+	}
+}
+
+/**
+ * @brief Read a register
+ * @param reg The register
+ * @return The register value
+ */
+uint32_t AD7124_Read(sAd7124 * ad7124, uint32_t reg)
+{
+	return AD7124_ReadRegister(ad7124, mRegisters[reg]);
+}
+
+/**
+ * @brief Write to a register
+ * @param reg The register
+ * @param val The value to set the register to
+ * @return None
+ */
+void AD7124_Write(sAd7124 * ad7124, uint32_t reg, uint32_t val)
+{
+	AD7124_WriteRegister(ad7124, mRegisters[reg], val);
+}
+
+/**
+ * @brief Read a register from the ADC
+ * @param reg The register
+ * @return The register value
+ */
+uint32_t AD7124_ReadRegister(sAd7124 * ad7124, sAD7124Register reg)
+{
+	uint32_t retval = 0;
+	uint8_t data [] = {0,0,0,0};
+	uint8_t cmd = reg.regNum | AD7124_COMMS_READ;
+
+	SpiSelect(ad7124->spiPort);
+
+	SpiWrite(ad7124->spiPort, (uint8_t*)&cmd, 1);
+	SpiRead(ad7124->spiPort, data, reg.len);
+	SpiDeSelect(ad7124->spiPort);
+
+	// Reverse bytes of reply
+	if (reg.len == 2)
+	{
+		uint8_t temp = data[0];
+		data[0] = data[1];
+		data[1] = temp;
+	}
+	if (reg.len == 3)
+	{
+		uint8_t temp = data[0];
+		data[0] = data[2];
+		data[2] = temp;
+	}
+
+	memcpy(&retval, data, 4);
+	return retval;
+}
+
+/**
+ * @brief Write to a ADC register
+ * @param reg The register to write to
+ * @param val The value to write
+ * @return None
+ */
+void AD7124_WriteRegister(sAd7124 * ad7124, sAD7124Register reg, uint32_t val)
+{
+	uint8_t data [] = {reg.regNum, 0, 0, 0, 0};
+	memcpy((uint8_t*)&data[1], (uint8_t*)&val, sizeof(uint32_t));
+
+	// Reverse bytes
+	if (reg.len == 2)
+	{
+		uint8_t temp = data[1];
+		data[1] = data[2];
+		data[2] = temp;
+	}
+	if (reg.len == 3)
+	{
+		uint8_t temp = data[1];
+		data[1] = data[3];
+		data[3] = temp;
+	}
+
+	SpiSelect(ad7124->spiPort);
+	SpiWrite(ad7124->spiPort, data, reg.len+1);
+	SpiDeSelect(ad7124->spiPort);
+}
+
+/**
+ * @brief Get the last data in counts
+ * @param ad7124 The ADC to read
+ * @param idx The index of the channel
+ * @return the last ADC counts value
+ */
+uint32_t AD7124_GetLastCount(sAd7124 * ad7124, int idx)
+{
+	return ad7124->lastCounts[idx];
+}
+
+/**
+ * @brief Get the last voltage value read from the ADC
+ * @param ad7124 The ADC to read
+ * @param idx The index of the channel
+ * @return the last force in voltage
+ */
+float AD7124_GetLastVolts(sAd7124 * ad7124, int idx)
+{
+	return ad7124->lastVoltage[idx];
+}
+
+/**
+ * @brief Get the last engineering units read from the ADC
+ * @param ad7124 The ADC to read
+ * @param idx The index of the channel
+ * @return The last engineering unit output data
+ */
+float AD7124_GetLastEng(sAd7124 * ad7124, int idx)
+{
+	return ad7124->lastEng[idx];
+}
+
+/**
+ * @brief Reset SPI communications with the ADC by sending a string of 0xFF data
+ * @return None
+ */
+void AD7124_Reset(sAd7124 * ad7124)
+{
+	uint8_t data [] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+	SpiSelect(ad7124->spiPort);
+	SpiWrite(ad7124->spiPort, data, 8);
+	SpiDeSelect(ad7124->spiPort);
+}
+
+/**
+ * @brief Fill a sAdcStatus struct with the latest status data from the ADC
+ * @return None, the returned data is passed back by reference
+ */
+void AD7124_GetStatus(sAd7124 * ad7124, sAd7124Status * status)
+{
+	status->status 		= AD7124_Read(ad7124, AD7124_STATUS);
+	status->id 			= AD7124_Read(ad7124, AD7124_ID);
+	status->channel 	= AD7124_Read(ad7124, AD7124_CH_00);
+	status->offset 		= AD7124_Read(ad7124, AD7124_OFFSET_00);
+	status->filter 		= AD7124_Read(ad7124, AD7124_FILTER_00);
+	status->config 		= AD7124_Read(ad7124, AD7124_CONFIG_00);
+	status->control 	= AD7124_Read(ad7124, AD7124_ADC_CTRL);
+	status->io1 		= AD7124_Read(ad7124, AD7124_IO_CTRL_1);
+	status->io2 		= AD7124_Read(ad7124, AD7124_IO_CTRL_2);
+	status->error 		= AD7124_Read(ad7124, AD7124_ERROR);
+	status->error_en 	= AD7124_Read(ad7124, AD7124_ERROR_EN);
+	status->gain 		= AD7124_Read(ad7124, AD7124_GAIN_00);
+}
+
+/**
+ * @brief Is data acquisition done for this chip?
+ * @param ad7124 The ADC to check
+ * @return 1 if done, 0 if its still working
+ */
+uint8_t AD7124_IsAcqDone(sAd7124 * ad7124)
+{
+	return ad7124->lastChannel == ad7124->maxChannel;
+}
+
+/**
+ * @brief Trigger a new conversion
+ * @param ad7124 The ADC to trigger
+ * @return None
+ */
+uint8_t AD7124_TriggerAcq(sAd7124 * ad7124)
+{
+	ad7124->lastChannel = 0;
+	uint16_t config = AD7124_CTRL_MODE_SNGL | AD7124_CTRL_PWR_MODE_FULL;
+	AD7124_Write(ad7124, AD7124_ADC_CTRL, config);
+	return HAL_OK;
+}
