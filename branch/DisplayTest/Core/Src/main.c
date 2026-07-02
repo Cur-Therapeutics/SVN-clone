@@ -28,6 +28,11 @@
 #include "string.h"
 #include "backlight.h"
 #include "lcd.h"
+#include "health.h"
+#include "stack_check.h"
+#include "ospiflash.h"
+#include "ad7124.h"
+#include "main.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,9 +54,16 @@
 
 DMA2D_HandleTypeDef hdma2d;
 
+I2C_HandleTypeDef hi2c1;
+
 LTDC_HandleTypeDef hltdc;
 
 OSPI_HandleTypeDef hospi1;
+OSPI_HandleTypeDef hospi2;
+
+RTC_HandleTypeDef hrtc;
+
+SPI_HandleTypeDef hspi2;
 
 TIM_HandleTypeDef htim8;
 
@@ -59,39 +71,22 @@ UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
 
-uint32_t gSystemTick = 0;
-
-/**
- * Track skipped ticks
- */
-uint32_t gSkippedTicks = 0;
-
-/**
- * Used for measuring idle time
- */
-uint32_t gIdleTicks 		= 0;
-uint32_t gLastIdleTicks 	= 0;
-uint32_t gMinIdleTicks 		= !0;
-uint32_t gMaxIdleTicks 		= 0;
-
-/**
- * LED Toggle
- */
-uint16_t mSecondTimer		= 0;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void SystemPower_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_FLASH_Init(void);
 static void MX_ICACHE_Init(void);
 static void MX_UART4_Init(void);
 static void MX_OCTOSPI1_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_LTDC_Init(void);
 static void MX_TIM8_Init(void);
+static void MX_OCTOSPI2_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_SPI2_Init(void);
+static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -139,26 +134,22 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_FLASH_Init();
   MX_ICACHE_Init();
   MX_UART4_Init();
   MX_OCTOSPI1_Init();
   MX_DMA2D_Init();
   MX_LTDC_Init();
   MX_TIM8_Init();
+  MX_OCTOSPI2_Init();
+  MX_I2C1_Init();
+  MX_SPI2_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
-  // Subsystem initialization
-  ISS66WVH8M8_EnableMemoryMappedMode(&hospi1);
-  DIAG_Init();
-  BacklightInit();
-
-  sColor c = {255, 0, 255};
-  LCD_FillWindow(LCD_GetDisplayIndex(), c);
-
-  // Begin loop on start of system tick
-  gSystemTick = HAL_GetTick();
-  while (gSystemTick == HAL_GetTick()) { /*  */ }
+  /**
+   * Main entry to our application, DOES NOT RETURN
+   */
+  main_cur();
 
   /* USER CODE END 2 */
 
@@ -169,42 +160,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-	gSystemTick = HAL_GetTick();
-	DIAG_Drive();
-	BacklightDrive();
-
-	// Wait for next tick
-	if (gSystemTick != HAL_GetTick())
-	{
-		// We missed a tick!
-		gSkippedTicks += HAL_GetTick() - gSystemTick;
-		gIdleTicks = 0;
-		gLastIdleTicks = 0;
-	}
-	else
-	{
-		// Wait for the next tick, track idle time
-		gIdleTicks = 0;
-		while(gSystemTick == HAL_GetTick())
-		{
-			gIdleTicks++;
-		}
-		gLastIdleTicks = gIdleTicks;
-
-		// Update min/max idle ticks
-		if (gLastIdleTicks > gMaxIdleTicks)
-			gMaxIdleTicks = gLastIdleTicks;
-		else if (gLastIdleTicks < gMinIdleTicks)
-			gMinIdleTicks = gLastIdleTicks;
-	}
-
-	// Toggle led if we have crossed over a second
-	if (mSecondTimer++ > TICKS_PER_SECOND)
-	{
-		mSecondTimer = 0;
-		GpioToggle(&sGpioLedGreen);
-	}
 
   }
   /* USER CODE END 3 */
@@ -226,12 +181,19 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
+  /** Configure LSE Drive Capability
+  */
+  HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE
+                              |RCC_OSCILLATORTYPE_MSI;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
-  RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.MSICalibrationValue = 0;
   RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_0;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
@@ -259,7 +221,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
   {
     Error_Handler();
   }
@@ -326,31 +288,50 @@ static void MX_DMA2D_Init(void)
 }
 
 /**
-  * @brief FLASH Initialization Function
+  * @brief I2C1 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_FLASH_Init(void)
+static void MX_I2C1_Init(void)
 {
 
-  /* USER CODE BEGIN FLASH_Init 0 */
+  /* USER CODE BEGIN I2C1_Init 0 */
 
-  /* USER CODE END FLASH_Init 0 */
+  /* USER CODE END I2C1_Init 0 */
 
-  /* USER CODE BEGIN FLASH_Init 1 */
+  /* USER CODE BEGIN I2C1_Init 1 */
 
-  /* USER CODE END FLASH_Init 1 */
-  if (HAL_FLASH_Unlock() != HAL_OK)
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.Timing = 0x307075B1;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_FLASH_Lock() != HAL_OK)
+
+  /** Configure Analogue filter
+  */
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN FLASH_Init 2 */
 
-  /* USER CODE END FLASH_Init 2 */
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
 
 }
 
@@ -370,8 +351,12 @@ static void MX_ICACHE_Init(void)
 
   /* USER CODE END ICACHE_Init 1 */
 
-  /** Enable instruction cache (default 2-ways set associative cache)
+  /** Enable instruction cache in 1-way (direct mapped cache)
   */
+  if (HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY) != HAL_OK)
+  {
+    Error_Handler();
+  }
   if (HAL_ICACHE_Enable() != HAL_OK)
   {
     Error_Handler();
@@ -510,6 +495,163 @@ static void MX_OCTOSPI1_Init(void)
   /* USER CODE BEGIN OCTOSPI1_Init 2 */
 
   /* USER CODE END OCTOSPI1_Init 2 */
+
+}
+
+/**
+  * @brief OCTOSPI2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_OCTOSPI2_Init(void)
+{
+
+  /* USER CODE BEGIN OCTOSPI2_Init 0 */
+
+  /* USER CODE END OCTOSPI2_Init 0 */
+
+  OSPIM_CfgTypeDef sOspiManagerCfg = {0};
+
+  /* USER CODE BEGIN OCTOSPI2_Init 1 */
+
+  /* USER CODE END OCTOSPI2_Init 1 */
+  /* OCTOSPI2 parameter configuration*/
+  hospi2.Instance = OCTOSPI2;
+  hospi2.Init.FifoThreshold = 1;
+  hospi2.Init.DualQuad = HAL_OSPI_DUALQUAD_DISABLE;
+  hospi2.Init.MemoryType = HAL_OSPI_MEMTYPE_MICRON;
+  hospi2.Init.DeviceSize = 30;
+  hospi2.Init.ChipSelectHighTime = 3;
+  hospi2.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
+  hospi2.Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;
+  hospi2.Init.WrapSize = HAL_OSPI_WRAP_NOT_SUPPORTED;
+  hospi2.Init.ClockPrescaler = 8;
+  hospi2.Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_NONE;
+  hospi2.Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_ENABLE;
+  hospi2.Init.ChipSelectBoundary = 0;
+  hospi2.Init.DelayBlockBypass = HAL_OSPI_DELAY_BLOCK_BYPASSED;
+  hospi2.Init.MaxTran = 0;
+  hospi2.Init.Refresh = 0;
+  if (HAL_OSPI_Init(&hospi2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sOspiManagerCfg.ClkPort = 1;
+  sOspiManagerCfg.NCSPort = 1;
+  sOspiManagerCfg.IOLowPort = HAL_OSPIM_IOPORT_1_LOW;
+  sOspiManagerCfg.IOHighPort = HAL_OSPIM_IOPORT_1_HIGH;
+  if (HAL_OSPIM_Config(&hospi2, &sOspiManagerCfg, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN OCTOSPI2_Init 2 */
+
+  /* USER CODE END OCTOSPI2_Init 2 */
+
+}
+
+/**
+  * @brief RTC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RTC_Init(void)
+{
+
+  /* USER CODE BEGIN RTC_Init 0 */
+
+  /* USER CODE END RTC_Init 0 */
+
+  RTC_PrivilegeStateTypeDef privilegeState = {0};
+
+  /* USER CODE BEGIN RTC_Init 1 */
+
+  /* USER CODE END RTC_Init 1 */
+
+  /** Initialize RTC Only
+  */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  hrtc.Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
+  hrtc.Init.BinMode = RTC_BINARY_NONE;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  privilegeState.rtcPrivilegeFull = RTC_PRIVILEGE_FULL_NO;
+  privilegeState.backupRegisterPrivZone = RTC_PRIVILEGE_BKUP_ZONE_NONE;
+  privilegeState.backupRegisterStartZone2 = RTC_BKP_DR0;
+  privilegeState.backupRegisterStartZone3 = RTC_BKP_DR0;
+  if (HAL_RTCEx_PrivilegeModeSet(&hrtc, &privilegeState) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
+
+  /* USER CODE END RTC_Init 2 */
+
+}
+
+/**
+  * @brief SPI2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI2_Init(void)
+{
+
+  /* USER CODE BEGIN SPI2_Init 0 */
+
+  /* USER CODE END SPI2_Init 0 */
+
+  SPI_AutonomousModeConfTypeDef HAL_SPI_AutonomousMode_Cfg_Struct = {0};
+
+  /* USER CODE BEGIN SPI2_Init 1 */
+
+  /* USER CODE END SPI2_Init 1 */
+  /* SPI2 parameter configuration*/
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_HIGH;
+  hspi2.Init.CLKPhase = SPI_PHASE_2EDGE;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 0x7;
+  hspi2.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
+  hspi2.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
+  hspi2.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
+  hspi2.Init.MasterSSIdleness = SPI_MASTER_SS_IDLENESS_00CYCLE;
+  hspi2.Init.MasterInterDataIdleness = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
+  hspi2.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
+  hspi2.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
+  hspi2.Init.IOSwap = SPI_IO_SWAP_DISABLE;
+  hspi2.Init.ReadyMasterManagement = SPI_RDY_MASTER_MANAGEMENT_INTERNALLY;
+  hspi2.Init.ReadyPolarity = SPI_RDY_POLARITY_HIGH;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  HAL_SPI_AutonomousMode_Cfg_Struct.TriggerState = SPI_AUTO_MODE_DISABLE;
+  HAL_SPI_AutonomousMode_Cfg_Struct.TriggerSelection = SPI_GRP1_GPDMA_CH0_TCF_TRG;
+  HAL_SPI_AutonomousMode_Cfg_Struct.TriggerPolarity = SPI_TRIG_POLARITY_RISING;
+  if (HAL_SPIEx_SetConfigAutonomousMode(&hspi2, &HAL_SPI_AutonomousMode_Cfg_Struct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI2_Init 2 */
+
+  /* USER CODE END SPI2_Init 2 */
 
 }
 
@@ -657,19 +799,34 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOI_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOJ_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SPI2_SELECT_GPIO_Port, SPI2_SELECT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOI, LED_RED_Pin|LED_GREEN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LCD_RESET_GPIO_Port, LCD_RESET_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SPI1_SELECT_GPIO_Port, SPI1_SELECT_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : SPI2_SELECT_Pin */
+  GPIO_InitStruct.Pin = SPI2_SELECT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(SPI2_SELECT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LED_RED_Pin LED_GREEN_Pin */
   GPIO_InitStruct.Pin = LED_RED_Pin|LED_GREEN_Pin;
@@ -684,6 +841,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
   HAL_GPIO_Init(LCD_RESET_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SPI1_SELECT_Pin */
+  GPIO_InitStruct.Pin = SPI1_SELECT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(SPI1_SELECT_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : TOUCH_INT_Pin */
+  GPIO_InitStruct.Pin = TOUCH_INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(TOUCH_INT_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 

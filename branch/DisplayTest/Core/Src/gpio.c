@@ -4,7 +4,7 @@
  *
  *   Description:    Controls access to general purpose I/O
  *
- *   Copyright NextPhase Medical Devices, Inc. 2023 -- All rights reserved.
+ *   Copyright NextPhase Medical Devices, Inc. 2026 -- All rights reserved.
  *
  *--------------------------------------------------------------------
  *
@@ -26,6 +26,8 @@ sGpio sGpioLedGreen 		= {LED_GREEN_GPIO_Port, LED_GREEN_Pin};
 sGpio sGpioLedRed 			= {LED_RED_GPIO_Port, LED_RED_Pin};
 //sGpio sGpioLedYellow1 		= {LED_YEL1_GPIO_Port, LED_YEL1_Pin};
 //sGpio sGpioLedYellow2 		= {LED_YEL2_GPIO_Port, LED_YEL2_Pin};
+
+sGpio sGpioSpi1Select		= {SPI1_SELECT_GPIO_Port, SPI1_SELECT_Pin};
 
 /**
  * Internal functions

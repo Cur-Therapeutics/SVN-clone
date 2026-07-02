@@ -4,7 +4,7 @@
  *
  *   Description:    Control the LCD interface
  *
- *   Copyright NextPhase Medical, Inc. 2024 -- All rights reserved.
+ *   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
  *
  *--------------------------------------------------------------------
  *
@@ -33,21 +33,6 @@ uint32_t gDisplays[COUNTOF_gDisplays] =
 		WINDOW_12, WINDOW_13, WINDOW_14, WINDOW_15
 };
 
-static uint32_t colorMap[11] =
-{
-	0xFFC8C8C8, // 0  - Light Grey
-	0xFF808080,	// 1  - Grey
-	0xFFFFFFFF,	// 2  - White
-	0xFF000000, // 3  - Black
-	0xFFE2E7F2, // 4  - Light Blue
-	0xFF5167C3, // 5  - Medium Blue
-	0xFF00D57D, // 6  - Green
-	0xFF16B6FA, // 7  - Blue
-	0xFF181C67, // 8  - Dark Blue
-	0xFFFFD000, // 9  - Yellow
-	0xFFF90083  // 10 - Red
-};
-
 /**
  * The current display window
  */
@@ -74,22 +59,19 @@ void LCD_Drive()
 {
 	uint32_t stateLcd = HAL_LTDC_GetState(&hltdc);
 	uint32_t stateDma = HAL_DMA2D_GetState(&hdma2d);
-
-	uint8_t health = HEALTH_GOOD;
-
 	if (stateLcd == HAL_LTDC_STATE_ERROR || stateLcd == HAL_LTDC_STATE_RESET)
 	{
-		health = HEALTH_BAD;
+		HealthSubsystemBad(eSystemLcd);
 	}
-
-	if (stateDma == HAL_DMA2D_STATE_ERROR || stateDma == HAL_DMA2D_STATE_RESET)
+	else if (stateDma == HAL_DMA2D_STATE_ERROR || stateDma == HAL_DMA2D_STATE_RESET)
 	{
-		health = HEALTH_BAD;
+		HealthSubsystemBad(eSystemLcd);
 	}
-
-	HealthUpdate(HEALTH_LCD, health);
+	else
+	{
+		HealthSubsystemGood(eSystemLcd);
+	}
 }
-extern uint8_t gFrameBuffer[];
 
 /**
  * @brief  Set the frame buffer display window
@@ -171,13 +153,13 @@ void LCD_Write(sLocation src, sLocation dst, sShape shape)
 
 	if(HAL_DMA2D_Init(&hdma2d) != HAL_OK)
 	{
-		FaultHandler(ERR_LCD_WRITE_1);
+		FaultHandler(ERR_LCD_WRITE);
 		return;
 	}
 
 	if(HAL_DMA2D_ConfigLayer(&hdma2d, 1) != HAL_OK)
 	{
-		FaultHandler(ERR_LCD_WRITE_2);
+		FaultHandler(ERR_LCD_WRITE);
 		return;
 	}
 
@@ -195,10 +177,9 @@ void LCD_Write(sLocation src, sLocation dst, sShape shape)
 		}
 	}
 
-
 	if (error != HAL_OK)
 	{
-		FaultHandler(ERR_LCD_WRITE_3);
+		FaultHandler(ERR_LCD_WRITE);
 	}
 }
 
@@ -210,75 +191,71 @@ void LCD_Write(sLocation src, sLocation dst, sShape shape)
  * @param shape The shape of area to write
  * @retval None
  */
-void LCD_Blend(sLocation src, sLocation background, sLocation dst, sShape shape, uint8_t alpha)
+void LCD_Blend(sLocation src, sLocation background, sLocation dst, sShape shape)
 {
+    if ((LCD_WindowIsValid(src.window) == 0U) || (LCD_WindowIsValid(background.window) == 0U) || (LCD_WindowIsValid(dst.window) == 0U))
+	{
+		FaultHandler(ERR_LCD_BLEND);
+		return;
+	}
+
+	if ((src.xPos + shape.width > DISPLAY_WIDTH) || (src.yPos + shape.height > DISPLAY_HEIGHT) ||
+		(background.xPos + shape.width > DISPLAY_WIDTH) || (background.yPos + shape.height > DISPLAY_HEIGHT) ||
+		(dst.xPos + shape.width > DISPLAY_WIDTH) || (dst.yPos + shape.height > DISPLAY_HEIGHT))
+	{
+		FaultHandler(ERR_LCD_BLEND);
+		return;
+	}
+
 	// Calculate source and destination addresses
 	uint32_t srcAddr 		= (gDisplays[src.window] + src.yPos * DISPLAY_WIDTH * BYTES_PER_PIXEL + src.xPos * BYTES_PER_PIXEL);
 	uint32_t backgroundAddr = (gDisplays[background.window] + background.yPos * DISPLAY_WIDTH * BYTES_PER_PIXEL + background.xPos * BYTES_PER_PIXEL);
 	uint32_t dstAddr 		= (gDisplays[dst.window] + dst.yPos * DISPLAY_WIDTH * BYTES_PER_PIXEL + dst.xPos * BYTES_PER_PIXEL);
-	uint8_t error;
 
-	if ((src.window >= 10) && (alpha == 255))
+	// Configure DMA2D
+	hdma2d.Init.Mode = DMA2D_M2M_BLEND;
+	hdma2d.Init.ColorMode = DMA2D_OUTPUT_ARGB8888;
+	hdma2d.Init.OutputOffset = (DISPLAY_WIDTH - shape.width);
+	hdma2d.LayerCfg[0].InputColorMode = DMA2D_INPUT_ARGB8888;
+	hdma2d.LayerCfg[0].AlphaMode = DMA2D_NO_MODIF_ALPHA;
+	hdma2d.LayerCfg[0].InputOffset = (DISPLAY_WIDTH - shape.width);
+	hdma2d.LayerCfg[1].InputColorMode = DMA2D_INPUT_ARGB8888;
+	hdma2d.LayerCfg[1].AlphaMode = DMA2D_NO_MODIF_ALPHA;
+	hdma2d.LayerCfg[1].InputOffset = (DISPLAY_WIDTH - shape.width);
+	uint8_t error = 1;
+
+	if(HAL_DMA2D_Init(&hdma2d) != HAL_OK)
 	{
-		hdma2d.Init.Mode = DMA2D_R2M;
-		hdma2d.Init.ColorMode = DMA2D_OUTPUT_ARGB8888;
-		hdma2d.Init.OutputOffset = (DISPLAY_WIDTH - shape.width);
+		FaultHandler(ERR_LCD_BLEND);
+		return;
 	}
-	else
-	{
-		// Configure DMA2D
-		hdma2d.Init.Mode = DMA2D_M2M_BLEND;
-		hdma2d.Init.ColorMode = DMA2D_OUTPUT_ARGB8888;
-		hdma2d.Init.OutputOffset = (DISPLAY_WIDTH - shape.width);
-		hdma2d.LayerCfg[0].InputColorMode = DMA2D_INPUT_ARGB8888;
-		hdma2d.LayerCfg[0].InputOffset = (DISPLAY_WIDTH - shape.width);
-		hdma2d.LayerCfg[1].InputColorMode = DMA2D_INPUT_ARGB8888;
-		hdma2d.LayerCfg[1].InputOffset = (DISPLAY_WIDTH - shape.width);
 
-		if (alpha == 255)
+	if(HAL_DMA2D_ConfigLayer(&hdma2d, 1) != HAL_OK)
+	{
+		FaultHandler(ERR_LCD_BLEND);
+		return;
+	}
+
+	if(HAL_DMA2D_ConfigLayer(&hdma2d, 0) != HAL_OK)
+	{
+		FaultHandler(ERR_LCD_BLEND);
+		return;
+	}
+
+	while (error != HAL_OK)
+	{
+		if (HAL_DMA2D_BlendingStart(&hdma2d, srcAddr, backgroundAddr, dstAddr, shape.width, shape.height) == HAL_OK)
 		{
-			hdma2d.LayerCfg[0].AlphaMode = DMA2D_NO_MODIF_ALPHA;
-			hdma2d.LayerCfg[1].AlphaMode = DMA2D_NO_MODIF_ALPHA;
-		}
-		else
-		{
-			hdma2d.LayerCfg[0].AlphaMode = DMA2D_REPLACE_ALPHA;
-			hdma2d.LayerCfg[0].InputAlpha = 255;
-			hdma2d.LayerCfg[1].AlphaMode = DMA2D_REPLACE_ALPHA;
-			hdma2d.LayerCfg[1].InputAlpha = 150;
+			/* Polling For DMA transfer */
+			error = HAL_DMA2D_PollForTransfer(&hdma2d, DMA2D_TIMEOUT);
+			if (error != HAL_OK)
+				gDMA2DTransferErrorCount++;
 		}
 	}
-
-	if (HAL_DMA2D_Init(&hdma2d) != HAL_OK)
-	{
-		FaultHandler(ERR_LCD_BLEND_1);
-		return;
-	}
-
-	if (HAL_DMA2D_ConfigLayer(&hdma2d, 1) != HAL_OK)
-	{
-		FaultHandler(ERR_LCD_BLEND_2);
-		return;
-	}
-
-	if (HAL_DMA2D_ConfigLayer(&hdma2d, 0) != HAL_OK)
-	{
-		FaultHandler(ERR_LCD_BLEND_3);
-		return;
-	}
-
-	if ((src.window >= 10) && (alpha == 255))
-	{
-		error = HAL_DMA2D_Start_IT(&hdma2d, colorMap[src.window - 10], dstAddr, shape.width, shape.height);
-	}
-	else
-    {
-		error = HAL_DMA2D_BlendingStart_IT(&hdma2d, srcAddr, backgroundAddr, dstAddr, shape.width, shape.height);
-    }
 
 	if (error != HAL_OK)
 	{
-		FaultHandler(ERR_LCD_BLEND_4);
+		FaultHandler(ERR_LCD_BLEND);
 	}
 }
 
@@ -420,39 +397,7 @@ void LCD_ClearWindow(uint8_t window)
  */
 void LCD_WriteTestImage(uint8_t window)
 {
-	/*
-	if (window > WINDOW_INDEX_MAX)
-		return;
 
-	uint32_t * buffer = (uint32_t*)gDisplays[window];
-	uint32_t * imageData = (uint32_t*)RGB888_480x272;
-
-	for (int i = 0; i < 480*272; i++)
-	{
-	    *buffer++ = *imageData++;
-	}*/
-
-	/*
-	uint32_t temp;
-	uint32_t val = 10;
-	for (int y = 0; y < 272; y++)
-	{
-		for (int x = 0; x < 480; x++)
-		{
-			temp = (val) + (val << 8) + (val << 16) + (0xFF000000);
-            *buffer++ = temp;
-
-			if (x % 25 == 0)
-			{
-				if (val == 25) val = 255; else val = 25;
-			}
-		}
-		if (y % 10 == 0)
-		{
-			if (val == 25) val = 255; else val = 25;
-		}
-	}
-*/
 }
 
 /**
@@ -484,8 +429,8 @@ void LCD_Draw(uint16_t x, uint16_t y, sColor color)
 }
 
 /**
- * @brief  Get the current backlight value
- * @retval the actual backlight value
+ * @brief  Get the current back light value
+ * @retval the actual back light value
  */
 uint16_t LCD_GetBacklight()
 {
@@ -493,7 +438,7 @@ uint16_t LCD_GetBacklight()
 }
 
 /**
- * @brief  Set the desired backlight value
+ * @brief  Set the desired back light value
  * @param value Brightness from 0 to 1,000
  * @retval None
  */
@@ -507,4 +452,19 @@ void LCD_SetBacklight(uint16_t value)
 
 	// Set desired value, this will be sent to the LCD on the next call to LCD_Drive.
 	mDesiredBacklight = value;
+}
+
+/**
+ * @brief Return true it window ID contains a valid address.
+ * @param window
+ * @return 1 if the window is valid, 0 otherwise
+ */
+uint8_t LCD_WindowIsValid(uint8_t window)
+{
+	if (window > WINDOW_INDEX_MAX)
+	{
+		return 0U;
+	}
+
+	return 1;
 }

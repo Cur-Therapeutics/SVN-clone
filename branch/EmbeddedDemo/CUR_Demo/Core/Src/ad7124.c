@@ -122,7 +122,7 @@ void AD7124_Aquire(sAd7124 * ad7124);
 void AD7124_Init()
 {
 	// Setup max channels per configuration
-	ad7124A.maxChannel = 1;
+	ad7124A.maxChannel = 0;
 
 	// Perform setup on each ADC
 	AD7124_InitInternal(&ad7124A);
@@ -137,40 +137,47 @@ void AD7124_InitInternal(sAd7124 * ad7124)
 {
 	// Check ID for communications check
 	uint32_t readback = AD7124_Read(ad7124, AD7124_ID);
-	if (readback != AD7124_DEVICE_ID && readback != AD7124_DEVICE_ID2)
+	while (readback != AD7124_DEVICE_ID && readback != AD7124_DEVICE_ID2 && readback != AD7124_DEVICE_ID3)
 	{
+
+		readback = AD7124_Read(ad7124, AD7124_ID);
+		HAL_Delay(1000);
+
 		//FaultHandler(ERR_AD7124);
-		return;
+		//return;
 	}
 
 	// Local variables
 	uint16_t setup;
 	uint32_t filter;
 
-	// Init according to chip id
-
-	// Two channels, differential, with current excitation, one setup
-	ad7124->channelConfig[0] = AD7124_CHANNEL_AIN_POS_02 | AD7124_CHANNEL_AIN_NEG_03 | AD7124_CHANNEL_SETUP_00 | AD7124_CHANNEL_ENABLE;
+	// One channel, differential, with current excitation, one setup
+	ad7124->channelConfig[0] = AD7124_CHANNEL_AIN_POS_04 | AD7124_CHANNEL_AIN_NEG_05 | AD7124_CHANNEL_SETUP_00 | AD7124_CHANNEL_ENABLE;
 	AD7124_Write(ad7124, AD7124_CH_00, ad7124->channelConfig[0]);
-
-	ad7124->channelConfig[1] = AD7124_CHANNEL_AIN_POS_04 | AD7124_CHANNEL_AIN_NEG_05 | AD7124_CHANNEL_SETUP_00 | AD7124_CHANNEL_ENABLE;
-	AD7124_Write(ad7124, AD7124_CH_01, ad7124->channelConfig[1]);
 
 	setup = AD7124_CONFIG_BIPOLOR | AD7124_CONFIG_REFSEL_1 | AD7124_CONFIG_GAIN_16 |
 			AD7124_CONFIG_AINP_BUF_EN | AD7124_CONFIG_AINN_BUF_EN |
 			AD7124_CONFIG_REFP_BUF_EN | AD7124_CONFIG_REFN_BUF_EN;
 	AD7124_Write(ad7124, AD7124_CONFIG_00, setup);
 
-	// Configure IOUT0 and IOUT1 for 500uA excitation
-	setup = AD7124_IOCTRL1_IOUT0_500UA | AD7124_IOCTRL1_IOUT1_500UA
-			| AD7124_IOCTRL1_IOUT0_CH0 | AD7124_IOCTRL1_IOUT1_CH1;
+	// Configure IOUT2 for 500uA excitation
+	setup = AD7124_IOCTRL1_IOUT0_500UA | AD7124_IOCTRL1_IOUT0_CH2;
 	AD7124_Write(ad7124, AD7124_IO_CTRL_1, setup);
 
 	// Filter setting to FS 5, Sinc4
 	filter = AD7124_FILTER_SINC4_FAST + (1);
 	AD7124_Write(ad7124, AD7124_FILTER_00, filter);
 
+	// Check configuration
+	volatile uint16_t temp;
 
+	temp = AD7124_Read(ad7124, AD7124_CH_00);
+	temp = AD7124_Read(ad7124, AD7124_IO_CTRL_1);
+	temp = AD7124_Read(ad7124, AD7124_FILTER_00);
+	temp = AD7124_Read(ad7124, AD7124_CONFIG_00);
+	temp = AD7124_Read(ad7124, AD7124_ERROR);
+
+	temp++;
 }
 
 /**
@@ -184,7 +191,7 @@ void AD7124_Drive()
 	{
 		case eAD7124_States_WAIT:
 
-			if (mTimer < 10)
+			if (mTimer < 1000)
 					return;
 
 				mAD7124State = eAD7124_States_ACQUIRE;
@@ -227,7 +234,7 @@ void AD7124_Aquire(sAd7124 * ad7124)
 
 		ad7124->lastCounts[channel] = counts;
 		ad7124->lastVoltage[channel] = (ad7124->lastCounts[channel] - AD7124_CONV_OFFSET_V) * AD7124_CONV_SCALE_BRIDGE;
-		ad7124->lastEng[channel] = ad7124->lastVoltage[channel] * AD7124_CONV_V_TO_LBS;
+		ad7124->lastEng[channel] = ad7124->lastVoltage[channel] * AD7124_CONV_V_TO_PSI;
 
 		ad7124->lastChannel = channel;
 	}

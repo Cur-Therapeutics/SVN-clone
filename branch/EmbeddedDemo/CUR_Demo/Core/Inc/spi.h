@@ -48,7 +48,8 @@ void SpiDeSelect(sSpi * spi);
  * Externs
  */
 extern sSpi sSpiAdc1;
-
+extern sSpi sSpiFlash;
 extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi3;
 
 #endif /* INCLUDES_SPI_H_ */

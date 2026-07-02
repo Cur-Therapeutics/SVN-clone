@@ -169,6 +169,7 @@ typedef enum
  */
 #define AD7124_DEVICE_ID	0x04
 #define AD7124_DEVICE_ID2	0x07
+#define AD7124_DEVICE_ID3	0x14
 
 /**
  * ADC Ctrl Register Values
@@ -303,13 +304,7 @@ typedef enum
 #define AD7124_CONV_VREF_OFFSET		(0.249f)
 
 #define AD7124_CONV_SCALE_BRIDGE	(0.0000022183964f)
-#define AD7124_CONV_V_TO_LBS		(5.019305019f)
-
-#define AD7124_RTD_VREF				(2.94f)
-#define AD7124_CONV_SCALE_V_RTD		((AD7124_RTD_VREF/16777216.0f)*2.0f)
-#define AD7124_GAIN_RTD				(16.0f)
-#define AD7124_RTD_RREF				(5110)		// Vref Resistor
-#define AD7124_RTD_CURRENT_GAIN		(2.0f)		// Accounts for current excitation gain from 2 RTDs
+#define AD7124_CONV_V_TO_PSI		(5.0f)
 
 /**
  * Functions

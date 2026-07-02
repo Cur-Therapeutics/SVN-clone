@@ -204,7 +204,7 @@ namespace CURDiags
                 }
             }
 
-            lock (_SerialPortLock)
+            //lock (_SerialPortLock)
             {
                 if (_SerialPort == null || !_SerialPort.IsOpen)
                 {

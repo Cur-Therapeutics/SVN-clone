@@ -53,6 +53,7 @@ void GpioDrive();
  */
 extern sGpio sGpioLedGreen;
 extern sGpio sGpioLedRed;
+extern sGpio sGpioSpi1Select;
 //extern sGpio sGpioLedYellow1;
 //extern sGpio sGpioLedYellow2;
 

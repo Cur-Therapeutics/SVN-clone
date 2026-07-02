@@ -4,14 +4,7 @@
 *
 *   Description:    Controls the LCD interface
 *
-*   Copyright NextPhase Medical, Inc. 2019 -- All rights reserved.
-*
-*--------------------------------------------------------------------
-*
-*   Functions:	LCD_Drive()
-*				LCD_SetDisplayWindow()
-*				LCD_Write()
-*				LCD_FillWindow()
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -30,6 +23,9 @@
 
 #define COUNTOF_gDisplays 16
 
+/**
+ * Externs
+ */
 extern uint32_t gDisplays[COUNTOF_gDisplays];
 extern int32_t gDisplaysCRC[COUNTOF_gDisplays];          // CRC for gdisplay[]
 extern int32_t gDisplaysSize[COUNTOF_gDisplays];         // Size for gdisplay[]
@@ -98,10 +94,11 @@ void LCD_SetDisplayWindow(uint8_t window);
 void LCD_SetOverlayWindow(uint8_t window);
 uint8_t LCD_GetDisplayIndex();
 uint32_t LCD_GetWindowAddress(uint8_t window);
+uint8_t LCD_WindowIsValid(uint8_t window);
 void LCD_Write(sLocation src, sLocation dst, sShape shape);
-void LCD_Blend(sLocation src, sLocation background, sLocation dst, sShape shape, uint8_t alpha);
+void LCD_Blend(sLocation src, sLocation background, sLocation dst, sShape shape);
 void LCD_BlendFont(sLocation src, sLocation background, sLocation dst, sShape shape, sColor color);
-void LCD_StartTransfer(void);
+
 //void LCD_QueueTransfer(sDisplayObject *obj);
 void HAL_DMA2D_XferCpltCallback(DMA2D_HandleTypeDef *hdma2d);
 void LCD_FillWindow(uint8_t window, sColor color);

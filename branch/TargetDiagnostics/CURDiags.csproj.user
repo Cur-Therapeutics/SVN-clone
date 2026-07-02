@@ -5,10 +5,7 @@
     <Compile Update="GUIForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="GUIFormTab_Debug.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="GUIFormTab_Testing.cs">
+    <Compile Update="GUIForm_Invokes.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="GUIForm_ProcessMessage.cs">

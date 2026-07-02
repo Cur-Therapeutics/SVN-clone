@@ -23,9 +23,9 @@
 #include <stdint.h>
 #include "ssd1322.h"
 
-#include "curlogo_240240.h"
-//#include "testimage_240240.h"
-//#include "curdisplay_240240.h"
+//#include "curlogo_240240.h"		// CUR Logo, bad colors
+//#include "testimage_240240.h"		// Checkerboard with colors
+#include "curdisplay_240240.h"	// 42 psi and bar image
 
 #include "oled_display.h"
 #include "curlogo_oled.h"
@@ -426,7 +426,7 @@ void oled_run_tests(void)
 {
     oled_init();
 
-    while (1)
+    //while (1)
     {
     	oled_clear_fb(0);
     	oled_flush();
@@ -520,6 +520,22 @@ void tft_run_tests(void)
 		  oled_cs_high();
 
 		  HAL_Delay(3000);
+
+
+		  oled_cs_low();
+		  oled_dc_command();
+		  HAL_SPI_Transmit(&OLED_SPI_HANDLE, &cmd, 1, HAL_SPI_DELAY);
+		  oled_dc_data();
+		  for (int i = 0; i < (240*240); i++)
+		  {
+
+			  uint16_t rgb565Pixel = 0x8c71;
+
+			  pixel[0] = rgb565Pixel & 0xFF;
+			  pixel[1] = rgb565Pixel >> 8;
+			  HAL_SPI_Transmit(&OLED_SPI_HANDLE, &pixel, 2, HAL_SPI_DELAY);
+		  }
+		  oled_cs_high();
 
 
 		  // Display demo gui with numbers and symbols

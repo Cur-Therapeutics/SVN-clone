@@ -4,11 +4,7 @@
 *
 *   Description:    Helper header file with commonly used display structures
 *
-*   Copyright NextPhase Medical, Inc. 2022 -- All rights reserved.
-*
-*--------------------------------------------------------------------
-*
-*   Functions:
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *

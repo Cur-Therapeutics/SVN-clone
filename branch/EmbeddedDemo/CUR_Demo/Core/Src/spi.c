@@ -22,7 +22,8 @@
 /**
  * Spi ports
  */
-sSpi sSpiAdc1 	= {&hspi2, &sGpioSpi1Select};
+sSpi sSpiAdc1 	= {&hspi3, &sGpioSpi1Select};
+sSpi sSpiFlash 	= {&hspi3, &sGpioSpi3Select};
 
 /**
  * Trash

@@ -8,14 +8,14 @@
 /* Change these to match your CubeMX-generated handle and GPIO labels */
 #define OLED_SPI_HANDLE     hspi3
 
-#define OLED_CS_PORT        GPIOB
-#define OLED_CS_PIN         GPIO_PIN_9
+#define OLED_CS_PORT        GPIOC
+#define OLED_CS_PIN         GPIO_PIN_1
 
 #define OLED_DC_PORT        GPIOD
 #define OLED_DC_PIN         GPIO_PIN_12
 
-#define OLED_RST_PORT       GPIOD
-#define OLED_RST_PIN        GPIO_PIN_5
+#define OLED_RST_PORT       GPIOC
+#define OLED_RST_PIN        GPIO_PIN_0
 
 /**
  *

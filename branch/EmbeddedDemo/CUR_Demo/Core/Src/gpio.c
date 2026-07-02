@@ -24,7 +24,9 @@
 sGpio sGpioLedGreen 	= {LED_GREEN_GPIO_Port, LED_GREEN_Pin};
 sGpio sGpioLedBlue 		= {LED_BLUE_GPIO_Port, LED_BLUE_Pin};
 sGpio sGpioLedRed 		= {LED_RED_GPIO_Port, LED_RED_Pin};
-sGpio sGpioSpi1Select 		= {SPI_SELECT_1_GPIO_Port, SPI_SELECT_1_Pin};
+
+sGpio sGpioSpi1Select 	= {SPI_SELECT_1_GPIO_Port, SPI_SELECT_1_Pin};
+sGpio sGpioSpi3Select 	= {OLED_CS_GPIO_Port, OLED_CS_Pin};
 
 /**
  * @brief Initialize the GPIO system and ports

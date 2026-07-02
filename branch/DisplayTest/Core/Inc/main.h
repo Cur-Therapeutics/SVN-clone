@@ -65,14 +65,21 @@ void Error_Handler(void);
 
 // Main application entry point
 void main_cur(void);
+void WaitForNextTick(uint32_t timeNow);
 
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SPI2_SELECT_Pin GPIO_PIN_9
+#define SPI2_SELECT_GPIO_Port GPIOB
 #define LED_RED_Pin GPIO_PIN_6
 #define LED_RED_GPIO_Port GPIOI
 #define LCD_RESET_Pin GPIO_PIN_2
 #define LCD_RESET_GPIO_Port GPIOE
+#define SPI1_SELECT_Pin GPIO_PIN_5
+#define SPI1_SELECT_GPIO_Port GPIOG
+#define TOUCH_INT_Pin GPIO_PIN_0
+#define TOUCH_INT_GPIO_Port GPIOJ
 #define LED_GREEN_Pin GPIO_PIN_4
 #define LED_GREEN_GPIO_Port GPIOI
 

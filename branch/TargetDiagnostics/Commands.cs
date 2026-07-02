@@ -16,6 +16,7 @@
 *
 ********************************************************************/
 
+using System;
 using System.Runtime.InteropServices;
 using static CURDiags.Enums;
 
@@ -45,13 +46,136 @@ namespace CURDiags
         public static bool IsOpen => _serial != null && _serial.IsOpen;
 
         /// <summary>
+        /// Status message
+        /// </summary>
+         
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sDIAG_Status
+        {
+            public sCommandHeader header;
+            public byte versionMajor;
+            public byte versionMinor;
+            public byte versionBuild;
+            public byte reserved;
+            public UInt32 sysTicks;
+            public UInt32 idleTicks;
+            public UInt32 skippedTicks;
+            public UInt32 minIdle;
+            public UInt32 maxIdle;
+            public UInt32 state;
+            public UInt32 health;
+            public UInt64 errors;
+        }
+
+        /// <summary>
         /// Create an instance of the Commands class with the indicated
         /// communications protocol.
         /// </summary>
-        /// <param name="serial"></param>
         public static void Init(Serial? serial)
         {
             _serial = serial;
+        }
+
+        /// <summary>
+        /// LCD Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public unsafe struct sLcdData
+        {
+            public sCommandHeader header;
+            public UInt32 address;
+            public UInt32 count;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+            public byte[] data;
+        }
+
+        /// <summary>
+        /// AD7124 Status
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sAD7124Status
+        {
+            public sCommandHeader header;
+            public byte chipId;
+            public byte status;
+            public UInt16 control;
+            public UInt32 io1;
+            public UInt32 io2;
+            public byte id;
+            public UInt32 error;
+            public UInt32 error_en;
+            public UInt16 channel;
+            public UInt16 config;
+            public UInt32 filter;
+            public UInt32 offset;
+            public UInt32 gain;
+        }
+
+        /// <summary>
+        /// AD7124 Read Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sAD7124ReadData
+        {
+            public sCommandHeader header;
+            public byte chipId;
+            public UInt32 counts;
+            public float engValue;
+            public float mLastVoltage;
+            public float mFilterAvg;
+        }
+
+        /// <summary>
+        /// Accel Read Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sAccelReadData
+        {
+            public sCommandHeader header;
+            public UInt32 x;
+            public UInt32 y;
+            public UInt32 z;
+        }
+
+        /// <summary>
+        /// RTC Read Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sRtcReadData
+        {
+            public sCommandHeader header;
+            public UInt32 status;
+            public byte hour;
+            public byte min;
+            public byte second;
+            public byte month;
+            public byte day;
+            public byte year;
+        }
+
+        /// <summary>
+        /// Flash Status Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sFlashStatusData
+        {
+            public sCommandHeader header;
+            public byte statusReg1;
+            public byte statusReg2;
+
+            public byte configReg1;
+            public byte configReg2;
+            public byte configReg3;
+            public byte configReg4;
+            public byte configReg5;
+
+            public byte manufactureId;
+            public byte memInterface;
+            public byte density;
+            public byte idLen;
+            public byte config;
+            public byte family;
+            public UInt64 uniqueId;
         }
 
         /// <summary>
@@ -79,8 +203,6 @@ namespace CURDiags
         /// <summary>
         /// Create a sCommandHeader instance with the indicated 
         /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
         internal static sCommandHeader CreateHeader(eDiagnosticCommands command)
         {
             return new sCommandHeader
@@ -97,9 +219,6 @@ namespace CURDiags
         /// Return the indicated message as a byte array after appending the indicated
         /// payload data to the sCommandHeader
         /// </summary>
-        /// <param name="header"></param>
-        /// <param name="payload"></param>
-        /// <returns></returns>
         internal static byte[] SerializeMessage(sCommandHeader header, ReadOnlySpan<byte> payload)
         {
             ushort fullSize = checked((ushort)(Sizeof_sCommandHeader + payload.Length));
@@ -126,9 +245,6 @@ namespace CURDiags
         /// Calculate the checksum of the indicated list of bytes, interpreted as
         /// sCommandHeader instance.
         /// </summary>
-        /// <param name="data"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
         internal static byte ComputeChecksum(IReadOnlyList<byte> data, int count)
         {
             byte checksum = 0;

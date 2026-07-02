@@ -4,7 +4,7 @@
  *
  *   Description:    Provides diagnostics communication over UART
  *
- *   Copyright NextPhase Medical, Inc. 2019 -- All rights reserved.
+ *   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
  *
  *--------------------------------------------------------------------
  *
@@ -26,6 +26,12 @@
 #include "string.h"
 #include "lcd.h"
 #include "backlight.h"
+#include "touch.h"
+#include "rtc.h"
+#include "ospiflash.h"
+#include "ad7124.h"
+#include "statemachine.h"
+#include "accel.h"
 
 /**
  * Reference to the uart instance
@@ -91,7 +97,7 @@ void DIAG_Init()
 	HAL_UART_StateTypeDef state = HAL_UART_GetState(&huart4);
 	if (state == HAL_UART_STATE_READY)
 	{
-		HealthUpdate(HEALTH_URT, HEALTH_GOOD);
+		HealthSubsystemGood(eSystemUart);
 	}
 
 	// Begin receiving command header
@@ -110,7 +116,7 @@ void DIAG_Drive()
 	HAL_UART_StateTypeDef state = HAL_UART_GetState(&huart4);
 	if (state == HAL_UART_STATE_ERROR || state == HAL_UART_STATE_RESET)
 	{
-		HealthUpdate(HEALTH_URT, HEALTH_BAD);
+		HealthSubsystemBad(eSystemUart);
 	}
 
 	// Handle communications timeouts
@@ -166,6 +172,7 @@ void DIAG_Process(uint8_t * data)
 {
 	// Cast to diagnostics command
 	sDIAG_Command * cmd = (sDIAG_Command*)data;
+	uint32_t retval;
 
 	// Check for valid command type
 	if (cmd->head.command >= eDIAG_Count)
@@ -207,12 +214,17 @@ void DIAG_Process(uint8_t * data)
 		gDiagReply.armStatus.skippedTicks	= gSkippedTicks;
 		gDiagReply.armStatus.minIdle		= gMinIdleTicks;
 		gDiagReply.armStatus.maxIdle		= gMaxIdleTicks;
+
+		gDiagReply.armStatus.state 			= GetCurrentState();
+		gDiagReply.armStatus.health			= HealthGetStatus();
+		gDiagReply.armStatus.errors			= GetErrorState();
+
 		DIAG_Send(cmd, &gDiagReply);
 		break;
 
 	case eDIAG_LCD_DATA:
 		// Copy data to the specified window
-		memcpy( (uint8_t*)(WINDOW_0 + cmd->lcdData.address), cmd->lcdData.data, cmd->lcdData.count);
+		memcpy( (uint8_t*)(WINDOW_0 + cmd->lcdData.address), cmd->lcdData.data, cmd->lcdData.count );
 
 		// Ack/Nak the message
 		cmd->head.command = eDIAG_LCD_DATA_ACK;
@@ -235,6 +247,176 @@ void DIAG_Process(uint8_t * data)
 
 	case eDIAG_LCD_BKLIGHT_SET:
 		BacklightSet(cmd->lcdSetBacklight.value);
+		break;
+
+	case eDIAG_TOUCH_INIT:
+		TOUCH_Init();
+		break;
+
+	case eDIAG_TOUCH_READ:
+		gDiagReply.touchRead.xPos = TOUCH_LastX();
+		gDiagReply.touchRead.yPos = TOUCH_LastY();
+		gDiagReply.touchRead.mode = TOUCH_GetMode();
+		gDiagReply.touchRead.xPosRaw = TOUCH_LastXRaw();
+		gDiagReply.touchRead.yPosRaw = TOUCH_LastYRaw();
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_TOUCH_MODE:
+		TOUCH_SetMode(cmd->touchMode.mode);
+		break;
+
+	case eDIAG_TOUCH_CAL:
+		if (cmd->touchCal.opType == READ)
+		{
+			gDiagReply.touchCal.opType = READ;
+			gDiagReply.touchCal.calValues = TOUCH_GetCal();
+			DIAG_Send(cmd, &gDiagReply);
+		}
+		else if (cmd->touchCal.opType == WRITE)
+		{
+			TOUCH_SetCal(cmd->touchCal.calValues);
+		}
+		break;
+
+	case eDIAG_RTC_STATUS:
+		gDiagReply.rtcStatus.status 		= RTC_GetStatus();
+		gDiagReply.rtcStatus.dateTime		= RTC_GetDateTime();
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_RTC_WRITE:
+		RTC_SetDateTime(cmd->rtcStatus.dateTime);
+		break;
+
+	case eDIAG_FLASH_ID:
+		FlashGetIds( (sFlashIds*)&gDiagReply.flashId );
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_FLASH_STATUS:
+
+		if (FlashGetState() == FLASH_STATE_LEGACY)
+		{
+			LegacyFlashReadId();
+			gDiagReply.flashStatus.statusReg1 = LegacyFlashReadSr1();
+			gDiagReply.flashStatus.statusReg2 = LegacyFlashReadSr2();
+
+			LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR1X, &gDiagReply.flashStatus.configReg1, 0);
+			LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR2X, &gDiagReply.flashStatus.configReg2, 0);
+			LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR3X, &gDiagReply.flashStatus.configReg3, 0);
+			LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR4X, &gDiagReply.flashStatus.configReg4, 0);
+			LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR5X, &gDiagReply.flashStatus.configReg5, 0);
+		}
+		else
+		{
+			OctalFlashReadId();
+			gDiagReply.flashStatus.statusReg1 = OctalFlashReadSr1();
+			gDiagReply.flashStatus.statusReg2 = OctalFlashReadSr2();
+
+			OctalFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR1X, &gDiagReply.flashStatus.configReg1, 3);
+			OctalFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR2X, &gDiagReply.flashStatus.configReg2, 3);
+			OctalFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR3X, &gDiagReply.flashStatus.configReg3, 3);
+			OctalFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR4X, &gDiagReply.flashStatus.configReg4, 3);
+			OctalFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR5X, &gDiagReply.flashStatus.configReg5, 3);
+		}
+
+		FlashGetIds( (sFlashIds*)&gDiagReply.flashStatus.ids );
+
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_FLASH_READ:
+		FlashRead(cmd->flashAddress.address, gDiagReply.flashData.data, cmd->flashAddress.count);
+		gDiagReply.flashData.address = cmd->flashAddress.address;
+		gDiagReply.flashData.count = cmd->flashAddress.count;
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_FLASH_WRITE:
+		retval = FlashWrite(cmd->flashData.address + FLASH_IMAGE_START_ADDRESS, cmd->flashData.data, cmd->flashData.count);
+
+		// Send ack/nak back to diagnostics
+		cmd->head.command = eDIAG_FLASH_ACK;
+		gDiagReply.flashAck.address = cmd->flashData.address;
+		gDiagReply.flashAck.result = retval;
+		DIAG_Send(cmd, &gDiagReply);
+
+		break;
+
+	case eDIAG_FLASH_ERASE:
+		FlashSectorErase(cmd->flashAddress.address + FLASH_IMAGE_START_ADDRESS);
+		break;
+
+	case eDIAG_FLASH_MASS_ERASE:
+		FlashMassErase();
+		break;
+
+	case eDIAG_FLASH_BURN:
+
+		// Erase, 2 sectors make up a slot
+		retval = OctalSpiFlashErase256KSector(cmd->flashAddress.address + FLASH_IMAGE_START_ADDRESS);
+		retval |= OctalSpiFlashErase256KSector(cmd->flashAddress.address + FLASH_IMAGE_START_ADDRESS + FLASH_SECTOR_SIZE);
+		if (retval != HAL_OK)
+		{
+			cmd->head.command = eDIAG_FLASH_ACK;
+			gDiagReply.flashAck.address = cmd->flashData.address;
+			gDiagReply.flashAck.result = 0;
+			DIAG_Send(cmd, &gDiagReply);
+		}
+
+		// Burn
+
+
+		// Send ACK
+		cmd->head.command = eDIAG_FLASH_ACK;
+		gDiagReply.flashAck.address = cmd->flashData.address;
+		gDiagReply.flashAck.result = 1;
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_FLASH_RESET:
+		FlashReset();
+		break;
+
+	case eDIAG_FLASH_CLEAR_PROG:
+		FlashClearProgramAndErrors();
+		break;
+
+	case eDIAG_AD7124_GET_STATUS:
+		AD7124_GetStatus(&ad7124, &gDiagReply.ad7124Status);
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_AD7124_REG_WRITE:
+		AD7124_Write(&ad7124, cmd->ad7124RegWrite.reg, cmd->ad7124RegWrite.val);
+		break;
+
+	case eDIAG_AD7124_REG_READ:
+		gDiagReply.ad7124RegRead.data = AD7124_Read(&ad7124, cmd->ad7124RegRead.reg);
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_AD7124_INIT:
+		AD7124_Init();
+		break;
+
+	case eDIAG_AD7124_RESET:
+		AD7124_Reset(&ad7124);
+		break;
+
+	case eDIAG_AD7124_READ_DATA:
+		gDiagReply.ad7124Read.counts = AD7124_GetLastCount(&ad7124);
+		gDiagReply.ad7124Read.mLastVoltage = AD7124_GetLastVolts(&ad7124);
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_ACCEL_READ:
+
+		gDiagReply.accelRead.x = AccelReadX();
+		gDiagReply.accelRead.y = AccelReadY();
+		gDiagReply.accelRead.z = AccelReadZ();
+		DIAG_Send(cmd, &gDiagReply);
 		break;
 
 	default:
@@ -395,6 +577,31 @@ void DIAG_Send(sDIAG_Command * rx, sDIAG_Command * tx)
 		case eDIAG_STATUS:
 			tx->head.size += sizeof(sDIAG_Status);
 			break;
+
+		case eDIAG_RTC_STATUS:
+			tx->head.size += sizeof(sDIAG_Rtc_Status);
+			break;
+
+		case eDIAG_AD7124_GET_STATUS:
+			tx->head.size += sizeof(sAd7124Status);
+			break;
+
+		case eDIAG_AD7124_REG_READ:
+			tx->head.size += sizeof(sAd7124RegRead);
+			break;
+
+		case eDIAG_AD7124_READ_DATA:
+			tx->head.size += sizeof(sAd7124Read);
+			break;
+
+		case eDIAG_ACCEL_READ:
+			tx->head.size += sizeof(sAccelRead);
+			break;
+
+		case eDIAG_FLASH_STATUS:
+			tx->head.size += sizeof(sDIAG_Flash_Status);
+			break;
+
 		default:
 			// We should never get here!
 			FaultHandler(ERR_DIAG_UNKNOWN);

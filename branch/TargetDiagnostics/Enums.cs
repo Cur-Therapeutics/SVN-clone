@@ -29,7 +29,60 @@ namespace CURDiags
         /// </summary>
         public enum eDiagnosticCommands
         {
-            Hello = 2,
+            eDIAG_NOP,
+            eDIAG_HELLO,
+            eDIAG_STATUS,
+            eDIAG_LCD_DATA,
+            eDIAG_LCD_DATA_ACK,
+            eDIAG_LCD_SET_DISPLAY,
+            eDIAG_LCD_BKLIGHT_ON,
+            eDIAG_LCD_BKLIGHT_OFF,
+            eDIAG_LCD_BKLIGHT_SET,
+            eDIAG_TOUCH_INIT,
+            eDIAG_TOUCH_READ,
+            eDIAG_TOUCH_MODE,
+            eDIAG_TOUCH_CAL,
+            eDIAG_RTC_STATUS,
+            eDIAG_RTC_WRITE,
+            eDIAG_FLASH_STATUS,
+            eDIAG_FLASH_ID,
+            eDIAG_FLASH_READ,
+            eDIAG_FLASH_WRITE,
+            eDIAG_FLASH_ACK,
+            eDIAG_FLASH_ERASE,
+            eDIAG_FLASH_MASS_ERASE,
+            eDIAG_FLASH_BURN,
+            eDIAG_FLASH_RESET,
+            eDIAG_FLASH_CLEAR_PROG,
+            eDIAG_AD7124_GET_STATUS,
+            eDIAG_AD7124_REG_WRITE,
+            eDIAG_AD7124_REG_READ,
+            eDIAG_AD7124_INIT,
+            eDIAG_AD7124_RESET,
+            eDIAG_AD7124_READ_DATA,
+            eDIAG_ACCEL_READ,
         }
-    }
-}
+
+        /// <summary>
+        /// List of subsystems used on the embedded system
+        /// </summary>
+        public enum eSubsystems
+        {
+            eSystemArm,
+            eSystemFlash,
+            eSystemRam,
+            eSystemAdc,
+            eSystem7124,
+            eSystemUart,
+            eSystemTouch,
+            eSystemRtc,
+            eSystemLcd,
+            eSystemStack,
+            eSystemAccel,
+            eSystemSpi,
+            eSystemI2C,
+            eSystemCath,
+        }
+
+    } // end class
+}  // end namespace

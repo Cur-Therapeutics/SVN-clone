@@ -92,7 +92,7 @@ namespace CURDiags
         {
             string line = $"{DateTime.Now:HH:mm:ss.fff} [{level}] {message}";
 
-            lock (_logLock)
+            //lock (_logLock)
             {
                 OnLoggedMessage(new LoggerEventArgs(line));
                 Debug.WriteLine(line);
