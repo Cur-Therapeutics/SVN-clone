@@ -2,9 +2,9 @@
  *
  *   version.h
  *
- *   Description:    Version
+ *   Description:    Tracks the version of the embedded software
  *
- *   Copyright NextPhase Medical, Inc. 2025 -- All rights reserved.
+ *   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
  *
  ********************************************************************/
 
@@ -16,6 +16,6 @@
  */
 #define   	BUILD_MAJOR  	0
 #define		BUILD_MINOR 	0
-#define		BUILD_COMPILE 	1
+#define		BUILD_COMPILE 	2
 
 #endif /* INC_VERSION_H_ */

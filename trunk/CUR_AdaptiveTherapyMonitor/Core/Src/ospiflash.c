@@ -83,13 +83,13 @@ void FlashInit()
 	HAL_Delay(50);
 
 	// Reset Flash chip so we start at a known state
-	FlashReset();
-	FlashClearProgramAndErrors();
+	//FlashReset();
+	//FlashClearProgramAndErrors();
 
 	LegacyFlashReadJedec();
 
 	LegacyFlashReadId();
-	OctalFlashReadId();
+	//OctalFlashReadId();
 
 	// Configuration registers
 	uint8_t cfr1x = 0;
@@ -98,21 +98,11 @@ void FlashInit()
 	uint8_t cfr4x = 0;
 	uint8_t cfr5x = 0;
 
-	for (int i = 0; i < 32; i++)
-	{
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR1X, &cfr1x, i);
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR2X, &cfr2x, i);
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR3X, &cfr3x, i);
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR4X, &cfr4x, i);
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR5X, &cfr5x, i);
-
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_NV_REG_CFR1X, &cfr1x, i);
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_NV_REG_CFR2X, &cfr2x, i);
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_NV_REG_CFR3X, &cfr3x, i);
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_NV_REG_CFR4X, &cfr4x, i);
-		LegacyFlashReadAnyRegister(OCTOSPIFLASH_NV_REG_CFR5X, &cfr5x, i);
-	}
-
+	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR1X, &cfr1x, 0);
+	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR2X, &cfr2x, 0);
+	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR3X, &cfr3x, 0);
+	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR4X, &cfr4x, 0);
+	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR5X, &cfr5x, 0);
 
 	volatile uint8_t sr1 = LegacyFlashReadSr1();
 	volatile uint8_t sr2 = LegacyFlashReadSr2();

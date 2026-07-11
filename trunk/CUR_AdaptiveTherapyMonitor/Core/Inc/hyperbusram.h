@@ -3,9 +3,9 @@
 *   hyperbusram.h
 *
 *   Description:    Manages the Octo-Spi PSRAM
-*   				IS66WVH8M8BLL-100B1LI Hyperbus PSRAM
+*   				S70KL1282DPBHI020 Hyperbus PSRAM
 *
-*   Copyright NextPhase Medical, Inc. 2023 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -20,18 +20,18 @@
 #define INC_HYPERBUSRAM_H_
 
 /**
- * IS66WVH8M8BLL-100B1LI Hyperbus PSRAM
+ * Hyperbus PSRAM
  */
-#define ISS66WVH8M8_CR0_ADDRESS         0x00001000U
-#define ISS66WVH8M8_CR1_ADDRESS         0x00001002U
-#define ISS66WVH8M8_ID0_ADDRESS			0x00000000U
-#define ISS66WVH8M8_ID1_ADDRESS			0x00000002U
+#define HYPERBUS_CR0_ADDRESS        0x00001000U
+#define HYPERBUS_CR1_ADDRESS        0x00001002U
+#define HYPERBUS_ID0_ADDRESS		0x00000000U
+#define HYPERBUS_ID1_ADDRESS		0x00000002U
 
 /**
  * Expected values
  */
-#define ISS66WVH8M8_ID0_VALUE			0x0C83
-#define ISS66WVH8M8_ID1_VALUE			0x0
+#define HYPERBUS_ID0_VALUE			0x0C81
+#define HYPERBUS_ID1_VALUE			0x1
 
 /**
  * Functions

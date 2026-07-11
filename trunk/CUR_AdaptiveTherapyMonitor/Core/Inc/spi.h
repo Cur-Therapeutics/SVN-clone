@@ -2,7 +2,7 @@
 *
 *   spi.h
 *
-*   Description:
+*   Description: Handles structures and operation of SPI ports
 *
 *   Copyright NextPhase Medical Devices, Inc. 2025 -- All rights reserved.
 *
@@ -21,6 +21,9 @@
 #include "main.h"
 #include "gpio.h"
 
+/**
+ * Timeout value for SPI operations
+ */
 #define SPI_TIMEOUT    (500)
 
 /**
@@ -47,10 +50,7 @@ void SpiDeSelect(sSpi * spi);
 /**
  * Externs
  */
-extern sSpi sSpiAdc1;
-extern sSpi sSpiAdc2;
-extern sSpi sSpiAdc3;
-
+extern sSpi sSpiAdc;
 extern SPI_HandleTypeDef hspi2;
 
 #endif /* INCLUDES_SPI_H_ */

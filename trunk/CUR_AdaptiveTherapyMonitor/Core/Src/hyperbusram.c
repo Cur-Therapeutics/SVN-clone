@@ -40,13 +40,13 @@ OSPI_HandleTypeDef * phospi = &hospi1;
 void HyperbusInit()
 {
 	// Fetch ID and CR registers
-	mIdReg0 = HyperbusReadReg(ISS66WVH8M8_ID0_ADDRESS);
-	mIdReg1 = HyperbusReadReg(ISS66WVH8M8_ID1_ADDRESS);
-	mCrReg0 = HyperbusReadReg(ISS66WVH8M8_CR0_ADDRESS);
-	mCrReg1 = HyperbusReadReg(ISS66WVH8M8_CR1_ADDRESS);
+	mIdReg0 = HyperbusReadReg(HYPERBUS_ID0_ADDRESS);
+	mIdReg1 = HyperbusReadReg(HYPERBUS_ID1_ADDRESS);
+	mCrReg0 = HyperbusReadReg(HYPERBUS_CR0_ADDRESS);
+	mCrReg1 = HyperbusReadReg(HYPERBUS_CR1_ADDRESS);
 
 	// Check IDs to confirm comms
-	if (mIdReg0 != ISS66WVH8M8_ID0_VALUE || mIdReg1 != ISS66WVH8M8_ID1_VALUE)
+	if (mIdReg0 != HYPERBUS_ID0_VALUE || mIdReg1 != HYPERBUS_ID1_VALUE)
 	{
 		FaultHandler(ERR_HYPERBUS_RAM);
 		return;

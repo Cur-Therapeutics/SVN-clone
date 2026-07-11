@@ -28,6 +28,7 @@ sGpio sGpioLedRed 			= {LED_RED_GPIO_Port, LED_RED_Pin};
 //sGpio sGpioLedGp2 		= {LED_YEL2_GPIO_Port, LED_YEL2_Pin};
 
 sGpio sGpioSpi1Select		= {SPI1_SELECT_GPIO_Port, SPI1_SELECT_Pin};
+sGpio sGpioSpi2Select		= {SPI2_SELECT_GPIO_Port, SPI2_SELECT_Pin};
 
 /**
  * Internal functions
@@ -110,4 +111,3 @@ void GpioToggle(sGpio * gpio)
 	else
 		GpioSet(gpio);
 }
-

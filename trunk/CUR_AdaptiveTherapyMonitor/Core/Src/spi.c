@@ -23,7 +23,7 @@
 /**
  * Spi ports
  */
-sSpi sSpiAdc1 	= {&hspi2, &sGpioSpi1Select};
+sSpi sSpiAdc 	= {&hspi2, &sGpioSpi2Select};
 
 /**
  * Trash
@@ -37,14 +37,14 @@ volatile unsigned char trash;
 void SpiInit()
 {
 	// Deselect all SPI ports
-	SpiDeSelect(&sSpiAdc1);
+	SpiDeSelect(&sSpiAdc);
 	HAL_Delay(50);
 
 	// Check health
-	if (	HAL_SPI_GetState(sSpiAdc1.hSpiPort) != HAL_SPI_STATE_ERROR &&
-			HAL_SPI_GetState(sSpiAdc1.hSpiPort) != HAL_SPI_STATE_RESET &&
-			HAL_SPI_GetState(sSpiAdc1.hSpiPort) != HAL_SPI_STATE_ERROR &&
-			HAL_SPI_GetState(sSpiAdc1.hSpiPort) != HAL_SPI_STATE_RESET)
+	if (	HAL_SPI_GetState(sSpiAdc.hSpiPort) != HAL_SPI_STATE_ERROR &&
+			HAL_SPI_GetState(sSpiAdc.hSpiPort) != HAL_SPI_STATE_RESET &&
+			HAL_SPI_GetState(sSpiAdc.hSpiPort) != HAL_SPI_STATE_ERROR &&
+			HAL_SPI_GetState(sSpiAdc.hSpiPort) != HAL_SPI_STATE_RESET)
 	{
 		// SPI is initialized and not in error
 		HealthSubsystemGood(eSystemSpi);

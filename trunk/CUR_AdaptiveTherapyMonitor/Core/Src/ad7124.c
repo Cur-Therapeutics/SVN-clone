@@ -28,7 +28,7 @@
 /**
  * AD7124 Device Instance
  */
-sAd7124 ad7124 = {eAD7124_Bridge, &sSpiAdc1};
+sAd7124 ad7124 = {eAD7124_Bridge, &sSpiAdc};
 
 /**
  * Current state

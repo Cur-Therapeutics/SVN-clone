@@ -73,6 +73,8 @@ void WaitForNextTick(uint32_t timeNow);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SPI2_SELECT_Pin GPIO_PIN_9
+#define SPI2_SELECT_GPIO_Port GPIOB
 #define LED_GREEN_Pin GPIO_PIN_7
 #define LED_GREEN_GPIO_Port GPIOJ
 #define LED_RED_Pin GPIO_PIN_6

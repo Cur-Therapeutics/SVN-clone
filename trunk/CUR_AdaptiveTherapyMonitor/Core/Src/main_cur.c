@@ -61,20 +61,21 @@ void main_cur()
 {
 	// Subsystem initialization
 	HealthInit();
-	//HyperbusInit();
-	//FlashInit();
+	HyperbusInit();
+	FlashInit();
 	DIAG_Init();
-	//BacklightInit();
-	//SpiInit();
-	//AD7124_Init();
+	BacklightInit();
+	SpiInit();
+	AD7124_Init();
 	//StateInit();
-
-	//sColor c = {255, 0, 255};
-	//LCD_FillWindow(LCD_GetDisplayIndex(), c);
 
 	// Begin loop on start of system tick
 	gSystemTick = HAL_GetTick();
 	while (gSystemTick == HAL_GetTick()) { /*  */ }
+
+
+	sColor color = {255, 0, 255};
+	LCD_FillWindow(0, color);
 
 	while (1)
 	{
@@ -82,9 +83,9 @@ void main_cur()
 		gSystemTick = HAL_GetTick();
 
 		DIAG_Drive();
-		//BacklightDrive();
+		BacklightDrive();
 		//AD7124_Drive();
-		//RTC_Drive();
+		RTC_Drive();
 		//LCD_Drive();
 		//StateDrive();
 		//DisplayDrive(GetCurrentState());
