@@ -29,6 +29,9 @@
 #include "main.h"
 #include "statemachine.h"
 #include "display.h"
+#include "adc.h"
+#include "accel.h"
+#include "touch.h"
 
 /**
  * System tick
@@ -67,7 +70,10 @@ void main_cur()
 	BacklightInit();
 	SpiInit();
 	AD7124_Init();
-	//StateInit();
+	AdcInit();
+	AccelInit();
+	TOUCH_Init();
+	StateInit();
 
 	// Begin loop on start of system tick
 	gSystemTick = HAL_GetTick();
@@ -84,9 +90,13 @@ void main_cur()
 
 		DIAG_Drive();
 		BacklightDrive();
-		//AD7124_Drive();
+		AD7124_Drive();
 		RTC_Drive();
-		//LCD_Drive();
+		AdcDrive();
+		LCD_Drive();
+		AccelDrive();
+		TOUCH_Drive();
+
 		//StateDrive();
 		//DisplayDrive(GetCurrentState());
 

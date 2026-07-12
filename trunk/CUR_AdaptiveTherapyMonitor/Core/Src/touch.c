@@ -77,17 +77,6 @@ void TOUCH_Init()
 	// Initialize member variables
 	mLastXTouch = 0;
 	mLastYTouch = 0;
-
-	// Fetch and validate calibration from flash slot 16
-	/*FLA_Read(TOUCH_CAL_FLASH_ADDR, (uint8_t *)&mTouchCal, sizeof(mTouchCal));
-	if (mTouchCal.xMax > 5000 || mTouchCal.yMax > 5000 || mTouchCal.xMin == 0xFFFF || mTouchCal.yMin == 0xFFFF)
-	{
-		// Setup defaults
-		mTouchCal.xMax = 3800;
-		mTouchCal.xMin = 275;
-		mTouchCal.yMax = 3800;
-		mTouchCal.yMin = 275;
-	}*/
 }
 
 /**
@@ -97,13 +86,6 @@ void TOUCH_Init()
 void TOUCH_Drive()
 {
 	GPIO_PinState touchDetected = HAL_GPIO_ReadPin(TOUCH_INT_GPIO_Port, TOUCH_INT_Pin);
-
-	// Detect activity
-	if (touchDetected == GPIO_PIN_RESET)
-	{
-		//Activity_Kick();
-	}
-
 	switch (mTouchState)
 	{
 		case eTOUCH_IDLE:
@@ -155,7 +137,6 @@ void TOUCH_Drive()
 				// Draw to frame buffer DEBUG
 				LCD_Draw(mLastXTouch, mLastYTouch, colorRed);
 			}
-
 			break;
 	}
 }
@@ -308,24 +289,8 @@ uint16_t TOUCH_Read(uint8_t cmd)
   */
 uint16_t TOUCH_X()
 {
-	mLastXTouchRaw = TOUCH_Read(TOUCH_MEASURE_Y);
+	mLastXTouchRaw = TOUCH_Read(TOUCH_MEASURE_X);
 	float xPosition = mLastXTouchRaw;
-
-	// Check divisor
-	if (mTouchCal.xMax-mTouchCal.xMin == 0)
-	{
-		FaultHandler(ERR_TOUCH_CAL);
-		return 0;
-	}
-
-	// Translate to the screen size
-	float scale = ((float)DISPLAY_HEIGHT) / ((float)(mTouchCal.xMax-mTouchCal.xMin));
-	xPosition = (xPosition - mTouchCal.xMin) * scale;
-
-	xPosition = DISPLAY_HEIGHT - xPosition;	// Flip coordinates
-	if (xPosition > DISPLAY_HEIGHT)
-		xPosition = 0;
-
 	return (uint16_t)xPosition;
 }
 
@@ -335,24 +300,8 @@ uint16_t TOUCH_X()
   */
 uint16_t TOUCH_Y()
 {
-	mLastYTouchRaw = TOUCH_Read(TOUCH_MEASURE_X);
+	mLastYTouchRaw = TOUCH_Read(TOUCH_MEASURE_Y);
 	float yPosition = mLastYTouchRaw;
-
-	// Check divisor
-	if (mTouchCal.yMax-mTouchCal.yMin == 0)
-	{
-		FaultHandler(ERR_TOUCH_CAL);
-		return 0;
-	}
-
-	// Translate to the screen size
-	float scale = ((float)DISPLAY_WIDTH) / ((float)(mTouchCal.yMax-mTouchCal.yMin));
-	yPosition = (yPosition - mTouchCal.yMin) * scale;
-
-	yPosition = DISPLAY_WIDTH - yPosition;	// Flip coordinates
-	if (yPosition > DISPLAY_WIDTH)
-		yPosition = 0;
-
 	return (uint16_t)yPosition;
 }
 

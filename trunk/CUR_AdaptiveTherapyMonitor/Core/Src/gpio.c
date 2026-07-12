@@ -24,10 +24,10 @@
  */
 sGpio sGpioLedGreen 		= {LED_GREEN_GPIO_Port, LED_GREEN_Pin};
 sGpio sGpioLedRed 			= {LED_RED_GPIO_Port, LED_RED_Pin};
-//sGpio sGpioLedGp1 		= {LED_YEL1_GPIO_Port, LED_YEL1_Pin};
-//sGpio sGpioLedGp2 		= {LED_YEL2_GPIO_Port, LED_YEL2_Pin};
+sGpio sGpioLedGp1 			= {LED_GP1_GPIO_Port, LED_GP1_Pin};
+sGpio sGpioLedGp2 			= {LED_GP2_GPIO_Port, LED_GP2_Pin};
 
-sGpio sGpioSpi1Select		= {SPI1_SELECT_GPIO_Port, SPI1_SELECT_Pin};
+sGpio sGpioAccelSelect		= {ACCEL_SELECT_GPIO_Port, ACCEL_SELECT_Pin};
 sGpio sGpioSpi2Select		= {SPI2_SELECT_GPIO_Port, SPI2_SELECT_Pin};
 
 /**

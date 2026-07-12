@@ -32,7 +32,7 @@ typedef enum
 /**
  * Channel counts
  */
-#define AD7124_MAX_CH		(1)	// Zero based index
+#define AD7124_MAX_CH		(0)	// Zero based index
 
 /**
  * Number of possible channels in each AD7124
@@ -42,7 +42,18 @@ typedef enum
 /**
  * Sample period
  */
-#define AD7124_SAMPLE_PERIOD	(50)
+#define AD7124_SAMPLE_PERIOD	(500)
+
+/**
+ * Bipolar offset value
+ */
+#define AD7124_OFFSET	(8388608)
+
+/**
+ * Scale from counts to mV
+ * 3.19 Vref divided by 1/2 full scale 16777216
+ */
+#define AD7124_SCALE	(0.00000038028f)
 
 /**
  * Support for multiple ADCs
@@ -289,6 +300,18 @@ typedef enum
 #define AD7124_IOCTRL1_IOUT1_CH5			(0x00B0)
 #define AD7124_IOCTRL1_IOUT1_CH6			(0x00E0)
 #define AD7124_IOCTRL1_IOUT1_CH7			(0x00F0)
+
+/**
+ * IO Control 2 Register Values
+ */
+#define AD7124_IOCTRL2_VBIAS_CH0			(0x0001)
+#define AD7124_IOCTRL2_VBIAS_CH1			(0x0002)
+#define AD7124_IOCTRL2_VBIAS_CH2			(0x0010)
+#define AD7124_IOCTRL2_VBIAS_CH3			(0x0020)
+#define AD7124_IOCTRL2_VBIAS_CH4			(0x0400)
+#define AD7124_IOCTRL2_VBIAS_CH5			(0x0800)
+#define AD7124_IOCTRL2_VBIAS_CH6			(0x4000)
+#define AD7124_IOCTRL2_VBIAS_CH7			(0x8000)
 
 /**
  * Filter Register Values

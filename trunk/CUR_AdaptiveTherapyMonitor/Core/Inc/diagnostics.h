@@ -95,6 +95,7 @@ typedef enum
 		eDIAG_AD7124_RESET,
 		eDIAG_AD7124_READ_DATA,
 		eDIAG_ACCEL_READ,
+		eDIAG_ADC_READ,
 	eDIAG_Count
 } eDIAG_Commands;
 
@@ -361,6 +362,15 @@ typedef struct __attribute__((packed, aligned(1)))
 } sAccelRead;
 
 /**
+ * ADC Read
+ */
+typedef struct __attribute__((packed, aligned(1)))
+{
+	uint32_t 	counts;
+	float 		volts;
+} sAdcRead;
+
+/**
  * Command Message
  */
 typedef struct
@@ -389,6 +399,7 @@ typedef struct
 		sAd7124Read				ad7124Read;
 		sAd7124Status			ad7124Status;
 		sAccelRead				accelRead;
+		sAdcRead				adcRead;
 	};
 } sDIAG_Command;
 

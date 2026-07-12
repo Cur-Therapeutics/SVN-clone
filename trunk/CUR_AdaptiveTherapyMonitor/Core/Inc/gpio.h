@@ -55,5 +55,6 @@ extern sGpio sGpioLedGreen;
 extern sGpio sGpioLedRed;
 extern sGpio sGpioSpi1Select;
 extern sGpio sGpioSpi2Select;
+extern sGpio sGpioAccelSelect;
 
 #endif /* INCLUDES_GPIO_H_ */

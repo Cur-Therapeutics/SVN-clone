@@ -132,7 +132,7 @@ void AD7124_Init()
 }
 
 /**
- * @brief
+ * @brief Initialize the ADC for use. Configure all registers to support desired operation
  * @param ad7124 The AD7124 to configure
  * @return HAL_OK on success, HAL_ERROR otherwise
  */
@@ -151,15 +151,21 @@ uint32_t AD7124_InitInternal(sAd7124 * ad7124)
 	uint16_t setup;
 	uint32_t filter;
 
+	// Configure channel 0
 	ad7124->channelConfig = AD7124_CHANNEL_AIN_POS_02 | AD7124_CHANNEL_AIN_NEG_03 | AD7124_CHANNEL_SETUP_00 | AD7124_CHANNEL_ENABLE;
-	AD7124_Write(ad7124, AD7124_CH_01, ad7124->channelConfig);
+	AD7124_Write(ad7124, AD7124_CH_00, ad7124->channelConfig);
 
-	setup = AD7124_CONFIG_BIPOLOR | AD7124_CONFIG_REFSEL_1 | AD7124_CONFIG_GAIN_128 |
+	// Configure reference and buffers
+	setup = AD7124_CONFIG_BIPOLOR | AD7124_CONFIG_REFSEL_1 | AD7124_CONFIG_GAIN_1 |
 			AD7124_CONFIG_AINP_BUF_EN | AD7124_CONFIG_AINN_BUF_EN |
 			AD7124_CONFIG_REFP_BUF_EN | AD7124_CONFIG_REFN_BUF_EN;
 	AD7124_Write(ad7124, AD7124_CONFIG_00, setup);
 
-	// Filter setting to FS 5, Sinc4
+	// Configure output (excitation)
+	setup = AD7124_IOCTRL2_VBIAS_CH0;
+	AD7124_Write(ad7124, AD7124_IO_CTRL_2, setup);
+
+	// Configure Filter setting to FS 5, Sinc4
 	filter = AD7124_FILTER_SINC4_FAST + (1);
 	AD7124_Write(ad7124, AD7124_FILTER_00, filter);
 
@@ -219,7 +225,7 @@ void AD7124_DriveBridge(sAd7124 * ad7124)
 		uint16_t channel = status & AD7124_STATUS_CH_ACTIVE_MASK;
 
 		ad7124->lastCounts = counts;
-		ad7124->lastVoltage = (ad7124->lastCounts);
+		ad7124->lastVoltage = (counts - AD7124_OFFSET) * AD7124_SCALE;
 		ad7124->lastEng = ad7124->lastVoltage;
 
 		ad7124->lastChannel = channel;

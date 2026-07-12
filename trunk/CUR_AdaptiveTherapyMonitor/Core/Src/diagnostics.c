@@ -32,6 +32,7 @@
 #include "ad7124.h"
 #include "statemachine.h"
 #include "accel.h"
+#include "adc.h"
 
 /**
  * Reference to the uart instance
@@ -408,14 +409,20 @@ void DIAG_Process(uint8_t * data)
 	case eDIAG_AD7124_READ_DATA:
 		gDiagReply.ad7124Read.counts = AD7124_GetLastCount(&ad7124);
 		gDiagReply.ad7124Read.mLastVoltage = AD7124_GetLastVolts(&ad7124);
+		gDiagReply.ad7124Read.engValue = AD7124_GetLastEng(&ad7124);
 		DIAG_Send(cmd, &gDiagReply);
 		break;
 
 	case eDIAG_ACCEL_READ:
-
 		gDiagReply.accelRead.x = AccelReadX();
 		gDiagReply.accelRead.y = AccelReadY();
 		gDiagReply.accelRead.z = AccelReadZ();
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_ADC_READ:
+		gDiagReply.adcRead.counts = AdcGetBatteryCounts();
+		gDiagReply.adcRead.volts = AdcGetBatteryVolts();
 		DIAG_Send(cmd, &gDiagReply);
 		break;
 
@@ -600,6 +607,14 @@ void DIAG_Send(sDIAG_Command * rx, sDIAG_Command * tx)
 
 		case eDIAG_FLASH_STATUS:
 			tx->head.size += sizeof(sDIAG_Flash_Status);
+			break;
+
+		case eDIAG_ADC_READ:
+			tx->head.size += sizeof(sAdcRead);
+			break;
+
+		case eDIAG_TOUCH_READ:
+			tx->head.size += sizeof(sDIAG_Touch_Read);
 			break;
 
 		default:

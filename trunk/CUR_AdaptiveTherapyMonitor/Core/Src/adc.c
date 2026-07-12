@@ -55,6 +55,7 @@ void AdcInit()
 		/* Calibration Error */
 		FaultHandler(ERR_ADC);
 	}
+	HealthSubsystemGood(eSystemAdc);
 }
 
 /**
@@ -80,12 +81,21 @@ void AdcDrive()
 }
 
 /**
- * @brief Get battery voltage
+ * @brief Get battery counts
  * @return Battery voltage in counts
  */
-uint16_t AdcGetBatteryVolts()
+uint16_t AdcGetBatteryCounts()
 {
 	return mAdcResults[eAdcChannelBattery];
+}
+
+/**
+ * @brief Get battery voltage
+ * @return Battery voltage in volts
+ */
+float AdcGetBatteryVolts()
+{
+	return (float)mAdcResults[eAdcChannelBattery] * ADC_BAT_COUNTS_TO_VOLTS * ADC_BAT_VOLTS_TO_ENG;
 }
 
 /**

@@ -75,6 +75,12 @@ void WaitForNextTick(uint32_t timeNow);
 /* Private defines -----------------------------------------------------------*/
 #define SPI2_SELECT_Pin GPIO_PIN_9
 #define SPI2_SELECT_GPIO_Port GPIOB
+#define LED_GP2_Pin GPIO_PIN_3
+#define LED_GP2_GPIO_Port GPIOJ
+#define LED_GP1_Pin GPIO_PIN_2
+#define LED_GP1_GPIO_Port GPIOJ
+#define ACCEL_SELECT_Pin GPIO_PIN_6
+#define ACCEL_SELECT_GPIO_Port GPIOG
 #define LED_GREEN_Pin GPIO_PIN_7
 #define LED_GREEN_GPIO_Port GPIOJ
 #define LED_RED_Pin GPIO_PIN_6
