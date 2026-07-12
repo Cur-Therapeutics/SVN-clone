@@ -545,5 +545,15 @@ namespace CURDiags
         {
             Commands.SendCommand(eDiagnosticCommands.eDIAG_FLASH_CLEAR_PROG);
         }
+
+        private void buttonBatRead_Click(object sender, EventArgs e)
+        {
+            Commands.SendCommand(eDiagnosticCommands.eDIAG_ADC_READ);
+        }
+
+        private void buttonTouchRead_Click(object sender, EventArgs e)
+        {
+            Commands.SendCommand(eDiagnosticCommands.eDIAG_TOUCH_READ);
+        }
     }  // end class
 }  // end namespace

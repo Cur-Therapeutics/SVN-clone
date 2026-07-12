@@ -179,6 +179,31 @@ namespace CURDiags
         }
 
         /// <summary>
+        /// ADC Read Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sAdcReadData
+        {
+            public sCommandHeader header;
+            public UInt32 counts;
+            public float volts;
+        }
+
+        /// <summary>
+        /// Touch Read Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sTouchReadData
+        {
+            public sCommandHeader header;
+            public UInt16 xPos;
+            public UInt16 yPos;
+            public byte mode;
+            public UInt16 xPosRaw;
+            public UInt16 yPosRaw;
+        }
+
+        /// <summary>
         /// Send a command with no payload.
         /// </summary>
         public static bool SendCommand(eDiagnosticCommands cmdId)

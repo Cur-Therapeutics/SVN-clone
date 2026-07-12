@@ -157,6 +157,8 @@ namespace CURDiags
             textBoxAd7124Status = new TextBox();
             label13 = new Label();
             groupBox10 = new GroupBox();
+            textBoxAd7124mmHg = new TextBox();
+            label40 = new Label();
             buttonAD7124Read = new Button();
             textBoxAd7124Volts = new TextBox();
             label12 = new Label();
@@ -180,6 +182,15 @@ namespace CURDiags
             label39 = new Label();
             textBoxFlashStatus1 = new TextBox();
             label33 = new Label();
+            tabPageAdc = new TabPage();
+            groupBox14 = new GroupBox();
+            buttonBatRead = new Button();
+            textBoxBatVolts = new TextBox();
+            label42 = new Label();
+            textBoxBatCountDec = new TextBox();
+            label43 = new Label();
+            textBoxBatCountsHex = new TextBox();
+            label44 = new Label();
             labelCOMStatus = new Label();
             buttonConnect = new Button();
             comboBoxCOMPort = new ComboBox();
@@ -226,6 +237,8 @@ namespace CURDiags
             groupBox12.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewFlashIds).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridViewFlashRegisters).BeginInit();
+            tabPageAdc.SuspendLayout();
+            groupBox14.SuspendLayout();
             statusStrip1.SuspendLayout();
             groupBox1.SuspendLayout();
             SuspendLayout();
@@ -241,6 +254,7 @@ namespace CURDiags
             tabControl1.Controls.Add(tabPageRtc);
             tabControl1.Controls.Add(tabPageAd7124);
             tabControl1.Controls.Add(tabPageFlash);
+            tabControl1.Controls.Add(tabPageAdc);
             tabControl1.Location = new Point(12, 95);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
@@ -827,6 +841,7 @@ namespace CURDiags
             buttonTouchRead.TabIndex = 26;
             buttonTouchRead.Text = "Read";
             buttonTouchRead.UseVisualStyleBackColor = true;
+            buttonTouchRead.Click += buttonTouchRead_Click;
             // 
             // buttonTouchClear
             // 
@@ -1556,6 +1571,8 @@ namespace CURDiags
             // 
             // groupBox10
             // 
+            groupBox10.Controls.Add(textBoxAd7124mmHg);
+            groupBox10.Controls.Add(label40);
             groupBox10.Controls.Add(buttonAD7124Read);
             groupBox10.Controls.Add(textBoxAd7124Volts);
             groupBox10.Controls.Add(label12);
@@ -1565,15 +1582,35 @@ namespace CURDiags
             groupBox10.Controls.Add(label7);
             groupBox10.Location = new Point(6, 6);
             groupBox10.Name = "groupBox10";
-            groupBox10.Size = new Size(279, 191);
+            groupBox10.Size = new Size(279, 416);
             groupBox10.TabIndex = 0;
             groupBox10.TabStop = false;
             groupBox10.Text = "AD7124";
             // 
+            // textBoxAd7124mmHg
+            // 
+            textBoxAd7124mmHg.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxAd7124mmHg.Location = new Point(6, 127);
+            textBoxAd7124mmHg.Name = "textBoxAd7124mmHg";
+            textBoxAd7124mmHg.ReadOnly = true;
+            textBoxAd7124mmHg.Size = new Size(162, 29);
+            textBoxAd7124mmHg.TabIndex = 13;
+            textBoxAd7124mmHg.TextAlign = HorizontalAlignment.Center;
+            // 
+            // label40
+            // 
+            label40.AutoSize = true;
+            label40.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label40.Location = new Point(174, 135);
+            label40.Name = "label40";
+            label40.Size = new Size(58, 21);
+            label40.TabIndex = 12;
+            label40.Text = "mmHg";
+            // 
             // buttonAD7124Read
             // 
             buttonAD7124Read.Font = new Font("Segoe UI", 12F);
-            buttonAD7124Read.Location = new Point(6, 127);
+            buttonAD7124Read.Location = new Point(6, 195);
             buttonAD7124Read.Name = "buttonAD7124Read";
             buttonAD7124Read.Size = new Size(162, 34);
             buttonAD7124Read.TabIndex = 11;
@@ -1800,6 +1837,104 @@ namespace CURDiags
             label33.Size = new Size(80, 21);
             label33.TabIndex = 14;
             label33.Text = "Status 1:";
+            // 
+            // tabPageAdc
+            // 
+            tabPageAdc.Controls.Add(groupBox14);
+            tabPageAdc.Location = new Point(4, 24);
+            tabPageAdc.Name = "tabPageAdc";
+            tabPageAdc.Padding = new Padding(3);
+            tabPageAdc.Size = new Size(1023, 428);
+            tabPageAdc.TabIndex = 8;
+            tabPageAdc.Text = "Adc";
+            tabPageAdc.UseVisualStyleBackColor = true;
+            // 
+            // groupBox14
+            // 
+            groupBox14.Controls.Add(buttonBatRead);
+            groupBox14.Controls.Add(textBoxBatVolts);
+            groupBox14.Controls.Add(label42);
+            groupBox14.Controls.Add(textBoxBatCountDec);
+            groupBox14.Controls.Add(label43);
+            groupBox14.Controls.Add(textBoxBatCountsHex);
+            groupBox14.Controls.Add(label44);
+            groupBox14.Location = new Point(6, 6);
+            groupBox14.Name = "groupBox14";
+            groupBox14.Size = new Size(279, 416);
+            groupBox14.TabIndex = 1;
+            groupBox14.TabStop = false;
+            groupBox14.Text = "Battery";
+            // 
+            // buttonBatRead
+            // 
+            buttonBatRead.Font = new Font("Segoe UI", 12F);
+            buttonBatRead.Location = new Point(6, 127);
+            buttonBatRead.Name = "buttonBatRead";
+            buttonBatRead.Size = new Size(162, 34);
+            buttonBatRead.TabIndex = 11;
+            buttonBatRead.Text = "READ";
+            buttonBatRead.UseVisualStyleBackColor = true;
+            buttonBatRead.Click += buttonBatRead_Click;
+            // 
+            // textBoxBatVolts
+            // 
+            textBoxBatVolts.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxBatVolts.Location = new Point(6, 92);
+            textBoxBatVolts.Name = "textBoxBatVolts";
+            textBoxBatVolts.ReadOnly = true;
+            textBoxBatVolts.Size = new Size(162, 29);
+            textBoxBatVolts.TabIndex = 10;
+            textBoxBatVolts.TextAlign = HorizontalAlignment.Center;
+            // 
+            // label42
+            // 
+            label42.AutoSize = true;
+            label42.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label42.Location = new Point(174, 100);
+            label42.Name = "label42";
+            label42.Size = new Size(34, 21);
+            label42.TabIndex = 9;
+            label42.Text = "mV";
+            // 
+            // textBoxBatCountDec
+            // 
+            textBoxBatCountDec.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxBatCountDec.Location = new Point(6, 57);
+            textBoxBatCountDec.Name = "textBoxBatCountDec";
+            textBoxBatCountDec.ReadOnly = true;
+            textBoxBatCountDec.Size = new Size(162, 29);
+            textBoxBatCountDec.TabIndex = 8;
+            textBoxBatCountDec.TextAlign = HorizontalAlignment.Center;
+            // 
+            // label43
+            // 
+            label43.AutoSize = true;
+            label43.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label43.Location = new Point(174, 65);
+            label43.Name = "label43";
+            label43.Size = new Size(97, 21);
+            label43.TabIndex = 7;
+            label43.Text = "Counts (dec)";
+            // 
+            // textBoxBatCountsHex
+            // 
+            textBoxBatCountsHex.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxBatCountsHex.Location = new Point(6, 22);
+            textBoxBatCountsHex.Name = "textBoxBatCountsHex";
+            textBoxBatCountsHex.ReadOnly = true;
+            textBoxBatCountsHex.Size = new Size(162, 29);
+            textBoxBatCountsHex.TabIndex = 6;
+            textBoxBatCountsHex.TextAlign = HorizontalAlignment.Center;
+            // 
+            // label44
+            // 
+            label44.AutoSize = true;
+            label44.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label44.Location = new Point(174, 30);
+            label44.Name = "label44";
+            label44.Size = new Size(97, 21);
+            label44.TabIndex = 5;
+            label44.Text = "Counts (hex)";
             // 
             // labelCOMStatus
             // 
@@ -2095,6 +2230,9 @@ namespace CURDiags
             groupBox12.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewFlashIds).EndInit();
             ((System.ComponentModel.ISupportInitialize)dataGridViewFlashRegisters).EndInit();
+            tabPageAdc.ResumeLayout(false);
+            groupBox14.ResumeLayout(false);
+            groupBox14.PerformLayout();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             groupBox1.ResumeLayout(false);
@@ -2274,5 +2412,16 @@ namespace CURDiags
         private GroupBox groupBox13;
         private Button buttonFlashClearProg;
         private Button buttonFlashReset;
+        private TextBox textBoxAd7124mmHg;
+        private Label label40;
+        private TabPage tabPageAdc;
+        private GroupBox groupBox14;
+        private Button buttonBatRead;
+        private TextBox textBoxBatVolts;
+        private Label label42;
+        private TextBox textBoxBatCountDec;
+        private Label label43;
+        private TextBox textBoxBatCountsHex;
+        private Label label44;
     }
 }

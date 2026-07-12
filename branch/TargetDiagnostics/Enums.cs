@@ -61,6 +61,7 @@ namespace CURDiags
             eDIAG_AD7124_RESET,
             eDIAG_AD7124_READ_DATA,
             eDIAG_ACCEL_READ,
+            eDIAG_ADC_READ,
         }
 
         /// <summary>

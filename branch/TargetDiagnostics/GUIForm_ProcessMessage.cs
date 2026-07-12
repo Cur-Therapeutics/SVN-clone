@@ -91,6 +91,18 @@ namespace CURDiags
                     UpdateFlashStatus(flashStatus);
                     break;
 
+                case eDiagnosticCommands.eDIAG_ADC_READ:
+                    Commands.sAdcReadData adcData = new Commands.sAdcReadData();
+                    Utils.MarshalPtrToStruct(data, out adcData);
+                    UpdateBattery(adcData);
+                    break;
+
+                case eDiagnosticCommands.eDIAG_TOUCH_READ:
+                    Commands.sTouchReadData touchData = new Commands.sTouchReadData();
+                    Utils.MarshalPtrToStruct(data, out touchData);
+                    UpdateTouch(touchData);
+                    break;
+
                 default:
                     Logger.LogError($"ProcessIncomingMessage() unhandled message {data[Commands.MessageCommandIndex]}");
                     break;
@@ -160,7 +172,8 @@ namespace CURDiags
         {
             UpdateTextBox(textBoxAd7124CountsHex, "0x" + read.counts.ToString("X4"));
             UpdateTextBox(textBoxAd7124CountsDec, read.counts.ToString());
-            UpdateTextBox(textBoxAd7124Volts, read.engValue.ToString("F2"));
+            UpdateTextBox(textBoxAd7124Volts, read.mLastVoltage.ToString("F2"));
+            UpdateTextBox(textBoxAd7124mmHg, read.engValue.ToString("F1"));
         }
 
         /// <summary>
@@ -183,6 +196,10 @@ namespace CURDiags
             UpdateTextBox(textBoxRtcSecRead, read.second.ToString());
         }
 
+        /// <summary>
+        /// Update flash status
+        /// </summary>
+        /// <param name="status"></param>
         private void UpdateFlashStatus(Commands.sFlashStatusData status)
         {
             UpdateTextBox(textBoxFlashStatus1, "0x" + status.statusReg1.ToString("X2"));
@@ -203,6 +220,27 @@ namespace CURDiags
             dataGridViewFlashIds.Rows[r++].Cells[1].Value = "0x" + status.config.ToString("X2");
             dataGridViewFlashIds.Rows[r++].Cells[1].Value = "0x" + status.family.ToString("X2");
             dataGridViewFlashIds.Rows[r++].Cells[1].Value = "0x" + status.uniqueId.ToString("X8");
+        }
+
+        /// <summary>
+        /// Update the battery counts and volts
+        /// </summary>
+        private void UpdateBattery(Commands.sAdcReadData data)
+        {
+            UpdateTextBox(textBoxBatCountsHex, "0x" + data.counts.ToString("X4"));
+            UpdateTextBox(textBoxBatCountDec, data.counts.ToString());
+            UpdateTextBox(textBoxBatVolts, data.volts.ToString("F2"));
+        }
+
+        /// <summary>
+        /// Update the touch data
+        /// </summary>
+        private void UpdateTouch(Commands.sTouchReadData data)
+        {
+            UpdateTextBox(textBoxTouchXPosition, data.xPos.ToString());
+            UpdateTextBox(textBoxTouchYPosition, data.yPos.ToString());
+            UpdateTextBox(textBoxTouchXRaw, data.xPosRaw.ToString());
+            UpdateTextBox(textBoxTouchYRaw, data.yPosRaw.ToString());
         }
 
     }  // end class
