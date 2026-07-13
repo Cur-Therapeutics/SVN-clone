@@ -83,64 +83,28 @@ void FlashInit()
 	HAL_Delay(50);
 
 	// Reset Flash chip so we start at a known state
-	//FlashReset();
-	//FlashClearProgramAndErrors();
+	FlashReset();
+	FlashClearProgramAndErrors();
 
 	LegacyFlashReadJedec();
-
 	LegacyFlashReadId();
-	//OctalFlashReadId();
 
-	// Configuration registers
 	uint8_t cfr1x = 0;
 	uint8_t cfr2x = 0;
 	uint8_t cfr3x = 0;
 	uint8_t cfr4x = 0;
 	uint8_t cfr5x = 0;
 
-	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR1X, &cfr1x, 0);
-	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR2X, &cfr2x, 0);
-	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR3X, &cfr3x, 0);
-	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR4X, &cfr4x, 0);
-	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR5X, &cfr5x, 0);
-
-	volatile uint8_t sr1 = LegacyFlashReadSr1();
-	volatile uint8_t sr2 = LegacyFlashReadSr2();
-
-	return;
-
-	// Reset Flash chip so we start at a known state
-	FlashReset();
-
-	FlashClearProgramAndErrors();
-
-	// Read and verify IDs so we know we are communicating
-	sr1 = LegacyFlashReadSr1();
-	sr2 = LegacyFlashReadSr2();
-	LegacyFlashReadId();
-	OctalFlashReadId();
-	OctalFlashReadId();
-
-	LegacyFlashReadAnyRegister(OCTOSPIFLASH_NV_REG_CFR1X, &cfr1x, 0);
-	LegacyFlashReadAnyRegister(OCTOSPIFLASH_NV_REG_CFR3X, &cfr3x, 0);
-
-
-	if (mFlashIds.manufactureId != FLASH_MANUFACTURE_ID || mFlashIds.family != FLASH_FAMILY_ID)
-	{
-		FaultHandler(ERR_FLASH_INIT);
-		//return;
-	}
-
+	// Read Configuration registers
     LegacyFlashReadAnyRegister24(OCTOSPIFLASH_REG_CFR1X, &cfr1x, 0);
     LegacyFlashReadAnyRegister24(OCTOSPIFLASH_REG_CFR2X, &cfr2x, 0);
     LegacyFlashReadAnyRegister24(OCTOSPIFLASH_REG_CFR3X, &cfr3x, 0);
     LegacyFlashReadAnyRegister24(OCTOSPIFLASH_REG_CFR4X, &cfr4x, 0);
     LegacyFlashReadAnyRegister24(OCTOSPIFLASH_REG_CFR5X, &cfr5x, 0);
 
-	// Enable 32 bit addressing
+    // Enable 32 bit addressing
 	LegacyFlashWriteAnyRegister24(OCTOSPIFLASH_REG_CFR2X, FLASH_CFG2_32ADDR_MODE);
 
-	LegacyFlashReadId();
 	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR1X, &cfr1x, 0);
 	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR2X, &cfr2x, 0);
 	LegacyFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR3X, &cfr3x, 0);
@@ -159,20 +123,11 @@ void FlashInit()
 	OctalFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR4X, &cfr4x, 3);
 	OctalFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR5X, &cfr5x, 3);
 
+	// Verify Flash ids
 	if (mFlashIds.manufactureId != FLASH_MANUFACTURE_ID || mFlashIds.family != FLASH_FAMILY_ID)
 	{
 		FaultHandler(ERR_FLASH_INIT);
 		return;
-	}
-
-	// Verify configuration registers
-	// Set CFR1X to store 4K sectors in top of memory address space
-	if (cfr1x != FLASH_CFG1_TB4KBS)
-	{
-		// Set configuration and reboot...
-		//OctalFlashWriteAnyRegister(OCTOSPIFLASH_NV_REG_CFR1X, FLASH_CFG1_TB4KBS);
-		//OctalFlashReadAnyRegister(OCTOSPIFLASH_REG_CFR1X, &cfr1x, 3);
-		//NVIC_SystemReset();
 	}
 
 	// Init completed
@@ -210,7 +165,8 @@ eOctoSpiFlashState FlashGetState()
 }
 
 /**
- *
+ * @brief Read JEDEC header information
+ * @return None
  */
 void LegacyFlashReadJedec()
 {
@@ -250,7 +206,7 @@ void LegacyFlashReadJedec()
 
 /**
  * @brief Read the flash IDs and store them locally in legacy 1S-1S-1S mode
- * @return None
+ * @return None, output are placed in member variables
  */
 void LegacyFlashReadId()
 {
@@ -304,7 +260,7 @@ void LegacyFlashReadId()
 
 /**
  * @brief Read status register 1 in legacy 1S-1S-1S mode
- * @return None
+ * @return Status register 1 value
  */
 uint8_t LegacyFlashReadSr1()
 {
@@ -347,7 +303,7 @@ uint8_t LegacyFlashReadSr1()
 
 /**
  * @brief Read status register 2 in legacy 1S-1S-1S mode
- * @return None
+ * @return Status register 2 value
  */
 uint8_t LegacyFlashReadSr2()
 {
@@ -671,7 +627,7 @@ void OctalFlashReadId()
 	sCommand.DataDtrMode= HAL_OSPI_DATA_DTR_DISABLE;
 	sCommand.NbData = 6;
 
-	sCommand.DummyCycles = 0;
+	sCommand.DummyCycles = 3;
 	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
 	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
 	if (HAL_OSPI_Command(phospiflash, &sCommand, OCTOSPIFLASH_TIMEOUT_MS) != HAL_OK)
@@ -702,7 +658,7 @@ void OctalFlashReadId()
 
 /**
  * @brief Reset the chip to factory settings
- * @return
+ * @return HAL_OK on success, HAL_ERROR otherwise
  */
 uint8_t OctalFlashReset()
 {
@@ -830,6 +786,7 @@ uint8_t OctalFlashWriteAnyRegister(uint32_t reg, uint8_t val)
 
 /**
  * @brief Read status register 1
+ * @return Status register 1 value
  */
 uint8_t OctalFlashReadSr1()
 {
@@ -855,7 +812,7 @@ uint8_t OctalFlashReadSr1()
 	sCommand.DataDtrMode= HAL_OSPI_DATA_DTR_DISABLE;
 	sCommand.NbData = 1;
 
-	sCommand.DummyCycles = 0;
+	sCommand.DummyCycles = 5;
 	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
 	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
 
@@ -876,6 +833,7 @@ uint8_t OctalFlashReadSr1()
 
 /**
  * @brief Read status register 2
+ * @return Status register 2 value
  */
 uint8_t OctalFlashReadSr2()
 {
@@ -901,7 +859,7 @@ uint8_t OctalFlashReadSr2()
 	sCommand.DataDtrMode= HAL_OSPI_DATA_DTR_DISABLE;
 	sCommand.NbData = 1;
 
-	sCommand.DummyCycles = 0;
+	sCommand.DummyCycles = 5;
 	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
 	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
 
@@ -920,9 +878,8 @@ uint8_t OctalFlashReadSr2()
 	return statusReg;
 }
 
-
 /**
- * @brief
+ * @brief Enable write operations
  * @return None
  */
 void OctalWriteEnable()
@@ -950,205 +907,6 @@ void OctalWriteEnable()
 	}
 }
 
-/* This function Configures Software polling to wait until WEL=1 */
-void OctalPollingWEL(void)
-{
-	OSPI_AutoPollingTypeDef sConfig;
-	OSPI_RegularCmdTypeDef sCommand;
-	/* Initialize Indirect read mode for Software Polling to wait until WEL=1 */
-	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
-	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = OCTAL_READ_STATUS_REG_CMD;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_8_LINES;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_16_BITS;
-	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
-	sCommand.Address = 0x0;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_8_LINES;
-
-	sCommand.AddressSize = HAL_OSPI_ADDRESS_32_BITS;
-	sCommand.AddressDtrMode = HAL_OSPI_ADDRESS_DTR_DISABLE;
-	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DataMode = HAL_OSPI_DATA_8_LINES;
-	sCommand.DataDtrMode = HAL_OSPI_DATA_DTR_DISABLE;
-	sCommand.NbData = 1;
-	sCommand.DummyCycles = DUMMY_CLOCK_CYCLES_READ_REG;
-	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
-	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
-
-	/* Set the mask to 0x02 to mask all Status REG bits except WEL */
-	/* Set the match to 0x02 to check if the WEL bit is Set */
-	sConfig.Match = WRITE_ENABLE_MATCH_VALUE;
-	sConfig.Mask = WRITE_ENABLE_MASK_VALUE;
-	sConfig.MatchMode = HAL_OSPI_MATCH_MODE_AND;
-	sConfig.Interval = 0x10;
-	sConfig.AutomaticStop = HAL_OSPI_AUTOMATIC_STOP_ENABLE;
-	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		FaultHandler(ERR_FLASH_TIMEOUT);
-		return;
-	}
-
-	/* Start Automatic-Polling mode to wait until the memory is ready WEL=1 */
-	if (HAL_OSPI_AutoPolling(phospiflash, &sConfig, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)	!= HAL_OK)
-	{
-		FaultHandler(ERR_FLASH_TIMEOUT);
-		return;
-	}
-}
-
-/**
- * @brief This function Configures Automatic-polling mode to wait until WIP=0
- * @return None
- */
-void AutoPollingWIP(void)
-{
-	OSPI_RegularCmdTypeDef sCommand;
-	OSPI_AutoPollingTypeDef sConfig;
-	/* Initialize Automatic-Polling mode to wait until WIP=0 */
-	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
-	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = READ_STATUS_REG_CMD;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_8_BITS;
-	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_NONE;
-	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DummyCycles = 0;
-	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
-
-	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
-	sCommand.DataMode = HAL_OSPI_DATA_1_LINE;
-	sCommand.NbData = 1;
-	sCommand.DataDtrMode = HAL_OSPI_DATA_DTR_DISABLE;
-	/* Set the mask to 0x01 to mask all Status REG bits except WIP */
-	/* Set the match to 0x00 to check if the WIP bit is Reset */
-	sConfig.Match = MEMORY_READY_MATCH_VALUE;
-	sConfig.Mask = MEMORY_READY_MASK_VALUE;
-	sConfig.MatchMode = HAL_OSPI_MATCH_MODE_AND;
-	sConfig.Interval = 0x10;
-	sConfig.AutomaticStop = HAL_OSPI_AUTOMATIC_STOP_ENABLE;
-	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	/* Start Automatic-Polling mode to wait until the memory is ready WIP=0 */
-	if (HAL_OSPI_AutoPolling(phospiflash, &sConfig, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)	!= HAL_OK)
-	{
-		Error_Handler();
-	}
-}
-
-/**
- * @brief This function Configures Software polling mode to wait the memory is ready WIP=0
- * @return None
- */
-void OctalPollingWIP(void)
-{
-	OSPI_RegularCmdTypeDef sCommand;
-	OSPI_AutoPollingTypeDef sConfig;
-	/* Initialize Automatic-Polling mode to wait until WIP=0 */
-	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
-	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = OCTAL_READ_STATUS_REG_CMD;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_8_LINES;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_16_BITS;
-	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_ENABLE;
-	sCommand.Address = 0x0;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_8_LINES;
-	sCommand.AddressSize = HAL_OSPI_ADDRESS_32_BITS;
-	sCommand.AddressDtrMode = HAL_OSPI_ADDRESS_DTR_ENABLE;
-	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DataMode = HAL_OSPI_DATA_8_LINES;
-	sCommand.DataDtrMode = HAL_OSPI_DATA_DTR_ENABLE;
-	sCommand.NbData = 2;
-	sCommand.DummyCycles = DUMMY_CLOCK_CYCLES_READ_REG;
-	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
-	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
-	/* Set the mask to 0x01 to mask all Status REG bits except WIP */
-	/* Set the match to 0x00 to check if the WIP bit is Reset */
-	sConfig.Match = MEMORY_READY_MATCH_VALUE;
-	sConfig.Mask = MEMORY_READY_MASK_VALUE;
-	sConfig.MatchMode = HAL_OSPI_MATCH_MODE_AND;
-	sConfig.Interval = 0x10;
-	sConfig.AutomaticStop = HAL_OSPI_AUTOMATIC_STOP_ENABLE;
-	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	/* Start Automatic-Polling mode to wait until the memory is ready WIP=0 */
-	if (HAL_OSPI_AutoPolling(phospiflash, &sConfig, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)	!= HAL_OK)
-	{
-		Error_Handler();
-	}
-}
-
-/**
- * @brief This function configures the memory
- * @return None
- */
-void OctalDTR_MemoryCfg(void)
-{
-	OSPI_RegularCmdTypeDef sCommand;
-	uint8_t tmp;
-
-	/* Enable writing to memory in order to set Dummy */
-	LegacyFlashWriteEnable();
-
-	/* Initialize Indirect write mode to configure Dummy */
-	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
-	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_8_BITS;
-	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
-	sCommand.Instruction = WRITE_CFG_REG_2_CMD;
-	sCommand.Address = CONFIG_REG2_ADDR3;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
-	sCommand.AddressSize = HAL_OSPI_ADDRESS_32_BITS;
-	sCommand.AddressDtrMode = HAL_OSPI_ADDRESS_DTR_DISABLE;
-	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DataMode = HAL_OSPI_DATA_1_LINE;
-	sCommand.DataDtrMode= HAL_OSPI_DATA_DTR_DISABLE;
-	sCommand.NbData = 1;
-	sCommand.DummyCycles = 0;
-	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
-	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
-	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	/* Write Configuration register 2 with new dummy cycles */
-	tmp = CR2_DUMMY_CYCLES_66MHZ;
-	if (HAL_OSPI_Transmit(phospiflash, &tmp, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	AutoPollingWIP();
-
-	/* Enable writing to memory in order to set Octal DTR mode */
-	LegacyFlashWriteEnable();
-
-	/* Initialize OCTOSPI1 to Indirect write mode to configure Octal mode */
-	sCommand.Instruction = WRITE_CFG_REG_2_CMD;
-	sCommand.Address = CONFIG_REG2_ADDR1;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
-	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	/* Write Configuration register 2 with with Octal mode */
-	tmp = CR2_DTR_OPI_ENABLE;
-	if (HAL_OSPI_Transmit(phospiflash, &tmp, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
-}
-
-
 /**
  * @brief Erase a 4K sector at the provided address
  * Sector addresses and sizes (4K/256K) are dependent on register settings!
@@ -1156,15 +914,15 @@ void OctalDTR_MemoryCfg(void)
 uint8_t OctalSpiFlashErase4KSector(uint32_t addr)
 {
 	// Set write enable
-	LegacyFlashWriteEnable();
+	OctalWriteEnable();
 
 	OSPI_RegularCmdTypeDef cmd = {0};
 
 	cmd.OperationType      = HAL_OSPI_OPTYPE_COMMON_CFG;
 	cmd.InstructionMode    = HAL_OSPI_INSTRUCTION_8_LINES;
-	cmd.InstructionSize    = HAL_OSPI_INSTRUCTION_8_BITS;
+	cmd.InstructionSize    = HAL_OSPI_INSTRUCTION_16_BITS;
 	cmd.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
-	cmd.Instruction        = ERASE_4K_SECTOR;
+	cmd.Instruction        = 0x2121;
 
 	cmd.AddressMode        = HAL_OSPI_ADDRESS_8_LINES;
 	cmd.AddressSize        = HAL_OSPI_ADDRESS_32_BITS;
@@ -1176,7 +934,7 @@ uint8_t OctalSpiFlashErase4KSector(uint32_t addr)
 
 	if (HAL_OSPI_Command(phospiflash, &cmd, OCTOSPIFLASH_TIMEOUT_MS) != HAL_OK)
 	{
-		//mOctalErrorCount++;
+		mOspiErrors++;
 		return HAL_ERROR;
 	}
 	return HAL_OK;
@@ -1189,15 +947,15 @@ uint8_t OctalSpiFlashErase4KSector(uint32_t addr)
 uint8_t OctalSpiFlashErase256KSector(uint32_t addr)
 {
 	// Set write enable
-	LegacyFlashWriteEnable();
+	OctalWriteEnable();
 
 	OSPI_RegularCmdTypeDef cmd = {0};
 
 	cmd.OperationType      = HAL_OSPI_OPTYPE_COMMON_CFG;
 	cmd.InstructionMode    = HAL_OSPI_INSTRUCTION_8_LINES;
-	cmd.InstructionSize   = HAL_OSPI_INSTRUCTION_8_BITS;
+	cmd.InstructionSize   = HAL_OSPI_INSTRUCTION_16_BITS;
 	cmd.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
-	cmd.Instruction        = ERASE_256K_SECTOR;
+	cmd.Instruction        = 0xDCDC;
 
 	cmd.AddressMode        = HAL_OSPI_ADDRESS_8_LINES;
 	cmd.AddressSize       = HAL_OSPI_ADDRESS_32_BITS;
@@ -1209,101 +967,11 @@ uint8_t OctalSpiFlashErase256KSector(uint32_t addr)
 
 	if (HAL_OSPI_Command(phospiflash, &cmd, OCTOSPIFLASH_TIMEOUT_MS) != HAL_OK)
 	{
-		//mOctalErrorCount++;
+		mOspiErrors++;
+		FaultHandler(ERR_FLASH_ERASE);
 		return HAL_ERROR;
 	}
 	return HAL_OK;
-}
-
-/**
- * @brief Erase the first 256KB sector, 4KB at a time
- * @param addr The address to erase
- * @return None
- */
-void FlashSectorErase(uint32_t addr)
-{
-	if (addr != 0)
-	{
-		FlashSectorEraseBase(addr);
-		return;
-	}
-
-	FlashSectorEraseBase(addr);
-}
-
-/**
- * @brief Erase a 256Kb sector
- * @param addr The address to erase
- * @return None
- */
-void FlashSectorEraseBase(uint32_t addr)
-{
-	OSPI_RegularCmdTypeDef sCommand;
-
-	LegacyFlashWriteEnable();
-
-	// Initialize Indirect write mode to erase a sector
-	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
-	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = ERASE_256K_SECTOR;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_8_BITS;
-	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
-	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DataMode = HAL_OSPI_DATA_NONE;
-	sCommand.DataDtrMode = HAL_OSPI_DATA_DTR_DISABLE;
-	sCommand.DummyCycles = 0;
-	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
-	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
-	sCommand.AddressDtrMode = HAL_OSPI_ADDRESS_DTR_DISABLE;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
-	sCommand.AddressSize = HAL_OSPI_ADDRESS_32_BITS;
-	sCommand.Address = addr;
-
-	// Send Sector erase cmd
-	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	// Check status
-	uint8_t status1;
-	while ((status1 = OctalFlashReadSr1()) == 0x03)
-	{
-		HAL_Delay(10);
-	}
-}
-
-/**
- * @brief Erase the entire flash module
- * @return None
- */
-void FlashMassErase()
-{
-	LegacyFlashWriteEnable();
-
-	OSPI_RegularCmdTypeDef sCommand;
-	// Initialize Indirect write mode to erase a sector
-	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
-	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = ERASE_CHIP;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_8_BITS;
-	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
-	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DataMode = HAL_OSPI_DATA_NONE;
-	sCommand.DataDtrMode = HAL_OSPI_DATA_DTR_DISABLE;
-	sCommand.DummyCycles = 0;
-	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
-	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
-	sCommand.AddressDtrMode = HAL_OSPI_ADDRESS_DTR_DISABLE;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_NONE;
-
-	// Send Chip erase cmd
-	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
 }
 
 /**
@@ -1319,20 +987,23 @@ void FlashRead(uint32_t addr, uint8_t * data, uint32_t count)
 	// Initialize Indirect write mode to read from memory
 	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
 	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = FLASH_READ_CMD;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_8_BITS;
+	sCommand.Instruction = 0xECEC;
+	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_8_LINES;
+	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_16_BITS;
 	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
+
 	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DataMode = HAL_OSPI_DATA_1_LINE;
+
+	sCommand.DataMode = HAL_OSPI_DATA_8_LINES;
 	sCommand.DataDtrMode = HAL_OSPI_DATA_DTR_DISABLE;
 	sCommand.NbData = count;
-	sCommand.DummyCycles = 0;
+	sCommand.DummyCycles = 5;
 	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
 	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
+
 	sCommand.AddressDtrMode = HAL_OSPI_ADDRESS_DTR_DISABLE;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
-	sCommand.AddressSize = HAL_OSPI_ADDRESS_24_BITS;
+	sCommand.AddressMode = HAL_OSPI_ADDRESS_8_LINES;
+	sCommand.AddressSize = HAL_OSPI_ADDRESS_32_BITS;
 	sCommand.Address = addr;
 
 	// Send Sector read cmd
@@ -1346,16 +1017,12 @@ void FlashRead(uint32_t addr, uint8_t * data, uint32_t count)
 	{
 		Error_Handler();
 	}
-	uint8_t status = OctalFlashReadSr1();
-	if (status == 0x41)
-	{
-		FlashClearProgramAndErrors();
-	}
-
 }
 
 /*
- * @brief Write to flash.
+ * @brief Write to flash
+ * @note Flash writes are limited to 256 byte pages, this function will handle any size write by breaking it into multiple pages
+ * @note Flash address must be successfully erased prior to writing, use caution at sector boundaries
  * @return 0 for success, 1 for failure
  */
 uint8_t FlashWrite(uint32_t flashAddress, uint8_t * data, uint32_t size)
@@ -1397,40 +1064,43 @@ static uint8_t _FlashWrite(uint32_t addr, uint8_t * data, uint32_t count)
 	uint8_t retval = 0;
 
 	// Check page size
-	if (count > FLASH_PAGE_SIZE)
+	if (count > OSPI_FLASH_PAGE_SIZE)
 	{
 		// Can't write more than one page at a time
 		Error_Handler();
 		return 1;
 	}
 
-	LegacyFlashWriteEnable();
+	OctalWriteEnable();
 
-	// Initialize Indirect write mode to read from memory
+	// Initialize Indirect write mode to write to memory
 	OSPI_RegularCmdTypeDef sCommand;
 	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
 	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = FLASH_WRITE_PAGE_CMD;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_8_BITS;
+	sCommand.Instruction = 0x1212;
+	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_8_LINES;
+	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_16_BITS;
 	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
-	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DataMode = HAL_OSPI_DATA_1_LINE;
+
+	sCommand.DataMode = HAL_OSPI_DATA_8_LINES;
 	sCommand.DataDtrMode = HAL_OSPI_DATA_DTR_DISABLE;
 	sCommand.NbData = count;
 	sCommand.DummyCycles = 0;
 	sCommand.DQSMode = HAL_OSPI_DQS_DISABLE;
 	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
+
 	sCommand.AddressDtrMode = HAL_OSPI_ADDRESS_DTR_DISABLE;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_1_LINE;
+	sCommand.AddressMode = HAL_OSPI_ADDRESS_8_LINES;
 	sCommand.AddressSize = HAL_OSPI_ADDRESS_32_BITS;
 	sCommand.Address = addr;
+
+	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
 
 	// Send Sector write cmd
 	HAL_StatusTypeDef HAL_status = HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE);
 	if (HAL_status != HAL_OK)
 	{
-		retval = 1;
+		retval = HAL_ERROR;
 		Error_Handler();
 	}
 
@@ -1438,7 +1108,7 @@ static uint8_t _FlashWrite(uint32_t addr, uint8_t * data, uint32_t count)
 	HAL_status = HAL_OSPI_Transmit(phospiflash, data, HAL_OSPI_TIMEOUT_DEFAULT_VALUE);
 	if (HAL_status != HAL_OK)
 	{
-		retval = 1;
+		retval = HAL_ERROR;
 		Error_Handler();
 	}
 
@@ -1452,7 +1122,8 @@ static uint8_t _FlashWrite(uint32_t addr, uint8_t * data, uint32_t count)
 
 	if (status == 0x41)
 	{
-		FlashClearProgramAndErrors();
+		retval  = HAL_ERROR;
+		//FlashClearProgramAndErrors();
 	}
 
 	return retval;
@@ -1468,9 +1139,9 @@ void FlashClearProgramAndErrors()
 	/* Initialize the cmd in single SPI mode */
 	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
 	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = FLASH_CLEAR_PROG_AND_ERRS;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_1_LINE;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_8_BITS;
+	sCommand.Instruction = 0x8282;
+	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_8_LINES;
+	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_16_BITS;
 	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
 	sCommand.AddressMode = HAL_OSPI_ADDRESS_NONE;
 	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
@@ -1481,42 +1152,6 @@ void FlashClearProgramAndErrors()
 
 	/* Send command in single SPI mode */
 	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
-}
-
-/**
- * @brief  This function writes the memory
- */
-void OctalDTR_MemoryWrite(uint8_t *pData, uint32_t size)
-{
-	OSPI_RegularCmdTypeDef sCommand;
-	/* Initialize Indirect write mode for memory programming */
-	sCommand.OperationType = HAL_OSPI_OPTYPE_COMMON_CFG;
-	sCommand.FlashId = HAL_OSPI_FLASH_ID_1;
-	sCommand.Instruction = OCTAL_PAGE_PROG_CMD;
-	sCommand.InstructionMode = HAL_OSPI_INSTRUCTION_8_LINES;
-	sCommand.InstructionSize = HAL_OSPI_INSTRUCTION_16_BITS;
-	sCommand.AddressMode = HAL_OSPI_ADDRESS_8_LINES;
-	sCommand.AddressSize = HAL_OSPI_ADDRESS_32_BITS;
-	sCommand.Address = 0x00000000;
-	sCommand.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
-	sCommand.DataMode = HAL_OSPI_DATA_8_LINES;
-	sCommand.NbData = size;
-	sCommand.DummyCycles = 0;
-	sCommand.SIOOMode = HAL_OSPI_SIOO_INST_EVERY_CMD;
-	sCommand.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_ENABLE;
-	sCommand.AddressDtrMode = HAL_OSPI_ADDRESS_DTR_ENABLE;
-	sCommand.DataDtrMode = HAL_OSPI_DATA_DTR_ENABLE;
-	sCommand.DQSMode = HAL_OSPI_DQS_ENABLE;
-	if (HAL_OSPI_Command(phospiflash, &sCommand, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) !=	HAL_OK)
-	{
-		Error_Handler();
-	}
-
-	/* Memory Page programming */
-	if (HAL_OSPI_Transmit(phospiflash, pData, HAL_OSPI_TIMEOUT_DEFAULT_VALUE)!=	HAL_OK)
 	{
 		Error_Handler();
 	}
@@ -1640,4 +1275,56 @@ void HAL_OSPI_TimeOutCallback(OSPI_HandleTypeDef *hospi)
   /* Prevent unused argument(s) compilation warning */
   UNUSED(hospi);
   mOspiTimeOut++;
+}
+
+/**
+ * @brief Flash testing
+ * @return None
+ */
+void FlashTest()
+{
+	OctalWriteEnable();
+	uint8_t sr1 = OctalFlashReadSr1();
+	UNUSED(sr1);	// Suppress warning
+
+	// Erase 4K Sector
+	OctalSpiFlashErase4KSector(0);
+	sr1 = OctalFlashReadSr1();
+
+	// Write to Sector
+	uint8_t writeBuffer [512];
+	for (int i = 0; i < 512; i++)
+	{
+		writeBuffer[i] = i;
+	}
+	FlashWrite(0, writeBuffer, 256);
+
+	sr1 = OctalFlashReadSr1();
+	FlashClearProgramAndErrors();
+	sr1 = OctalFlashReadSr1();
+
+
+	// Read from Sector
+	uint8_t readBuffer [512];
+	memset(readBuffer, 0, 512);
+	FlashRead(0, readBuffer, 256);
+	readBuffer[0]++;
+
+	// ...
+
+	// Erase 256K Sector
+	OctalSpiFlashErase256KSector(0x40000);
+	sr1 = OctalFlashReadSr1();
+
+	// Write to Sector
+	FlashWrite(0x40000, writeBuffer, 256);
+
+	sr1 = OctalFlashReadSr1();
+	FlashClearProgramAndErrors();
+	sr1 = OctalFlashReadSr1();
+
+	// Read from Sector
+	memset(readBuffer, 0, 512);
+	FlashRead(0x40000, readBuffer, 256);
+	readBuffer[0]++;
 }

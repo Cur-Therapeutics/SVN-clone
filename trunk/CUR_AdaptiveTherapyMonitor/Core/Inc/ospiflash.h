@@ -137,6 +137,7 @@ void FlashInit(void);
 void FlashReset(void);
 void FlashGetIds(sFlashIds * ids);
 eOctoSpiFlashState FlashGetState(void);
+void FlashTest(void);
 
 /**
  * Legacy 1S-1S-1S Functions
@@ -163,24 +164,15 @@ uint8_t OctalFlashReset(void);
 uint8_t OctalFlashReadAnyRegister(uint32_t reg, uint8_t * val, uint32_t dummyCycles);
 uint8_t OctalFlashWriteAnyRegister(uint32_t reg, uint8_t val);
 void OctalWriteEnable(void);
+uint8_t OctalSpiFlashErase4KSector(uint32_t addr);
+uint8_t OctalSpiFlashErase256KSector(uint32_t addr);
 
 /**
- * To be sorted...
+ * Core functions
  */
 void FlashClearProgramAndErrors(void);
 void FlashRead(uint32_t addr, uint8_t * data, uint32_t count);
 uint8_t FlashWrite(uint32_t addr, uint8_t * data, uint32_t count);
-
-void OctalDTR_MemoryCfg(void);
-void FlashSectorErase(uint32_t addr);
-void FlashSectorEraseBase(uint32_t addr);
-void FlashMassErase();
-void OctalDTR_MemoryWrite(uint8_t *pData, uint32_t size);
-void AutoPollingWIP(void);
-void OctalPollingWEL(void);
-void OctalPollingWIP(void);
-uint8_t OctalSpiFlashErase4KSector(uint32_t addr);
-uint8_t OctalSpiFlashErase256KSector(uint32_t addr);
 
 /**
  * Externs

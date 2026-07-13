@@ -16,6 +16,7 @@
 ********************************************************************/
 
 #include "i2c.h"
+#include "health.h"
 
 /**
  * Tracks the state of the bus
@@ -33,6 +34,18 @@ eI2C_OPERATION_TYPE mOperationType = eI2C_NONE;
 uint16_t mSavedAddress;
 uint8_t * mSavedRxbuffer;
 uint16_t mSavedRxcount;
+
+/**
+ * @brief Initialize the I2C for use, checks subsystem state
+ * @return None
+ */
+void I2C_Init()
+{
+	if (hi2c3.State != HAL_I2C_STATE_RESET)
+		HealthSubsystemGood(eSystemI2C);
+	else
+		HealthSubsystemBad(eSystemI2C);
+}
 
 /**
   * @brief  Get the current state of the I2C controller

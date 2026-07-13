@@ -16,6 +16,6 @@
  */
 #define   	BUILD_MAJOR  	0
 #define		BUILD_MINOR 	0
-#define		BUILD_COMPILE 	3
+#define		BUILD_COMPILE 	4
 
 #endif /* INC_VERSION_H_ */

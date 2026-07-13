@@ -612,6 +612,7 @@ static void MX_OCTOSPI2_Init(void)
   /* USER CODE END OCTOSPI2_Init 0 */
 
   OSPIM_CfgTypeDef sOspiManagerCfg = {0};
+  HAL_OSPI_DLYB_CfgTypeDef HAL_OSPI_DLYB_Cfg_Struct = {0};
 
   /* USER CODE BEGIN OCTOSPI2_Init 1 */
 
@@ -626,7 +627,7 @@ static void MX_OCTOSPI2_Init(void)
   hospi2.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
   hospi2.Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;
   hospi2.Init.WrapSize = HAL_OSPI_WRAP_NOT_SUPPORTED;
-  hospi2.Init.ClockPrescaler = 1;
+  hospi2.Init.ClockPrescaler = 8;
   hospi2.Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_NONE;
   hospi2.Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_ENABLE;
   hospi2.Init.ChipSelectBoundary = 0;
@@ -638,11 +639,16 @@ static void MX_OCTOSPI2_Init(void)
     Error_Handler();
   }
   sOspiManagerCfg.ClkPort = 1;
-  sOspiManagerCfg.DQSPort = 1;
   sOspiManagerCfg.NCSPort = 1;
   sOspiManagerCfg.IOLowPort = HAL_OSPIM_IOPORT_1_LOW;
   sOspiManagerCfg.IOHighPort = HAL_OSPIM_IOPORT_1_HIGH;
   if (HAL_OSPIM_Config(&hospi2, &sOspiManagerCfg, HAL_OSPI_TIMEOUT_DEFAULT_VALUE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  HAL_OSPI_DLYB_Cfg_Struct.Units = 0;
+  HAL_OSPI_DLYB_Cfg_Struct.PhaseSel = 0;
+  if (HAL_OSPI_DLYB_SetConfig(&hospi2, &HAL_OSPI_DLYB_Cfg_Struct) != HAL_OK)
   {
     Error_Handler();
   }

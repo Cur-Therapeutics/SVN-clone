@@ -61,6 +61,7 @@ typedef enum
 /**
  * Functions
  */
+void I2C_Init();
 eI2C_STATE I2C_GetState();
 eI2C_STATE I2C_TryLock();
 void I2C_Unlock();

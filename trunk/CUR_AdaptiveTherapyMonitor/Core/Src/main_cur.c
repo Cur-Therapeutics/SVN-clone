@@ -32,6 +32,7 @@
 #include "adc.h"
 #include "accel.h"
 #include "touch.h"
+#include "i2c.h"
 
 /**
  * System tick
@@ -69,6 +70,7 @@ void main_cur()
 	DIAG_Init();
 	BacklightInit();
 	SpiInit();
+	I2C_Init();
 	AD7124_Init();
 	AdcInit();
 	AccelInit();

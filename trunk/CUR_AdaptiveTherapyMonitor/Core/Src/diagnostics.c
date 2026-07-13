@@ -346,11 +346,11 @@ void DIAG_Process(uint8_t * data)
 		break;
 
 	case eDIAG_FLASH_ERASE:
-		FlashSectorErase(cmd->flashAddress.address + FLASH_IMAGE_START_ADDRESS);
+		//FlashSectorErase(cmd->flashAddress.address + FLASH_IMAGE_START_ADDRESS);
 		break;
 
 	case eDIAG_FLASH_MASS_ERASE:
-		FlashMassErase();
+		//FlashMassErase();
 		break;
 
 	case eDIAG_FLASH_BURN:
@@ -377,11 +377,15 @@ void DIAG_Process(uint8_t * data)
 		break;
 
 	case eDIAG_FLASH_RESET:
-		FlashReset();
+		FlashInit();
 		break;
 
 	case eDIAG_FLASH_CLEAR_PROG:
 		FlashClearProgramAndErrors();
+		break;
+
+	case eDIAG_FLASH_TEST:
+		FlashTest();
 		break;
 
 	case eDIAG_AD7124_GET_STATUS:
