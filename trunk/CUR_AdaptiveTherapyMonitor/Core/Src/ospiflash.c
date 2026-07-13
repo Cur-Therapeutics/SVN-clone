@@ -937,6 +937,15 @@ uint8_t OctalSpiFlashErase4KSector(uint32_t addr)
 		mOspiErrors++;
 		return HAL_ERROR;
 	}
+
+	// Check status
+	uint8_t status = OctalFlashReadSr1();
+	while (status == 0x03)
+	{
+		HAL_Delay(10);
+		status = OctalFlashReadSr1();
+	}
+
 	return HAL_OK;
 }
 
@@ -971,6 +980,15 @@ uint8_t OctalSpiFlashErase256KSector(uint32_t addr)
 		FaultHandler(ERR_FLASH_ERASE);
 		return HAL_ERROR;
 	}
+
+	// Check status
+	uint8_t status = OctalFlashReadSr1();
+	while (status == 0x03)
+	{
+		HAL_Delay(10);
+		status = OctalFlashReadSr1();
+	}
+
 	return HAL_OK;
 }
 
@@ -1042,6 +1060,7 @@ uint8_t FlashWrite(uint32_t flashAddress, uint8_t * data, uint32_t size)
 
         if (_FlashWrite((uint32_t)dst, p, chunk) != 0)
         {
+        	FaultHandler(ERR_FLASH_WRITE);
             return 1;
         }
 
@@ -1116,14 +1135,13 @@ static uint8_t _FlashWrite(uint32_t addr, uint8_t * data, uint32_t count)
 	uint8_t status = OctalFlashReadSr1();
 	while (status == 0x03)
 	{
-		HAL_Delay(10);	// todo use interrupts
+		HAL_Delay(10);
 		status = OctalFlashReadSr1();
 	}
 
 	if (status == 0x41)
 	{
 		retval  = HAL_ERROR;
-		//FlashClearProgramAndErrors();
 	}
 
 	return retval;
@@ -1300,7 +1318,7 @@ void FlashTest()
 	FlashWrite(0, writeBuffer, 256);
 
 	sr1 = OctalFlashReadSr1();
-	FlashClearProgramAndErrors();
+	//FlashClearProgramAndErrors();
 	sr1 = OctalFlashReadSr1();
 
 
@@ -1320,7 +1338,7 @@ void FlashTest()
 	FlashWrite(0x40000, writeBuffer, 256);
 
 	sr1 = OctalFlashReadSr1();
-	FlashClearProgramAndErrors();
+	//FlashClearProgramAndErrors();
 	sr1 = OctalFlashReadSr1();
 
 	// Read from Sector

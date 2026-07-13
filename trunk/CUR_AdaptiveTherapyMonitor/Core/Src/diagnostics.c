@@ -234,6 +234,40 @@ void DIAG_Process(uint8_t * data)
 		DIAG_Send(cmd, &gDiagReply);
 		break;
 
+	case eDIAG_FLASH_BURN:
+
+		// Calculate addresses
+		uint32_t srcAddr = cmd->burnFlashData.srcAddr + WINDOW_0;
+		uint32_t dstAddr = (cmd->burnFlashData.dstSlot * (FLASH_SECTOR_SIZE * 2) ) + FLASH_IMAGE_START_ADDRESS;
+
+		// Erase 256K sectors, 2 sectors make up a slot
+		retval = OctalSpiFlashErase256KSector(dstAddr);
+		retval |= OctalSpiFlashErase256KSector(dstAddr + FLASH_SECTOR_SIZE);
+		if (retval != HAL_OK)
+		{
+			cmd->head.command = eDIAG_FLASH_ACK;
+			gDiagReply.flashAck.address = cmd->burnFlashData.dstSlot;
+			gDiagReply.flashAck.result = 0;
+			DIAG_Send(cmd, &gDiagReply);
+		}
+
+		// Burn
+		retval = FlashWrite(dstAddr, (uint8_t*)srcAddr, cmd->burnFlashData.size);
+		if (retval != HAL_OK)
+		{
+			cmd->head.command = eDIAG_FLASH_ACK;
+			gDiagReply.flashAck.address = cmd->burnFlashData.dstSlot;
+			gDiagReply.flashAck.result = 0;
+			DIAG_Send(cmd, &gDiagReply);
+		}
+
+		// Send ACK
+		cmd->head.command = eDIAG_FLASH_ACK;
+		gDiagReply.flashAck.address = cmd->burnFlashData.dstSlot;
+		gDiagReply.flashAck.result = 1;
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
 	case eDIAG_LCD_SET_DISPLAY:
 		LCD_SetDisplayWindow(cmd->lcdSetWindow.window);
 		break;
@@ -351,29 +385,6 @@ void DIAG_Process(uint8_t * data)
 
 	case eDIAG_FLASH_MASS_ERASE:
 		//FlashMassErase();
-		break;
-
-	case eDIAG_FLASH_BURN:
-
-		// Erase, 2 sectors make up a slot
-		retval = OctalSpiFlashErase256KSector(cmd->flashAddress.address + FLASH_IMAGE_START_ADDRESS);
-		retval |= OctalSpiFlashErase256KSector(cmd->flashAddress.address + FLASH_IMAGE_START_ADDRESS + FLASH_SECTOR_SIZE);
-		if (retval != HAL_OK)
-		{
-			cmd->head.command = eDIAG_FLASH_ACK;
-			gDiagReply.flashAck.address = cmd->flashData.address;
-			gDiagReply.flashAck.result = 0;
-			DIAG_Send(cmd, &gDiagReply);
-		}
-
-		// Burn
-		// todo
-
-		// Send ACK
-		cmd->head.command = eDIAG_FLASH_ACK;
-		gDiagReply.flashAck.address = cmd->flashData.address;
-		gDiagReply.flashAck.result = 1;
-		DIAG_Send(cmd, &gDiagReply);
 		break;
 
 	case eDIAG_FLASH_RESET:
@@ -613,12 +624,21 @@ void DIAG_Send(sDIAG_Command * rx, sDIAG_Command * tx)
 			tx->head.size += sizeof(sDIAG_Flash_Status);
 			break;
 
+		case eDIAG_FLASH_READ:
+			tx->head.size += sizeof(sDIAG_Flash_Data);
+			break;
+
 		case eDIAG_ADC_READ:
 			tx->head.size += sizeof(sAdcRead);
 			break;
 
 		case eDIAG_TOUCH_READ:
 			tx->head.size += sizeof(sDIAG_Touch_Read);
+			break;
+
+		case eDIAG_LCD_DATA_ACK:
+		case eDIAG_FLASH_ACK:
+			tx->head.size += sizeof(sDIAG_LCD_Data_Ack);
 			break;
 
 		default:

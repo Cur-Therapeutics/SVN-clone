@@ -43,13 +43,6 @@ typedef enum
 	eDISPLAY_WindowAssets06,	// 8
 	eDISPLAY_WindowAssets07,	// 9
 	eDISPLAY_WindowAssets08,	// 10
-	eDISPLAY_WindowAssets09,	// 11
-	eDISPLAY_WindowAssets10,	// 12
-	eDISPLAY_WindowAssets11,	// 13
-	eDISPLAY_WindowAssets12,	// 14
-	eDISPLAY_WindowAssets13,	// 15
-	eDISPLAY_WindowAssets14,	// 16
-	eDISPLAY_WindowAssets15,	// 17
 } eDisplayWindow;
 
 /**
@@ -72,16 +65,13 @@ typedef enum
 	eUnitBlockState_Selected
 } eUnitBlockState;
 
-
 /**
  * Functions
  */
 void DisplayInit(void);
 void DisplayDrive(eSystemStates currentState);
 void DisplayUpdate(void);
-
-void DisplayLoadFromFlash(void);
-
+void DisplayLoadFromFlash(uint32_t flashSlot, eDisplayWindow window);
 void DisplayQueueObject(sObjectQueueItem item);
 
 #endif /* INC_DISPLAY_H_ */

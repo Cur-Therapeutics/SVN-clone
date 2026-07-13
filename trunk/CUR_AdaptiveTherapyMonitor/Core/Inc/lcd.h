@@ -40,7 +40,7 @@ extern int32_t gDisplaysSize[COUNTOF_gDisplays];         // Size for gdisplay[]
 #define BYTES_PER_PIXEL		(4)
 #define BYTES_PER_RGB		(3)
 #define LINE_SIZE			(DISPLAY_WIDTH*BYTES_PER_PIXEL)
-#define FRAMEBUFFER_SIZE	(DISPLAY_WIDTH * DISPLAY_HEIGHT * BYTES_PER_PIXEL)  // Equal to two (2) sectors  (0x7F800)
+#define FRAMEBUFFER_SIZE	(DISPLAY_WIDTH * DISPLAY_HEIGHT * BYTES_PER_PIXEL)  // Equal to two (2) sectors
 #define WINDOW_0 			((uint32_t)RAMBUFF_START_ADDR)
 #define WINDOW_1 			((uint32_t)WINDOW_0 + FRAMEBUFFER_SIZE)
 #define WINDOW_2 			((uint32_t)WINDOW_1 + FRAMEBUFFER_SIZE)

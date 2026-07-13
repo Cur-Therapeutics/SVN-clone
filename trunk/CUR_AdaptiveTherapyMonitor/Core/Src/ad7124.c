@@ -161,10 +161,6 @@ uint32_t AD7124_InitInternal(sAd7124 * ad7124)
 			AD7124_CONFIG_REFP_BUF_EN | AD7124_CONFIG_REFN_BUF_EN;
 	AD7124_Write(ad7124, AD7124_CONFIG_00, setup);
 
-	// Configure output (excitation)
-	setup = AD7124_IOCTRL2_VBIAS_CH0;
-	AD7124_Write(ad7124, AD7124_IO_CTRL_2, setup);
-
 	// Configure Filter setting to FS 5, Sinc4
 	filter = AD7124_FILTER_SINC4_FAST + (1);
 	AD7124_Write(ad7124, AD7124_FILTER_00, filter);
@@ -216,8 +212,9 @@ void AD7124_Drive()
 void AD7124_DriveBridge(sAd7124 * ad7124)
 {
 	// Check status register
-	uint32_t status = AD7124_Read(ad7124, AD7124_STATUS);
-	if ((status & AD7124_STATUS_NRDY) != AD7124_STATUS_NRDY)
+	uint32_t control = AD7124_Read(ad7124, AD7124_ADC_CTRL);
+	uint32_t status;
+	if ((control & AD7124_CTRL_MODE_STANDBY) == AD7124_CTRL_MODE_STANDBY)
 	{
 		// Grab Data, determine channel and convert
 		uint32_t counts = AD7124_Read(ad7124, AD7124_DATA);
@@ -226,7 +223,7 @@ void AD7124_DriveBridge(sAd7124 * ad7124)
 
 		ad7124->lastCounts = counts;
 		ad7124->lastVoltage = (counts - AD7124_OFFSET) * AD7124_SCALE;
-		ad7124->lastEng = ad7124->lastVoltage;
+		ad7124->lastEng = (ad7124->lastVoltage * 1000.0f * AD7124_SCALE_MMHG) + AD7124_OFFSET_MMHG;
 
 		ad7124->lastChannel = channel;
 	}

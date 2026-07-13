@@ -76,14 +76,11 @@ void main_cur()
 	AccelInit();
 	TOUCH_Init();
 	StateInit();
+	DisplayInit();
 
 	// Begin loop on start of system tick
 	gSystemTick = HAL_GetTick();
 	while (gSystemTick == HAL_GetTick()) { /*  */ }
-
-
-	sColor color = {255, 0, 255};
-	LCD_FillWindow(0, color);
 
 	while (1)
 	{
@@ -100,7 +97,7 @@ void main_cur()
 		TOUCH_Drive();
 
 		//StateDrive();
-		//DisplayDrive(GetCurrentState());
+		DisplayDrive(GetCurrentState());
 
 		// Wait for next tick
 		WaitForNextTick(HAL_GetTick());

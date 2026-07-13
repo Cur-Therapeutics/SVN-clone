@@ -30,9 +30,9 @@ typedef enum
 /**
  * Flash sector size
  */
-#define FLASH_SECTOR_SIZE			262144	// 2^18
-#define OSPI_FLASH_PAGE_SIZE		256		// Max write size
-#define FLASH_IMAGE_START_ADDRESS	(0)		// Start of Flash images
+#define FLASH_SECTOR_SIZE			262144		// 2^18, 256 KB
+#define OSPI_FLASH_PAGE_SIZE		256			// Max write size in bytes
+#define FLASH_IMAGE_START_ADDRESS	(0x40000)	// Start of Flash images
 
 /**
  * Volatile Register Addresses
@@ -80,7 +80,6 @@ typedef struct __attribute__((packed, aligned(1)))
 #define FLASH_CFG1_TB4KBS		(0x04)
 #define FLASH_CFG2_32ADDR_MODE	(0x80)
 #define FLASH_CFG5_OCTAL_MODE	(0x41)
-
 
 /**
  * OSPI Flash Code from AN5050

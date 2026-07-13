@@ -19,6 +19,8 @@
 #include "display.h"
 #include "object.h"
 #include "pressure.h"
+#include "ospiflash.h"
+#include "lcd.h"
 
 /**
  * Display Object Queue
@@ -80,7 +82,13 @@ void DisplayInit()
 	LCD_FillWindow(mBufferState, colorWhite);
 
 	// Load assets from flash to RAM
-	// todo
+	DisplayLoadFromFlash(0, eDISPLAY_WindowAssets01);
+	DisplayLoadFromFlash(1, eDISPLAY_WindowAssets02);
+	DisplayLoadFromFlash(2, eDISPLAY_WindowAssets03);
+	DisplayLoadFromFlash(3, eDISPLAY_WindowAssets04);
+	DisplayLoadFromFlash(4, eDISPLAY_WindowAssets05);
+	DisplayLoadFromFlash(5, eDISPLAY_WindowAssets06);
+	DisplayLoadFromFlash(6, eDISPLAY_WindowAssets07);
 }
 
 /**
@@ -180,11 +188,19 @@ void DisplayQueueObject(sObjectQueueItem item)
 }
 
 /**
+ * @brief Load image data from flash to our RAM framebuffer
+ * @param flashSlot The slot in flash to
+ * @param window The framebuffer window index to load into
  *
+ * @note Please review data section of the SDD for specific details on how addresses are calculated from slot and window
+ *
+ * @return None
  */
-void DisplayLoadFromFlash()
+void DisplayLoadFromFlash(uint32_t flashSlot, eDisplayWindow window)
 {
-
+	uint32_t flashAddr = ( flashSlot * ( 2 * FLASH_SECTOR_SIZE) ) + FLASH_IMAGE_START_ADDRESS;
+	uint32_t displayAddr = gDisplays[window];
+	FlashRead(flashAddr, (uint8_t*)displayAddr, FRAMEBUFFER_SIZE);
 }
 
 /**

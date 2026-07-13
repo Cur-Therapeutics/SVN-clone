@@ -372,6 +372,16 @@ typedef struct __attribute__((packed, aligned(1)))
 } sAdcRead;
 
 /**
+ * Flash Burn Data
+ */
+typedef struct __attribute__((packed, aligned(1)))
+{
+	uint32_t srcAddr;
+	uint32_t dstSlot;
+	uint32_t size;
+}sDIAG_FlashBurnData;
+
+/**
  * Command Message
  */
 typedef struct
@@ -401,6 +411,7 @@ typedef struct
 		sAd7124Status			ad7124Status;
 		sAccelRead				accelRead;
 		sAdcRead				adcRead;
+		sDIAG_FlashBurnData		burnFlashData;
 	};
 } sDIAG_Command;
 

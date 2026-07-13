@@ -56,6 +56,13 @@ typedef enum
 #define AD7124_SCALE	(0.00000038028f)
 
 /**
+ * Scale from mV to mmHg
+ * Details of calculations based on Millar datasheet, 5uV/V/mmHg
+ */
+#define AD7124_SCALE_MMHG	(60.606061f)
+#define AD7124_OFFSET_MMHG	(760)	// Add back in 1 atm, sensor is zero trimmed
+
+/**
  * Support for multiple ADCs
  */
 typedef enum
@@ -195,6 +202,7 @@ typedef enum
 
 #define AD7124_CTRL_MODE_CONT		0x00
 #define AD7124_CTRL_MODE_SNGL		0x04
+#define AD7124_CTRL_MODE_STANDBY	0x08
 #define AD7124_CTRL_REF_ENABLE		0x100
 
 #define AD7124_CTRL_DATA_STATUS		0x400
