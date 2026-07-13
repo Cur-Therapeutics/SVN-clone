@@ -61,6 +61,8 @@ namespace CURDiags
             comboBoxDisplayWindow = new ComboBox();
             buttonLcdSetWindow = new Button();
             groupBox3 = new GroupBox();
+            label41 = new Label();
+            comboBoxSlot = new ComboBox();
             labelLoadStatus = new Label();
             label2 = new Label();
             comboBoxWindow = new ComboBox();
@@ -167,6 +169,13 @@ namespace CURDiags
             textBoxAd7124CountsHex = new TextBox();
             label7 = new Label();
             tabPageFlash = new TabPage();
+            groupBox15 = new GroupBox();
+            textBoxFlashReadData = new TextBox();
+            buttonFlashRead = new Button();
+            label46 = new Label();
+            textBoxFlashReadAddress = new TextBox();
+            label45 = new Label();
+            comboBoxFlashReadSlot = new ComboBox();
             groupBox13 = new GroupBox();
             buttonFlashTest = new Button();
             buttonFlashClearProg = new Button();
@@ -234,6 +243,7 @@ namespace CURDiags
             groupBox11.SuspendLayout();
             groupBox10.SuspendLayout();
             tabPageFlash.SuspendLayout();
+            groupBox15.SuspendLayout();
             groupBox13.SuspendLayout();
             groupBox12.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewFlashIds).BeginInit();
@@ -259,7 +269,7 @@ namespace CURDiags
             tabControl1.Location = new Point(12, 95);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(1031, 456);
+            tabControl1.Size = new Size(1031, 550);
             tabControl1.TabIndex = 0;
             // 
             // tabPageStatus
@@ -270,7 +280,7 @@ namespace CURDiags
             tabPageStatus.Location = new Point(4, 24);
             tabPageStatus.Name = "tabPageStatus";
             tabPageStatus.Padding = new Padding(3);
-            tabPageStatus.Size = new Size(1023, 428);
+            tabPageStatus.Size = new Size(1023, 522);
             tabPageStatus.TabIndex = 0;
             tabPageStatus.Text = "Status";
             tabPageStatus.UseVisualStyleBackColor = true;
@@ -333,7 +343,7 @@ namespace CURDiags
             tabPageDebug.Controls.Add(listBoxDebugLogList);
             tabPageDebug.Location = new Point(4, 24);
             tabPageDebug.Name = "tabPageDebug";
-            tabPageDebug.Size = new Size(1023, 428);
+            tabPageDebug.Size = new Size(1023, 522);
             tabPageDebug.TabIndex = 1;
             tabPageDebug.Text = "Debug";
             tabPageDebug.UseVisualStyleBackColor = true;
@@ -385,7 +395,7 @@ namespace CURDiags
             tabPageLCD.Location = new Point(4, 24);
             tabPageLCD.Name = "tabPageLCD";
             tabPageLCD.Padding = new Padding(3);
-            tabPageLCD.Size = new Size(1023, 428);
+            tabPageLCD.Size = new Size(1023, 522);
             tabPageLCD.TabIndex = 2;
             tabPageLCD.Text = "LCD";
             tabPageLCD.UseVisualStyleBackColor = true;
@@ -538,6 +548,8 @@ namespace CURDiags
             // 
             // groupBox3
             // 
+            groupBox3.Controls.Add(label41);
+            groupBox3.Controls.Add(comboBoxSlot);
             groupBox3.Controls.Add(labelLoadStatus);
             groupBox3.Controls.Add(label2);
             groupBox3.Controls.Add(comboBoxWindow);
@@ -547,15 +559,35 @@ namespace CURDiags
             groupBox3.Controls.Add(buttonSelectFile);
             groupBox3.Location = new Point(6, 6);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new Size(345, 252);
+            groupBox3.Size = new Size(345, 416);
             groupBox3.TabIndex = 0;
             groupBox3.TabStop = false;
             groupBox3.Text = "Data Loader";
             // 
+            // label41
+            // 
+            label41.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label41.Location = new Point(210, 83);
+            label41.Name = "label41";
+            label41.Size = new Size(121, 26);
+            label41.TabIndex = 8;
+            label41.Text = "Slot";
+            label41.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // comboBoxSlot
+            // 
+            comboBoxSlot.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            comboBoxSlot.FormattingEnabled = true;
+            comboBoxSlot.Items.AddRange(new object[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" });
+            comboBoxSlot.Location = new Point(210, 112);
+            comboBoxSlot.Name = "comboBoxSlot";
+            comboBoxSlot.Size = new Size(121, 29);
+            comboBoxSlot.TabIndex = 7;
+            // 
             // labelLoadStatus
             // 
             labelLoadStatus.AutoSize = true;
-            labelLoadStatus.Location = new Point(6, 99);
+            labelLoadStatus.Location = new Point(6, 166);
             labelLoadStatus.Name = "labelLoadStatus";
             labelLoadStatus.Size = new Size(45, 15);
             labelLoadStatus.TabIndex = 6;
@@ -594,14 +626,14 @@ namespace CURDiags
             // 
             // progressBarLoading
             // 
-            progressBarLoading.Location = new Point(6, 204);
+            progressBarLoading.Location = new Point(6, 271);
             progressBarLoading.Name = "progressBarLoading";
             progressBarLoading.Size = new Size(325, 42);
             progressBarLoading.TabIndex = 2;
             // 
             // labelFileName
             // 
-            labelFileName.Location = new Point(6, 159);
+            labelFileName.Location = new Point(6, 226);
             labelFileName.Name = "labelFileName";
             labelFileName.Size = new Size(325, 42);
             labelFileName.TabIndex = 1;
@@ -627,7 +659,7 @@ namespace CURDiags
             tabPageTouch.Location = new Point(4, 24);
             tabPageTouch.Name = "tabPageTouch";
             tabPageTouch.Padding = new Padding(3);
-            tabPageTouch.Size = new Size(1023, 428);
+            tabPageTouch.Size = new Size(1023, 522);
             tabPageTouch.TabIndex = 3;
             tabPageTouch.Text = "Touch";
             tabPageTouch.UseVisualStyleBackColor = true;
@@ -1060,7 +1092,7 @@ namespace CURDiags
             tabPageAccel.Location = new Point(4, 24);
             tabPageAccel.Name = "tabPageAccel";
             tabPageAccel.Padding = new Padding(3);
-            tabPageAccel.Size = new Size(1023, 428);
+            tabPageAccel.Size = new Size(1023, 522);
             tabPageAccel.TabIndex = 4;
             tabPageAccel.Text = "Accel";
             tabPageAccel.UseVisualStyleBackColor = true;
@@ -1155,7 +1187,7 @@ namespace CURDiags
             tabPageRtc.Location = new Point(4, 24);
             tabPageRtc.Name = "tabPageRtc";
             tabPageRtc.Padding = new Padding(3);
-            tabPageRtc.Size = new Size(1023, 428);
+            tabPageRtc.Size = new Size(1023, 522);
             tabPageRtc.TabIndex = 5;
             tabPageRtc.Text = "RTC";
             tabPageRtc.UseVisualStyleBackColor = true;
@@ -1290,7 +1322,7 @@ namespace CURDiags
             tabPageAd7124.Location = new Point(4, 24);
             tabPageAd7124.Name = "tabPageAd7124";
             tabPageAd7124.Padding = new Padding(3);
-            tabPageAd7124.Size = new Size(1023, 428);
+            tabPageAd7124.Size = new Size(1023, 522);
             tabPageAd7124.TabIndex = 6;
             tabPageAd7124.Text = "AD7124";
             tabPageAd7124.UseVisualStyleBackColor = true;
@@ -1681,15 +1713,95 @@ namespace CURDiags
             // 
             // tabPageFlash
             // 
+            tabPageFlash.Controls.Add(groupBox15);
             tabPageFlash.Controls.Add(groupBox13);
             tabPageFlash.Controls.Add(groupBox12);
             tabPageFlash.Location = new Point(4, 24);
             tabPageFlash.Name = "tabPageFlash";
             tabPageFlash.Padding = new Padding(3);
-            tabPageFlash.Size = new Size(1023, 428);
+            tabPageFlash.Size = new Size(1023, 522);
             tabPageFlash.TabIndex = 7;
             tabPageFlash.Text = "Flash";
             tabPageFlash.UseVisualStyleBackColor = true;
+            // 
+            // groupBox15
+            // 
+            groupBox15.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            groupBox15.Controls.Add(textBoxFlashReadData);
+            groupBox15.Controls.Add(buttonFlashRead);
+            groupBox15.Controls.Add(label46);
+            groupBox15.Controls.Add(textBoxFlashReadAddress);
+            groupBox15.Controls.Add(label45);
+            groupBox15.Controls.Add(comboBoxFlashReadSlot);
+            groupBox15.Location = new Point(6, 322);
+            groupBox15.Name = "groupBox15";
+            groupBox15.Size = new Size(1011, 194);
+            groupBox15.TabIndex = 2;
+            groupBox15.TabStop = false;
+            groupBox15.Text = "Flash Read";
+            // 
+            // textBoxFlashReadData
+            // 
+            textBoxFlashReadData.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            textBoxFlashReadData.Font = new Font("Consolas", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxFlashReadData.Location = new Point(6, 22);
+            textBoxFlashReadData.Multiline = true;
+            textBoxFlashReadData.Name = "textBoxFlashReadData";
+            textBoxFlashReadData.ReadOnly = true;
+            textBoxFlashReadData.ScrollBars = ScrollBars.Vertical;
+            textBoxFlashReadData.Size = new Size(848, 166);
+            textBoxFlashReadData.TabIndex = 22;
+            // 
+            // buttonFlashRead
+            // 
+            buttonFlashRead.Font = new Font("Segoe UI", 12F);
+            buttonFlashRead.Location = new Point(874, 149);
+            buttonFlashRead.Name = "buttonFlashRead";
+            buttonFlashRead.Size = new Size(131, 39);
+            buttonFlashRead.TabIndex = 21;
+            buttonFlashRead.Text = "Read";
+            buttonFlashRead.UseVisualStyleBackColor = true;
+            buttonFlashRead.Click += buttonFlashRead_Click;
+            // 
+            // label46
+            // 
+            label46.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label46.Location = new Point(874, 80);
+            label46.Name = "label46";
+            label46.Size = new Size(131, 26);
+            label46.TabIndex = 12;
+            label46.Text = "Address";
+            label46.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // textBoxFlashReadAddress
+            // 
+            textBoxFlashReadAddress.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            textBoxFlashReadAddress.Location = new Point(874, 109);
+            textBoxFlashReadAddress.Name = "textBoxFlashReadAddress";
+            textBoxFlashReadAddress.Size = new Size(131, 29);
+            textBoxFlashReadAddress.TabIndex = 11;
+            textBoxFlashReadAddress.Text = "0";
+            // 
+            // label45
+            // 
+            label45.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label45.Location = new Point(874, 13);
+            label45.Name = "label45";
+            label45.Size = new Size(131, 26);
+            label45.TabIndex = 10;
+            label45.Text = "Slot";
+            label45.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // comboBoxFlashReadSlot
+            // 
+            comboBoxFlashReadSlot.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            comboBoxFlashReadSlot.FormattingEnabled = true;
+            comboBoxFlashReadSlot.Items.AddRange(new object[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" });
+            comboBoxFlashReadSlot.Location = new Point(874, 42);
+            comboBoxFlashReadSlot.Name = "comboBoxFlashReadSlot";
+            comboBoxFlashReadSlot.Size = new Size(131, 29);
+            comboBoxFlashReadSlot.TabIndex = 9;
+            comboBoxFlashReadSlot.SelectedIndexChanged += comboBoxFlashReadSlot_SelectedIndexChanged;
             // 
             // groupBox13
             // 
@@ -1698,7 +1810,7 @@ namespace CURDiags
             groupBox13.Controls.Add(buttonFlashReset);
             groupBox13.Location = new Point(690, 6);
             groupBox13.Name = "groupBox13";
-            groupBox13.Size = new Size(146, 347);
+            groupBox13.Size = new Size(146, 310);
             groupBox13.TabIndex = 1;
             groupBox13.TabStop = false;
             groupBox13.Text = "Operations";
@@ -1747,7 +1859,7 @@ namespace CURDiags
             groupBox12.Controls.Add(label33);
             groupBox12.Location = new Point(6, 6);
             groupBox12.Name = "groupBox12";
-            groupBox12.Size = new Size(678, 347);
+            groupBox12.Size = new Size(678, 310);
             groupBox12.TabIndex = 0;
             groupBox12.TabStop = false;
             groupBox12.Text = "Flash Status";
@@ -1857,7 +1969,7 @@ namespace CURDiags
             tabPageAdc.Location = new Point(4, 24);
             tabPageAdc.Name = "tabPageAdc";
             tabPageAdc.Padding = new Padding(3);
-            tabPageAdc.Size = new Size(1023, 428);
+            tabPageAdc.Size = new Size(1023, 522);
             tabPageAdc.TabIndex = 8;
             tabPageAdc.Text = "Adc";
             tabPageAdc.UseVisualStyleBackColor = true;
@@ -2001,7 +2113,7 @@ namespace CURDiags
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { toolStripStatusLabel1 });
-            statusStrip1.Location = new Point(0, 552);
+            statusStrip1.Location = new Point(0, 646);
             statusStrip1.Name = "statusStrip1";
             statusStrip1.Size = new Size(1055, 22);
             statusStrip1.TabIndex = 5;
@@ -2196,7 +2308,7 @@ namespace CURDiags
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1055, 574);
+            ClientSize = new Size(1055, 668);
             Controls.Add(groupBox1);
             Controls.Add(statusStrip1);
             Controls.Add(comboBoxBaudRate);
@@ -2238,6 +2350,8 @@ namespace CURDiags
             groupBox10.ResumeLayout(false);
             groupBox10.PerformLayout();
             tabPageFlash.ResumeLayout(false);
+            groupBox15.ResumeLayout(false);
+            groupBox15.PerformLayout();
             groupBox13.ResumeLayout(false);
             groupBox12.ResumeLayout(false);
             groupBox12.PerformLayout();
@@ -2437,5 +2551,14 @@ namespace CURDiags
         private TextBox textBoxBatCountsHex;
         private Label label44;
         private Button buttonFlashTest;
+        private Label label41;
+        private ComboBox comboBoxSlot;
+        private GroupBox groupBox15;
+        private Label label46;
+        private TextBox textBoxFlashReadAddress;
+        private Label label45;
+        private ComboBox comboBoxFlashReadSlot;
+        private Button buttonFlashRead;
+        private TextBox textBoxFlashReadData;
     }
 }

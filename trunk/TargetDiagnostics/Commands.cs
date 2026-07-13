@@ -90,6 +90,19 @@ namespace CURDiags
         }
 
         /// <summary>
+        /// Flash Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public unsafe struct sFlashData
+        {
+            public sCommandHeader header;
+            public UInt32 address;
+            public UInt32 count;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)]
+            public byte[] data;
+        }
+
+        /// <summary>
         /// AD7124 Status
         /// </summary>
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -201,6 +214,17 @@ namespace CURDiags
             public byte mode;
             public UInt16 xPosRaw;
             public UInt16 yPosRaw;
+        }
+
+        /// <summary>
+        /// LCD and Flash ACK / Nack
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sFlashAck
+        {
+            public sCommandHeader header;
+            public UInt32 address;
+            public UInt32 status;
         }
 
         /// <summary>

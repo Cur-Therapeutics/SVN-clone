@@ -74,6 +74,8 @@ namespace CURDiags
             comboBoxBaudRate.SelectedIndex = 0;
             comboBoxWindow.SelectedIndex = 0;
             comboBoxDisplayWindow.SelectedIndex = 0;
+            comboBoxSlot.SelectedIndex = 0;
+            comboBoxFlashReadSlot.SelectedIndex = 0;
 
             // Attach logger
             Logger.LoggedMessage += Logger_LoggedMessage;
@@ -255,6 +257,9 @@ namespace CURDiags
                 case "tabPageAdc":
                     Commands.SendCommand(eDiagnosticCommands.eDIAG_ADC_READ);
                     break;
+                case "tabPageAd7124":
+                    Commands.SendCommand(eDiagnosticCommands.eDIAG_AD7124_READ_DATA);
+                    break;
                 case "tabPageRtc":
                     Commands.SendCommand(eDiagnosticCommands.eDIAG_RTC_STATUS);
                     break;
@@ -339,6 +344,10 @@ namespace CURDiags
             // Each window is 320*240x4 bytes...
             int window = comboBoxWindow.SelectedIndex;
             UInt32 addr = (UInt32)(320 * 240 * 4 * window);
+            UInt32 ramAddr = (UInt32)(320 * 240 * 4 * window);
+
+            // Grab slot address here so we avoid cross thread operations
+            UInt32 burnSlot = (UInt32)comboBoxSlot.SelectedIndex;
 
             // Send raw data to the embedded
             int bytesToSend = rawBytes.Length;
@@ -349,6 +358,8 @@ namespace CURDiags
 
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
             {
+                bool isAcked = false;
+
                 // Continue until all bytes are sent or we fail on retries
                 while (sentBytes < bytesToSend)
                 {
@@ -369,7 +380,7 @@ namespace CURDiags
                     Commands.SendCommand(cmd);
 
                     // Wait for an ACK
-                    bool isAcked = false;
+
                     for (int i = 0; i < 5; i++)
                     {
                         // Resend on Timeout
@@ -383,7 +394,7 @@ namespace CURDiags
                     if (!isAcked)
                     {
                         // Fail on too many timeouts
-                        MessageBox.Show("Failed on too many retries!");
+                        UpdateLabel(labelLoadStatus, "Failed on too many retries! Address: " + addr);
                         return;
                     }
                     sentBytes += (int)packetSize;
@@ -394,9 +405,22 @@ namespace CURDiags
                     UpdateProgressBar(progressBarLoading, sentBytes, bytesToSend);
                 }
 
-                // Send write command
+                // Send burn command
+                UpdateLabel(labelLoadStatus, "Status: Burning... ");
                 Commands.sRequest burnCmd = new Commands.sRequest(eDiagnosticCommands.eDIAG_FLASH_BURN);
+                burnCmd.AddBytes(BitConverter.GetBytes(ramAddr));
+                burnCmd.AddBytes(BitConverter.GetBytes(burnSlot));
+                burnCmd.AddBytes(BitConverter.GetBytes((UInt32)(320*240*4)));
 
+                Commands.SendCommand(burnCmd);
+                if (autoEvent.WaitOne(20000))
+                {
+                    UpdateLabel(labelLoadStatus, "Status: Burning Completed.");
+                }
+                else
+                {
+                    UpdateLabel(labelLoadStatus, "Status: Burn Failed!");
+                }
 
             });  // end QueuWorkerItem
 
@@ -487,6 +511,10 @@ namespace CURDiags
 
         private void buttonAD7124Read_Click(object sender, EventArgs e)
         {
+            UpdateTextBox(textBoxAd7124CountsHex, "");
+            UpdateTextBox(textBoxAd7124CountsDec, "");
+            UpdateTextBox(textBoxAd7124Volts, "");
+            UpdateTextBox(textBoxAd7124mmHg, "");
             Commands.SendCommand(eDiagnosticCommands.eDIAG_AD7124_READ_DATA);
         }
 
@@ -568,6 +596,31 @@ namespace CURDiags
         private void buttonFlashTest_Click(object sender, EventArgs e)
         {
             Commands.SendCommand(eDiagnosticCommands.eDIAG_FLASH_TEST);
+        }
+
+        private void comboBoxFlashReadSlot_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // Calculate new address for the flash read address
+            UInt32 address = 0x40000 + (UInt32)(comboBoxFlashReadSlot.SelectedIndex * (256 * 1024 * 2));
+            UpdateTextBox(textBoxFlashReadAddress, address.ToString());
+        }
+
+        private void buttonFlashRead_Click(object sender, EventArgs e)
+        {
+            UInt32 address;
+            bool dataGood = UInt32.TryParse(textBoxFlashReadAddress.Text, out address);
+
+            if (!dataGood)
+            {
+                MessageBox.Show("Invalid address!");
+                return;
+            }
+
+            Commands.sRequest cmd = new Commands.sRequest(eDiagnosticCommands.eDIAG_FLASH_READ);
+            cmd.AddBytes(BitConverter.GetBytes(address));
+            cmd.AddBytes(BitConverter.GetBytes((UInt32)512));
+            Commands.SendCommand(cmd);
+
         }
     }  // end class
 }  // end namespace

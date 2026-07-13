@@ -57,9 +57,16 @@ namespace CURDiags
                     break;
 
                 case eDiagnosticCommands.eDIAG_LCD_DATA_ACK:
+                case eDiagnosticCommands.eDIAG_FLASH_ACK:
+
                     AddToMessageListBox(data);
-                    autoEvent.Set();
-                    break;
+
+                    Commands.sFlashAck ack = new Commands.sFlashAck();
+                    Utils.MarshalPtrToStruct(data, out ack);
+                    if (ack.status == 1)
+                        autoEvent.Set();
+
+                        break;
 
                 case eDiagnosticCommands.eDIAG_AD7124_GET_STATUS:
                     Commands.sAD7124Status ad7124status = new Commands.sAD7124Status();
@@ -89,6 +96,12 @@ namespace CURDiags
                     Commands.sFlashStatusData flashStatus = new Commands.sFlashStatusData();
                     Utils.MarshalPtrToStruct(data, out flashStatus);
                     UpdateFlashStatus(flashStatus);
+                    break;
+
+                case eDiagnosticCommands.eDIAG_FLASH_READ:
+                    Commands.sFlashData flashRead = new Commands.sFlashData();
+                    Utils.MarshalPtrToStruct(data, out flashRead);
+                    UpdateFlashRead(flashRead);
                     break;
 
                 case eDiagnosticCommands.eDIAG_ADC_READ:
@@ -172,7 +185,8 @@ namespace CURDiags
         {
             UpdateTextBox(textBoxAd7124CountsHex, "0x" + read.counts.ToString("X4"));
             UpdateTextBox(textBoxAd7124CountsDec, read.counts.ToString());
-            UpdateTextBox(textBoxAd7124Volts, read.mLastVoltage.ToString("F2"));
+            float mV = read.mLastVoltage * 1000;    // Convert to mV
+            UpdateTextBox(textBoxAd7124Volts, mV.ToString("F4"));
             UpdateTextBox(textBoxAd7124mmHg, read.engValue.ToString("F1"));
         }
 
@@ -199,7 +213,6 @@ namespace CURDiags
         /// <summary>
         /// Update flash status
         /// </summary>
-        /// <param name="status"></param>
         private void UpdateFlashStatus(Commands.sFlashStatusData status)
         {
             UpdateTextBox(textBoxFlashStatus1, "0x" + status.statusReg1.ToString("X2"));
@@ -223,6 +236,23 @@ namespace CURDiags
         }
 
         /// <summary>
+        /// Update flash read data
+        /// </summary>
+        private void UpdateFlashRead(Commands.sFlashData data)
+        {
+            string str = "";
+            int count = 1;
+            foreach (byte b in data.data)
+            {
+                str += "0x" + b.ToString("X2") + " ";
+                if (count % 8 == 0) str += "   ";
+                if (count % 16 == 0) str += System.Environment.NewLine;
+                count++;
+            }
+            UpdateTextBox(textBoxFlashReadData, str);
+        }
+
+        /// <summary>
         /// Update the battery counts and volts
         /// </summary>
         private void UpdateBattery(Commands.sAdcReadData data)
@@ -230,6 +260,12 @@ namespace CURDiags
             UpdateTextBox(textBoxBatCountsHex, "0x" + data.counts.ToString("X4"));
             UpdateTextBox(textBoxBatCountDec, data.counts.ToString());
             UpdateTextBox(textBoxBatVolts, data.volts.ToString("F2"));
+
+            // Log data for evaluation
+            DateTime now = DateTime.Now;
+            string filename = "" + now.Month.ToString() + now.Day.ToString() + now.Year.ToString() + "_BatteryLog.txt";
+            string str = now.ToLongTimeString() + ", " + data.counts.ToString() + ", " + data.volts.ToString("F2") + System.Environment.NewLine;
+            File.AppendAllText(filename, str);
         }
 
         /// <summary>
