@@ -168,6 +168,7 @@ namespace CURDiags
             label7 = new Label();
             tabPageFlash = new TabPage();
             groupBox13 = new GroupBox();
+            buttonFlashTest = new Button();
             buttonFlashClearProg = new Button();
             buttonFlashReset = new Button();
             groupBox12 = new GroupBox();
@@ -1692,6 +1693,7 @@ namespace CURDiags
             // 
             // groupBox13
             // 
+            groupBox13.Controls.Add(buttonFlashTest);
             groupBox13.Controls.Add(buttonFlashClearProg);
             groupBox13.Controls.Add(buttonFlashReset);
             groupBox13.Location = new Point(690, 6);
@@ -1700,6 +1702,17 @@ namespace CURDiags
             groupBox13.TabIndex = 1;
             groupBox13.TabStop = false;
             groupBox13.Text = "Operations";
+            // 
+            // buttonFlashTest
+            // 
+            buttonFlashTest.Font = new Font("Segoe UI", 12F);
+            buttonFlashTest.Location = new Point(6, 109);
+            buttonFlashTest.Name = "buttonFlashTest";
+            buttonFlashTest.Size = new Size(131, 39);
+            buttonFlashTest.TabIndex = 22;
+            buttonFlashTest.Text = "Test";
+            buttonFlashTest.UseVisualStyleBackColor = true;
+            buttonFlashTest.Click += buttonFlashTest_Click;
             // 
             // buttonFlashClearProg
             // 
@@ -2027,7 +2040,7 @@ namespace CURDiags
             // 
             labelRtc.BackColor = SystemColors.ActiveBorder;
             labelRtc.BorderStyle = BorderStyle.FixedSingle;
-            labelRtc.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelRtc.Font = new Font("Verdana", 8.25F);
             labelRtc.Location = new Point(654, 19);
             labelRtc.Name = "labelRtc";
             labelRtc.Size = new Size(48, 48);
@@ -2039,7 +2052,7 @@ namespace CURDiags
             // 
             labelCatheter.BackColor = SystemColors.ActiveBorder;
             labelCatheter.BorderStyle = BorderStyle.FixedSingle;
-            labelCatheter.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelCatheter.Font = new Font("Verdana", 8.25F);
             labelCatheter.Location = new Point(600, 19);
             labelCatheter.Name = "labelCatheter";
             labelCatheter.Size = new Size(48, 48);
@@ -2051,7 +2064,7 @@ namespace CURDiags
             // 
             labelI2C.BackColor = SystemColors.ActiveBorder;
             labelI2C.BorderStyle = BorderStyle.FixedSingle;
-            labelI2C.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelI2C.Font = new Font("Verdana", 8.25F);
             labelI2C.Location = new Point(546, 19);
             labelI2C.Name = "labelI2C";
             labelI2C.Size = new Size(48, 48);
@@ -2063,7 +2076,7 @@ namespace CURDiags
             // 
             labelSpi.BackColor = SystemColors.ActiveBorder;
             labelSpi.BorderStyle = BorderStyle.FixedSingle;
-            labelSpi.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelSpi.Font = new Font("Verdana", 8.25F);
             labelSpi.Location = new Point(492, 19);
             labelSpi.Name = "labelSpi";
             labelSpi.Size = new Size(48, 48);
@@ -2075,7 +2088,7 @@ namespace CURDiags
             // 
             labelAccel.BackColor = SystemColors.ActiveBorder;
             labelAccel.BorderStyle = BorderStyle.FixedSingle;
-            labelAccel.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelAccel.Font = new Font("Verdana", 8.25F);
             labelAccel.Location = new Point(438, 19);
             labelAccel.Name = "labelAccel";
             labelAccel.Size = new Size(48, 48);
@@ -2087,7 +2100,7 @@ namespace CURDiags
             // 
             labelStack.BackColor = SystemColors.ActiveBorder;
             labelStack.BorderStyle = BorderStyle.FixedSingle;
-            labelStack.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelStack.Font = new Font("Verdana", 8.25F);
             labelStack.Location = new Point(384, 19);
             labelStack.Name = "labelStack";
             labelStack.Size = new Size(48, 48);
@@ -2099,7 +2112,7 @@ namespace CURDiags
             // 
             labelLcd.BackColor = SystemColors.ActiveBorder;
             labelLcd.BorderStyle = BorderStyle.FixedSingle;
-            labelLcd.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelLcd.Font = new Font("Verdana", 8.25F);
             labelLcd.Location = new Point(330, 19);
             labelLcd.Name = "labelLcd";
             labelLcd.Size = new Size(48, 48);
@@ -2111,7 +2124,7 @@ namespace CURDiags
             // 
             labelTouch.BackColor = SystemColors.ActiveBorder;
             labelTouch.BorderStyle = BorderStyle.FixedSingle;
-            labelTouch.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelTouch.Font = new Font("Verdana", 8.25F);
             labelTouch.Location = new Point(276, 19);
             labelTouch.Name = "labelTouch";
             labelTouch.Size = new Size(48, 48);
@@ -2123,7 +2136,7 @@ namespace CURDiags
             // 
             label7124.BackColor = SystemColors.ActiveBorder;
             label7124.BorderStyle = BorderStyle.FixedSingle;
-            label7124.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label7124.Font = new Font("Verdana", 8.25F);
             label7124.Location = new Point(222, 19);
             label7124.Name = "label7124";
             label7124.Size = new Size(48, 48);
@@ -2135,7 +2148,7 @@ namespace CURDiags
             // 
             labelAdc.BackColor = SystemColors.ActiveBorder;
             labelAdc.BorderStyle = BorderStyle.FixedSingle;
-            labelAdc.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelAdc.Font = new Font("Verdana", 8.25F);
             labelAdc.Location = new Point(168, 19);
             labelAdc.Name = "labelAdc";
             labelAdc.Size = new Size(48, 48);
@@ -2147,7 +2160,7 @@ namespace CURDiags
             // 
             labelFlash.BackColor = SystemColors.ActiveBorder;
             labelFlash.BorderStyle = BorderStyle.FixedSingle;
-            labelFlash.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelFlash.Font = new Font("Verdana", 8.25F);
             labelFlash.Location = new Point(114, 19);
             labelFlash.Name = "labelFlash";
             labelFlash.Size = new Size(48, 48);
@@ -2159,7 +2172,7 @@ namespace CURDiags
             // 
             labelRam.BackColor = SystemColors.ActiveBorder;
             labelRam.BorderStyle = BorderStyle.FixedSingle;
-            labelRam.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelRam.Font = new Font("Verdana", 8.25F);
             labelRam.Location = new Point(60, 19);
             labelRam.Name = "labelRam";
             labelRam.Size = new Size(48, 48);
@@ -2171,7 +2184,7 @@ namespace CURDiags
             // 
             labelSys.BackColor = SystemColors.ActiveBorder;
             labelSys.BorderStyle = BorderStyle.FixedSingle;
-            labelSys.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelSys.Font = new Font("Verdana", 8.25F);
             labelSys.Location = new Point(6, 19);
             labelSys.Name = "labelSys";
             labelSys.Size = new Size(48, 48);
@@ -2423,5 +2436,6 @@ namespace CURDiags
         private Label label43;
         private TextBox textBoxBatCountsHex;
         private Label label44;
+        private Button buttonFlashTest;
     }
 }

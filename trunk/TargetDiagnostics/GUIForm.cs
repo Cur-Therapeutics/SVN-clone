@@ -252,6 +252,15 @@ namespace CURDiags
                 case "tabPageAccel":
                     Commands.SendCommand(eDiagnosticCommands.eDIAG_ACCEL_READ);
                     break;
+                case "tabPageAdc":
+                    Commands.SendCommand(eDiagnosticCommands.eDIAG_ADC_READ);
+                    break;
+                case "tabPageRtc":
+                    Commands.SendCommand(eDiagnosticCommands.eDIAG_RTC_STATUS);
+                    break;
+                case "tabPageTouch":
+                    Commands.SendCommand(eDiagnosticCommands.eDIAG_TOUCH_READ);
+                    break;
             }
         }
 
@@ -554,6 +563,11 @@ namespace CURDiags
         private void buttonTouchRead_Click(object sender, EventArgs e)
         {
             Commands.SendCommand(eDiagnosticCommands.eDIAG_TOUCH_READ);
+        }
+
+        private void buttonFlashTest_Click(object sender, EventArgs e)
+        {
+            Commands.SendCommand(eDiagnosticCommands.eDIAG_FLASH_TEST);
         }
     }  // end class
 }  // end namespace

@@ -54,6 +54,7 @@ namespace CURDiags
             eDIAG_FLASH_BURN,
             eDIAG_FLASH_RESET,
             eDIAG_FLASH_CLEAR_PROG,
+            eDIAG_FLASH_TEST,
             eDIAG_AD7124_GET_STATUS,
             eDIAG_AD7124_REG_WRITE,
             eDIAG_AD7124_REG_READ,

@@ -1,30 +1,30 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\",
+  "WorkspaceRootPath": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\branch\\targetdiagnostics\\guiform_processmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:guiform_processmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\branch\\targetdiagnostics\\guiform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\guiform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:guiform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\branch\\targetdiagnostics\\commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\branch\\targetdiagnostics\\guiform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\trunk\\targetdiagnostics\\guiform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:guiform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\branch\\targetdiagnostics\\version.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:version.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\trunk\\targetdiagnostics\\enums.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:enums.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\branch\\targetdiagnostics\\enums.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:enums.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\trunk\\targetdiagnostics\\commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:commands.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\trunk\\targetdiagnostics\\guiform_processmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:guiform_processmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|c:\\engineer-apps\\cur svn\\trunk\\targetdiagnostics\\version.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1B7613AD-0FCE-466E-9484-BA94AA8372CD}|CURDiags.csproj|solutionrelative:version.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,80 +42,79 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Enums.cs",
-              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\Enums.cs",
-              "RelativeDocumentMoniker": "Enums.cs",
-              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\Enums.cs",
-              "RelativeToolTip": "Enums.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAwwD8AAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-11T23:22:53.797Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "GUIForm_ProcessMessage.cs",
-              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\GUIForm_ProcessMessage.cs",
+              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\GUIForm_ProcessMessage.cs",
               "RelativeDocumentMoniker": "GUIForm_ProcessMessage.cs",
-              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\GUIForm_ProcessMessage.cs",
+              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\GUIForm_ProcessMessage.cs",
               "RelativeToolTip": "GUIForm_ProcessMessage.cs",
-              "ViewState": "AgIAANYAAAAAAAAAAAAIwPIAAABFAAAAAAAAAA==",
+              "ViewState": "AgIAAIwAAAAAAAAAAAAkwPIAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-11T20:33:48.325Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Commands.cs",
-              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\Commands.cs",
+              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\Commands.cs",
               "RelativeDocumentMoniker": "Commands.cs",
-              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\Commands.cs",
+              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\Commands.cs",
               "RelativeToolTip": "Commands.cs",
-              "ViewState": "AgIAALQAAAAAAAAAAADwv8MAAAAkAAAAAAAAAA==",
+              "ViewState": "AgIAAGMAAAAAAAAAAAAmwMMAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-11T14:50:54.805Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Version.cs",
-              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\Version.cs",
-              "RelativeDocumentMoniker": "Version.cs",
-              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\Version.cs",
-              "RelativeToolTip": "Version.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAsAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "GUIForm.cs",
+              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\GUIForm.cs",
+              "RelativeDocumentMoniker": "GUIForm.cs",
+              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\GUIForm.cs",
+              "RelativeToolTip": "GUIForm.cs",
+              "ViewState": "AgIAABgCAAAAAAAAAAAAADkCAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-28T15:43:18.607Z",
+              "WhenOpened": "2026-05-19T17:31:12.386Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
+              "Title": "Enums.cs",
+              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\Enums.cs",
+              "RelativeDocumentMoniker": "Enums.cs",
+              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\Enums.cs",
+              "RelativeToolTip": "Enums.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAlwDgAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-11T23:22:53.797Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Version.cs",
+              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\Version.cs",
+              "RelativeDocumentMoniker": "Version.cs",
+              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\Version.cs",
+              "RelativeToolTip": "Version.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-28T15:43:18.607Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "GUIForm.cs [Design]",
-              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\GUIForm.cs",
+              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\GUIForm.cs",
               "RelativeDocumentMoniker": "GUIForm.cs",
-              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\GUIForm.cs [Design]",
+              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\trunk\\TargetDiagnostics\\GUIForm.cs [Design]",
               "RelativeToolTip": "GUIForm.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-19T19:52:06.168Z",
               "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "GUIForm.cs",
-              "DocumentMoniker": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\GUIForm.cs",
-              "RelativeDocumentMoniker": "GUIForm.cs",
-              "ToolTip": "C:\\Engineer-Apps\\CUR Svn\\branch\\TargetDiagnostics\\GUIForm.cs",
-              "RelativeToolTip": "GUIForm.cs",
-              "ViewState": "AgIAAB0CAAAAAAAAAAAQwCsCAABAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-19T17:31:12.386Z",
-              "EditorCaption": ""
             }
           ]
         }
