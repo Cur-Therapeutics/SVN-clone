@@ -24,6 +24,7 @@
 #include "string.h"
 #include "faulthandler.h"
 #include "health.h"
+#include "datalog.h"
 
 /**
  * AD7124 Device Instance
@@ -165,6 +166,9 @@ uint32_t AD7124_InitInternal(sAd7124 * ad7124)
 	filter = AD7124_FILTER_SINC4_FAST + (1);
 	AD7124_Write(ad7124, AD7124_FILTER_00, filter);
 
+	// Start conversions, continuous mode
+	AD7124_TriggerAcq(ad7124);
+
 	return HAL_OK;
 }
 
@@ -181,18 +185,16 @@ void AD7124_Drive()
 
 			if (mTimer < AD7124_SAMPLE_PERIOD)
 				return;
-
 			mAD7124State = eAD7124_States_ACQUIRE;
 			mTimer = 0;
 
-			AD7124_TriggerAcq(&ad7124);
 			break;
 
 		case eAD7124_States_ACQUIRE:
 			AD7124_DriveBridge(&ad7124);
 
-			// If all acquisition is complete, return to wait state
-			if (AD7124_IsAcqDone(&ad7124))
+			// If all acquisition is complete, return to wait state. Force if overtime to rekick off acquisition
+			if (AD7124_IsAcqDone(&ad7124) || (mTimer > AD7124_SAMPLE_PERIOD))
 			{
 				mAD7124State = eAD7124_States_WAIT;
 			}
@@ -205,28 +207,27 @@ void AD7124_Drive()
 }
 
 /**
- * @brief Sample and process data from our bag weight sensors
+ * @brief Sample and process data
  * @param ad7124 The AD7124 to drive
  * @return None
  */
 void AD7124_DriveBridge(sAd7124 * ad7124)
 {
-	// Check status register
-	uint32_t control = AD7124_Read(ad7124, AD7124_ADC_CTRL);
-	uint32_t status;
-	if ((control & AD7124_CTRL_MODE_STANDBY) == AD7124_CTRL_MODE_STANDBY)
-	{
-		// Grab Data, determine channel and convert
-		uint32_t counts = AD7124_Read(ad7124, AD7124_DATA);
-		status = AD7124_Read(ad7124, AD7124_STATUS);
-		uint16_t channel = status & AD7124_STATUS_CH_ACTIVE_MASK;
+	// Grab Data, determine channel and convert
+	uint32_t counts = AD7124_Read(ad7124, AD7124_DATA);
+	uint32_t status = AD7124_Read(ad7124, AD7124_STATUS);
+	uint16_t channel = status & AD7124_STATUS_CH_ACTIVE_MASK;
 
-		ad7124->lastCounts = counts;
-		ad7124->lastVoltage = (counts - AD7124_OFFSET) * AD7124_SCALE;
-		ad7124->lastEng = (ad7124->lastVoltage * 1000.0f * AD7124_SCALE_MMHG) + AD7124_OFFSET_MMHG;
+	ad7124->lastCounts = counts;
+	int32_t temp = counts;	// Allow negative values
+	ad7124->lastVoltage = (temp - AD7124_OFFSET) * AD7124_SCALE;
+	ad7124->lastEng = (ad7124->lastVoltage * 1000.0f * AD7124_SCALE_MMHG) + AD7124_OFFSET_MMHG;
 
-		ad7124->lastChannel = channel;
-	}
+	ad7124->lastChannel = channel;
+
+	// Save data to log
+	sDataSample sample = { HAL_GetTick(), ad7124->lastCounts, ad7124->lastEng};
+	DataLogSaveSample(sample);
 }
 
 /**
@@ -338,7 +339,7 @@ float AD7124_GetLastVolts(sAd7124 * ad7124)
 /**
  * @brief Get the last engineering units read from the ADC
  * @param ad7124 The ADC to read
- * @return The last engineering unit output data
+ * @return The last engineering unit output data in mmHg
  */
 float AD7124_GetLastEng(sAd7124 * ad7124)
 {
@@ -395,7 +396,7 @@ uint8_t AD7124_IsAcqDone(sAd7124 * ad7124)
 uint8_t AD7124_TriggerAcq(sAd7124 * ad7124)
 {
 	ad7124->lastChannel = 0;
-	uint16_t config = AD7124_CTRL_MODE_SNGL | AD7124_CTRL_PWR_MODE_FULL;
+	uint16_t config = AD7124_CTRL_MODE_CONT | AD7124_CTRL_PWR_MODE_FULL;
 	AD7124_Write(ad7124, AD7124_ADC_CTRL, config);
 	return HAL_OK;
 }

@@ -22,14 +22,12 @@
 #include "displaystructs.h"
 #include "colors.h"
 
-#define COUNTOF_gDisplays 16
+#define COUNTOF_gDisplays 11
 
 /**
  * Externs
  */
 extern uint32_t gDisplays[COUNTOF_gDisplays];
-extern int32_t gDisplaysCRC[COUNTOF_gDisplays];          // CRC for gdisplay[]
-extern int32_t gDisplaysSize[COUNTOF_gDisplays];         // Size for gdisplay[]
 
 /**
  * Frame buffer addresses
@@ -52,12 +50,7 @@ extern int32_t gDisplaysSize[COUNTOF_gDisplays];         // Size for gdisplay[]
 #define WINDOW_8 			((uint32_t)WINDOW_7 + FRAMEBUFFER_SIZE)
 #define WINDOW_9 			((uint32_t)WINDOW_8 + FRAMEBUFFER_SIZE)
 #define WINDOW_10 			((uint32_t)WINDOW_9 + FRAMEBUFFER_SIZE)
-#define WINDOW_11 			((uint32_t)WINDOW_10 + FRAMEBUFFER_SIZE)
-#define WINDOW_12 			((uint32_t)WINDOW_11 + FRAMEBUFFER_SIZE)
-#define WINDOW_13 			((uint32_t)WINDOW_12 + FRAMEBUFFER_SIZE)
-#define WINDOW_14 			((uint32_t)WINDOW_13 + FRAMEBUFFER_SIZE)
-#define WINDOW_15 			((uint32_t)WINDOW_14 + FRAMEBUFFER_SIZE)
-#define WINDOW_INDEX_MAX	15
+#define WINDOW_INDEX_MAX	11
 
 /**
  * Timeout for polled operations
@@ -91,7 +84,6 @@ void LCD_Blend(sLocation src, sLocation background, sLocation dst, sShape shape)
 void LCD_BlendFont(sLocation src, sLocation background, sLocation dst, sShape shape, sColor color);
 
 //void LCD_QueueTransfer(sDisplayObject *obj);
-void HAL_DMA2D_XferCpltCallback(DMA2D_HandleTypeDef *hdma2d);
 void LCD_FillWindow(uint8_t window, sColor color);
 void LCD_ClearWindow(uint8_t window);
 void LCD_WriteTestImage(uint8_t window);
@@ -99,10 +91,7 @@ void LCD_Draw(uint16_t x, uint16_t y, sColor color);
 uint16_t LCD_GetBacklight();
 void LCD_SetBacklight(uint16_t value);
 void LCD_FillLocation(sLocation loc, sShape sh, sColor color, uint8_t alpha);
-void LCD_FillLocation_Queue(sLocation loc, sShape sh, uint16_t color, uint8_t alpha);
 void LCD_DrawBox(sLocation loc, sShape sh, uint16_t thickness, sColor color, uint8_t alpha);
-
-void LCD_FillGrey(uint8_t window);
 void LCD_FillGradient(uint8_t window, uint32_t * gradData);
 
 extern uint32_t gDisplays[];

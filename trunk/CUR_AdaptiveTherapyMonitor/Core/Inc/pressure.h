@@ -2,7 +2,7 @@
 *
 *   pressure.h
 *
-*   Description:    Pressure sensor
+*   Description:    Pressure sensor accessor
 *
 *   Copyright PPMD, Inc. 2026 -- All rights reserved.
 *
@@ -17,6 +17,23 @@
 #ifndef INC_PRESSURE_H_
 #define INC_PRESSURE_H_
 
+/**
+ * Conversion values
+ */
+#define CONVERT_MMHG_TO_PSI (0.0193368f)
+#define CONVERT_MMHG_TO_KPA (0.133322f)
+
+/**
+ * Pressure units
+ */
+typedef enum
+{
+	ePressureUnits_mmHg,
+	ePressureUnits_kPa,
+	ePressureUnits_psi
+} ePressureUnits;
+
 uint32_t GetBaselinePressure(void);
+uint32_t GetPressure(ePressureUnits units);
 
 #endif /* INC_PRESSURE_H_ */

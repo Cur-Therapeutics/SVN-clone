@@ -1,8 +1,8 @@
 /********************************************************************
 *
-*   colors.h
+*   post.c
 *
-*   Description:    Collection of colors common across the system
+*   Description:    Power on self test
 *
 *   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
@@ -11,17 +11,41 @@
 *   Revision History:
 *
 *   Rev.    | Date      | Name              | Description
-*   1       | 08/19/19  | Brian Compter     | Created.
+*   1       | 07/14/26  | Brian Compter     | Created
 *
 ********************************************************************/
 
-#include "colors.h"
+#include "main.h"
+#include "post.h"
 
 /**
- * Common Colors
+ *
  */
-sColor colorWhite 	= {0xFF, 0xFF, 0xFF};
-sColor colorBlack 	= {0x00, 0x00, 0x00};
-sColor colorCurRed	= {0xFF, 0x6B, 0x6B};
-sColor colorCurBlue	= {0x15, 0x18, 0x3E};
-sColor colorRed		= {0xFF, 0x00, 0x00};
+void PostInit()
+{
+
+}
+
+/**
+ *
+ */
+void PostDrive()
+{
+
+}
+
+/**
+ *
+ */
+uint8_t PostIsComplete()
+{
+
+}
+
+/**
+ *
+ */
+uint32_t PostGetResult()
+{
+
+}

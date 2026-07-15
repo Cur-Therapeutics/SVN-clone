@@ -28,6 +28,7 @@ typedef enum
 	eSTATE_READY_TO_CONNECT,
 	eSTATE_SELECT_UNITS,
 	eSTATE_MEASURING,
+	eSTATE_COMPLETE_SELECTED,
 	eSTATE_COMPLETE,
 	eSTATE_TEST,
 	eSTATE_ERROR
@@ -39,5 +40,6 @@ typedef enum
 eSystemStates GetCurrentState(void);
 void StateInit(void);
 void StateDrive(void);
+void ChangeState(eSystemStates newState);
 
 #endif /* INC_STATEMACHINE_H_ */

@@ -23,11 +23,6 @@
 #include "main.h"
 
 /**
- * Reference to our I2C comms handle
- */
-extern I2C_HandleTypeDef hi2c3;
-
-/**
  * I2C State
  */
 typedef enum
@@ -59,14 +54,36 @@ typedef enum
 }eI2C_OPERATION_TYPE;
 
 /**
+ * The structure of an I2C port
+ */
+typedef struct
+{
+	I2C_HandleTypeDef * i2c;
+	eI2C_STATE 			state;
+	eI2C_OPERATION_TYPE opType;
+	uint16_t 			savedAddress;
+	uint8_t * 			savedRxBuffer;
+	uint16_t 			savedRxCount;
+} sI2CPort;
+
+/**
  * Functions
  */
 void I2C_Init();
-eI2C_STATE I2C_GetState();
-eI2C_STATE I2C_TryLock();
-void I2C_Unlock();
-eI2C_RESULT I2C_Read(uint16_t address, uint8_t * buffer, uint16_t count);
-eI2C_RESULT I2C_Write(uint16_t address, uint8_t * buffer, uint16_t count);
-eI2C_RESULT I2C_ReadAfterWrite(uint16_t address, uint8_t * txbuffer, uint16_t txcount, uint8_t * rxbuffer, uint16_t rxcount);
+eI2C_STATE I2C_GetState(sI2CPort * port);
+eI2C_RESULT I2C_Read(sI2CPort * port, uint16_t address, uint8_t * buffer, uint16_t count);
+eI2C_RESULT I2C_Write(sI2CPort * port, uint16_t address, uint8_t * buffer, uint16_t count);
+eI2C_RESULT I2C_ReadAfterWrite(sI2CPort * port, uint16_t address, uint8_t * txbuffer, uint16_t txcount, uint8_t * rxbuffer, uint16_t rxcount);
+
+eI2C_RESULT I2C_Read_IT(sI2CPort * port, uint16_t address, uint8_t * buffer, uint16_t count);
+eI2C_RESULT I2C_Write_IT(sI2CPort * port, uint16_t address, uint8_t * buffer, uint16_t count);
+
+/**
+ * Externs
+ */
+extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef hi2c3;
+extern sI2CPort sI2CBarometric;
+extern sI2CPort sI2CTouch;
 
 #endif

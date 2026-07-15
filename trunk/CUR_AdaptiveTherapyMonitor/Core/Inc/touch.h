@@ -95,11 +95,14 @@ uint16_t TOUCH_LastX();
 uint16_t TOUCH_LastY();
 uint16_t TOUCH_LastXRaw();
 uint16_t TOUCH_LastYRaw();
-uint8_t TOUCH_TargetActive(sTouchTarget target, uint16_t x, uint16_t y);
+uint8_t TOUCH_TargetActive(sTouchTarget target);
 
 /**
  * Externs
  */
-/* TBD */
+extern sTouchTarget sTargetBottomButton;
+extern sTouchTarget sTargetFinishedButton;
+extern sTouchTarget sTargetFinishedGoButton;
+extern sTouchTarget sTargetNoButton;
 
 #endif

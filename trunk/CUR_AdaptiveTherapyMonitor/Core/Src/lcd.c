@@ -28,9 +28,7 @@ extern sColor sColorGrey;
  */
 uint32_t gDisplays[COUNTOF_gDisplays] =
 {
-		WINDOW_0, WINDOW_1, WINDOW_2, WINDOW_3, WINDOW_4, WINDOW_5,
-		WINDOW_6, WINDOW_7, WINDOW_8, WINDOW_9, WINDOW_10, WINDOW_11,
-		WINDOW_12, WINDOW_13, WINDOW_14, WINDOW_15
+		WINDOW_0, WINDOW_1, WINDOW_2, WINDOW_3, WINDOW_4, WINDOW_5, WINDOW_6, WINDOW_7, WINDOW_8, WINDOW_9, WINDOW_10
 };
 
 /**
@@ -294,28 +292,6 @@ void LCD_FillGradient(uint8_t window, uint32_t * gradData)
 }
 
 /**
- * @brief  Fill a window with a solid color
- * @param color The color to fill with
- * @retval None
- */
-void LCD_FillGrey(uint8_t window)
-{
-	uint32_t * ptrFrameBuffer = (uint32_t*)(gDisplays[window]);
-	uint32_t temp;
-
-	uint32_t val = 255;
-
-	for (int i = 0; i < FRAMEBUFFER_SIZE / BYTES_PER_PIXEL; i++)
-	{
-		if (i % LINE_SIZE == 0 && val > 0 && i > LINE_SIZE * 110)
-			val-=2;
-
-		temp = (val) + (val << 8) + (val << 16) + (0xFF000000);
-		*ptrFrameBuffer++ = temp;
-	}
-}
-
-/**
  * @brief  Fill a location with a solid color
  * @param loc 	The location to fill
  * @param sh 	The shape to fill
@@ -411,21 +387,22 @@ void LCD_Draw(uint16_t x, uint16_t y, sColor color)
 	uint16_t xPrime;
 	uint16_t yPrime;
 
-	xPrime = DISPLAY_WIDTH - y;
-	yPrime = x;
+	xPrime = x;
+	yPrime = y;
 
 	if (yPrime > DISPLAY_HEIGHT)
-		yPrime = 0;
+		yPrime = DISPLAY_HEIGHT;
 	if (xPrime > DISPLAY_WIDTH)
-		xPrime = 0;
+		xPrime = DISPLAY_WIDTH;
 
 	uint8_t * ptrFrameBuffer = (uint8_t*)(gDisplays[gCurrentDisplay]);
 	ptrFrameBuffer += xPrime * BYTES_PER_PIXEL + (yPrime * LINE_SIZE);
 
-	*ptrFrameBuffer++ = color.red;
-	*ptrFrameBuffer++ = color.green;
 	*ptrFrameBuffer++ = color.blue;
+	*ptrFrameBuffer++ = color.green;
+	*ptrFrameBuffer++ = color.red;
 	*ptrFrameBuffer++ = 255;
+
 }
 
 /**

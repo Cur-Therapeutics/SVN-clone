@@ -35,7 +35,8 @@ typedef struct
  */
 extern sColor colorWhite;
 extern sColor colorBlack;
+extern sColor colorCurRed;
+extern sColor colorCurBlue;
 extern sColor colorRed;
-extern sColor colorBlue;
 
 #endif /* INC_COLORS_H_ */

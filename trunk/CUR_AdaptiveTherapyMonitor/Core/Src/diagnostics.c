@@ -33,6 +33,7 @@
 #include "statemachine.h"
 #include "accel.h"
 #include "adc.h"
+#include "barometric.h"
 
 /**
  * Reference to the uart instance
@@ -221,6 +222,10 @@ void DIAG_Process(uint8_t * data)
 		gDiagReply.armStatus.errors			= GetErrorState();
 
 		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_SET_STATE:
+		ChangeState(cmd->changeState.newState);
 		break;
 
 	case eDIAG_LCD_DATA:
@@ -441,6 +446,14 @@ void DIAG_Process(uint8_t * data)
 		DIAG_Send(cmd, &gDiagReply);
 		break;
 
+	case eDIAG_READ_BAROMETRIC:
+		gDiagReply.barometricData.id = cmd->barometricData.id;
+		gDiagReply.barometricData.lastPressure = BarometricGetLast(&mBarometricSensor);
+		gDiagReply.barometricData.lastTemperature = BarometricGetLastTemp(&mBarometricSensor);
+		BarometricCopyProm(&gDiagReply.barometricData.prom, &mBarometricSensor.prom);
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
 	default:
 		gDiagInvalidCmdCount++;
 		break;
@@ -639,6 +652,10 @@ void DIAG_Send(sDIAG_Command * rx, sDIAG_Command * tx)
 		case eDIAG_LCD_DATA_ACK:
 		case eDIAG_FLASH_ACK:
 			tx->head.size += sizeof(sDIAG_LCD_Data_Ack);
+			break;
+
+		case eDIAG_READ_BAROMETRIC:
+			tx->head.size += sizeof(sDIAG_BarometricData);
 			break;
 
 		default:

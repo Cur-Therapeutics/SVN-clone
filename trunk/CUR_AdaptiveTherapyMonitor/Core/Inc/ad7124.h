@@ -18,6 +18,7 @@
 #define INC_AD7124_H_
 
 #include "spi.h"
+#include "diagnostics.h"
 
 /**
  * Acquisition states
@@ -330,11 +331,6 @@ typedef enum
 #define AD7124_FILTER_SINC4_FAST			(0x800000)
 #define AD7124_FILTER_SINC3_FAST			(0xA00000)
 #define AD7124_FILTER_POST					(0xE00000)
-
-/**
- * Conversion values
- */
-/* tbd */
 
 /**
  * Functions

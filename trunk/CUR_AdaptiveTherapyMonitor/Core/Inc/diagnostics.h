@@ -21,6 +21,7 @@
 #include "touch.h"
 #include "rtc.h"
 #include "ospiflash.h"
+#include "barometric.h"
 
 /**
  * From main, used in Arm Status message
@@ -97,6 +98,8 @@ typedef enum
 		eDIAG_AD7124_READ_DATA,
 		eDIAG_ACCEL_READ,
 		eDIAG_ADC_READ,
+		eDIAG_SET_STATE,
+		eDIAG_READ_BAROMETRIC,
 	eDIAG_Count
 } eDIAG_Commands;
 
@@ -112,6 +115,14 @@ typedef struct __attribute__((packed, aligned(1)))
 	uint16_t size;
 	uint8_t checksum;
 } sDIAG_Header;
+
+/**
+ * Change state
+ */
+typedef struct __attribute__((packed, aligned(1)))
+{
+	uint32_t newState;
+}sDIAG_ChangeState;
 
 /**
  * RTC status and write
@@ -382,6 +393,17 @@ typedef struct __attribute__((packed, aligned(1)))
 }sDIAG_FlashBurnData;
 
 /**
+ * Pressure detailed data
+ */
+typedef struct __attribute__((packed, aligned(1)))
+{
+	uint8_t id;
+	float lastPressure;
+	float lastTemperature;
+	sPressureProm prom;
+}sDIAG_BarometricData;
+
+/**
  * Command Message
  */
 typedef struct
@@ -412,6 +434,8 @@ typedef struct
 		sAccelRead				accelRead;
 		sAdcRead				adcRead;
 		sDIAG_FlashBurnData		burnFlashData;
+		sDIAG_ChangeState		changeState;
+		sDIAG_BarometricData	barometricData;
 	};
 } sDIAG_Command;
 

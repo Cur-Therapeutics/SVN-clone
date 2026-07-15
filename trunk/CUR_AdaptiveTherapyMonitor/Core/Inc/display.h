@@ -28,6 +28,11 @@
 #define BUFFER_OVERLAY	2
 
 /**
+ * Time between updates in ms
+ */
+#define DISPLAY_UPDATE_THRESHOLD	500
+
+/**
  * Display windows
  */
 typedef enum
@@ -43,6 +48,7 @@ typedef enum
 	eDISPLAY_WindowAssets06,	// 8
 	eDISPLAY_WindowAssets07,	// 9
 	eDISPLAY_WindowAssets08,	// 10
+	eDISPLAY_Count
 } eDisplayWindow;
 
 /**

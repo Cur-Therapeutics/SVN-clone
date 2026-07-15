@@ -4,7 +4,7 @@
 *
 *   Description:    Controls a TS2007 Touch Screen Controller
 *
-*   Copyright PPMD, Inc. 2026 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -61,7 +61,10 @@ uint8_t mDebugCooldown = 0;
 /**
  * Touch targets
  */
-/* TBD */
+sTouchTarget sTargetBottomButton 		= {0, 184, 320, 56};
+sTouchTarget sTargetFinishedButton 		= {0, 184, 265, 56};
+sTouchTarget sTargetFinishedGoButton 	= {265, 184, 56, 56};
+sTouchTarget sTargetNoButton 			= {0, 0, 320, 180};
 
 /**
   * @brief  Initialize the touch chip for operation
@@ -77,6 +80,12 @@ void TOUCH_Init()
 	// Initialize member variables
 	mLastXTouch = 0;
 	mLastYTouch = 0;
+
+	// Init calibration values
+	mTouchCal.xMax = 3800;
+	mTouchCal.xMin = 275;
+	mTouchCal.yMax = 3800;
+	mTouchCal.yMin = 275;
 }
 
 /**
@@ -144,19 +153,17 @@ void TOUCH_Drive()
 /**
   * @brief  Determines if a touch event matches a touch target
   * @param	target The touch target to check
-  * @param	The touch x coordinate
-  * @param	The touch y coordinate
   * @retval True if the supplied touch coordinates match the touch target
   */
-uint8_t TOUCH_TargetActive(sTouchTarget target, uint16_t x, uint16_t y)
+uint8_t TOUCH_TargetActive(sTouchTarget target)
 {
-	if (x < target.x + target.width)
+	if (mLastXTouch < target.x + target.width)
 	{
-		if (x > target.x)
+		if (mLastXTouch > target.x)
 		{
-			if (y < target.y + target.height)
+			if (mLastYTouch < target.y + target.height)
 			{
-				if (y > target.y)
+				if (mLastYTouch > target.y)
 				{
 					return 1;
 				}
@@ -223,17 +230,9 @@ uint16_t TOUCH_LastYRaw()
   */
 void TOUCH_Idle()
 {
-	eI2C_STATE i2cState = I2C_TryLock();
-	if (i2cState != eI2C_IDLE)
-	{
-		return;
-	}
-
 	// Send idle command
 	uint8_t cmd = TOUCH_SETUP_IDLE;
-	I2C_Write(TOUCH_SLAVE_ADDRESS, &cmd, 1);
-
-	I2C_Unlock();
+	I2C_Write(&sI2CTouch, TOUCH_SLAVE_ADDRESS, &cmd, 1);
 }
 
 /**
@@ -243,14 +242,6 @@ void TOUCH_Idle()
   */
 uint16_t TOUCH_Read(uint8_t cmd)
 {
-	eI2C_STATE i2cState = I2C_TryLock();
-	if (i2cState != eI2C_IDLE)
-	{
-		FaultHandler(ERR_I2C_TOUCH);
-		HealthSubsystemBad(eSystemTouch);
-		return 0;
-	}
-
 	// Start conversion
 	uint8_t retval = HAL_OK;
 	retval |= HAL_I2C_Master_Transmit(&hi2c3, TOUCH_SLAVE_ADDRESS, &cmd, 1, TOUCH_TIMEOUT);
@@ -258,7 +249,6 @@ uint16_t TOUCH_Read(uint8_t cmd)
 	{
 		FaultHandler(ERR_TOUCH_COMMS);
 		HealthSubsystemBad(eSystemTouch);
-		I2C_Unlock();
 		return 0;
 	}
 
@@ -272,14 +262,12 @@ uint16_t TOUCH_Read(uint8_t cmd)
 	{
 		FaultHandler(ERR_TOUCH_COMMS);
 		HealthSubsystemBad(eSystemTouch);
-		I2C_Unlock();
 		return 0;
 	}
 
 	result = readData[0] << 4;
 	result |= readData[1] >> 4;
 
-	I2C_Unlock();
 	return result;
 }
 
@@ -291,6 +279,14 @@ uint16_t TOUCH_X()
 {
 	mLastXTouchRaw = TOUCH_Read(TOUCH_MEASURE_X);
 	float xPosition = mLastXTouchRaw;
+
+	// Translate to the screen size
+	float scale = ((float)DISPLAY_WIDTH) / ((float)(mTouchCal.xMax-mTouchCal.xMin));
+	xPosition = (xPosition - mTouchCal.xMin) * scale;
+	xPosition = DISPLAY_WIDTH - xPosition;	// Flip coordinates
+	if (xPosition > DISPLAY_WIDTH)
+		xPosition = 0;
+
 	return (uint16_t)xPosition;
 }
 
@@ -302,6 +298,13 @@ uint16_t TOUCH_Y()
 {
 	mLastYTouchRaw = TOUCH_Read(TOUCH_MEASURE_Y);
 	float yPosition = mLastYTouchRaw;
+
+	// Translate to the screen size
+	float scale = ((float)DISPLAY_HEIGHT) / ((float)(mTouchCal.yMax-mTouchCal.yMin));
+	yPosition = (yPosition - mTouchCal.yMin) * scale;
+	if (yPosition > DISPLAY_HEIGHT)
+		yPosition = 0;
+
 	return (uint16_t)yPosition;
 }
 
@@ -341,8 +344,4 @@ sTouchCalibration TOUCH_GetCal()
 void TOUCH_SetCal(sTouchCalibration cal)
 {
 	mTouchCal = cal;
-
-	// Store calibration
-	//FLA_EraseSegment(TOUCH_CAL_FLASH_ADDR);
-	//FLA_Write(TOUCH_CAL_FLASH_ADDR, (uint8_t*)&mTouchCal, sizeof(mTouchCal));
 }

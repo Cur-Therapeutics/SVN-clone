@@ -33,6 +33,7 @@
 #include "accel.h"
 #include "touch.h"
 #include "i2c.h"
+#include "barometric.h"
 
 /**
  * System tick
@@ -76,6 +77,7 @@ void main_cur()
 	AccelInit();
 	TOUCH_Init();
 	StateInit();
+	BarometricInit();
 	DisplayInit();
 
 	// Begin loop on start of system tick
@@ -87,6 +89,7 @@ void main_cur()
 		StackCheck();
 		gSystemTick = HAL_GetTick();
 
+		// Update subsystems
 		DIAG_Drive();
 		BacklightDrive();
 		AD7124_Drive();
@@ -95,12 +98,14 @@ void main_cur()
 		LCD_Drive();
 		AccelDrive();
 		TOUCH_Drive();
+		BarometricDrive();
 
-		//StateDrive();
+		// Update state and display
+		StateDrive();
 		DisplayDrive(GetCurrentState());
 
 		// Wait for next tick
-		WaitForNextTick(HAL_GetTick());
+		WaitForNextTick(gSystemTick);
 
 	}  // end while
 
