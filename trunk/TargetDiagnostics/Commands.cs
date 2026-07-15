@@ -217,6 +217,25 @@ namespace CURDiags
         }
 
         /// <summary>
+        /// Barometric Read Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sBarometricData
+        {
+            public sCommandHeader header;
+            public byte id;
+            public float lastPressure;
+            public float lastTemperature;
+            public UInt16 prom;
+            public UInt16 sensitivity;
+            public UInt16 offset;
+            public UInt16 tcoeffSens;
+            public UInt16 tcoeffOffset;
+            public UInt16 tref;
+            public UInt16 tempSens;
+        }
+
+        /// <summary>
         /// LCD and Flash ACK / Nack
         /// </summary>
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

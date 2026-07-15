@@ -34,6 +34,10 @@ namespace CURDiags
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GUIForm));
             tabControl1 = new TabControl();
             tabPageStatus = new TabPage();
+            groupBox16 = new GroupBox();
+            comboBoxStateSelect = new ComboBox();
+            buttonSetState = new Button();
+            labelSystemState = new Label();
             groupBox2 = new GroupBox();
             dataGridViewStatusMsg = new DataGridView();
             Parameter = new DataGridViewTextBoxColumn();
@@ -74,6 +78,8 @@ namespace CURDiags
             buttonClearTouchEvents = new Button();
             listBoxTouchEvents = new ListBox();
             groupBox9 = new GroupBox();
+            buttonTouchIdle = new Button();
+            buttonTouchDebug = new Button();
             textBoxTouchVendorId = new TextBox();
             label25 = new Label();
             textBoxTouchFirmwareId = new TextBox();
@@ -201,6 +207,10 @@ namespace CURDiags
             label43 = new Label();
             textBoxBatCountsHex = new TextBox();
             label44 = new Label();
+            tabPageBarometric = new TabPage();
+            dataGridViewBarometric = new DataGridView();
+            dataGridViewTextBoxColumn3 = new DataGridViewTextBoxColumn();
+            dataGridViewTextBoxColumn4 = new DataGridViewTextBoxColumn();
             labelCOMStatus = new Label();
             buttonConnect = new Button();
             comboBoxCOMPort = new ComboBox();
@@ -224,6 +234,7 @@ namespace CURDiags
             labelSys = new Label();
             tabControl1.SuspendLayout();
             tabPageStatus.SuspendLayout();
+            groupBox16.SuspendLayout();
             groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewStatusMsg).BeginInit();
             tabPageDebug.SuspendLayout();
@@ -250,6 +261,8 @@ namespace CURDiags
             ((System.ComponentModel.ISupportInitialize)dataGridViewFlashRegisters).BeginInit();
             tabPageAdc.SuspendLayout();
             groupBox14.SuspendLayout();
+            tabPageBarometric.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridViewBarometric).BeginInit();
             statusStrip1.SuspendLayout();
             groupBox1.SuspendLayout();
             SuspendLayout();
@@ -266,6 +279,7 @@ namespace CURDiags
             tabControl1.Controls.Add(tabPageAd7124);
             tabControl1.Controls.Add(tabPageFlash);
             tabControl1.Controls.Add(tabPageAdc);
+            tabControl1.Controls.Add(tabPageBarometric);
             tabControl1.Location = new Point(12, 95);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
@@ -274,6 +288,7 @@ namespace CURDiags
             // 
             // tabPageStatus
             // 
+            tabPageStatus.Controls.Add(groupBox16);
             tabPageStatus.Controls.Add(groupBox2);
             tabPageStatus.Controls.Add(label1);
             tabPageStatus.Controls.Add(listBox1);
@@ -284,6 +299,49 @@ namespace CURDiags
             tabPageStatus.TabIndex = 0;
             tabPageStatus.Text = "Status";
             tabPageStatus.UseVisualStyleBackColor = true;
+            // 
+            // groupBox16
+            // 
+            groupBox16.Controls.Add(comboBoxStateSelect);
+            groupBox16.Controls.Add(buttonSetState);
+            groupBox16.Controls.Add(labelSystemState);
+            groupBox16.Location = new Point(446, 109);
+            groupBox16.Name = "groupBox16";
+            groupBox16.Size = new Size(571, 200);
+            groupBox16.TabIndex = 4;
+            groupBox16.TabStop = false;
+            groupBox16.Text = "System State";
+            // 
+            // comboBoxStateSelect
+            // 
+            comboBoxStateSelect.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            comboBoxStateSelect.FormattingEnabled = true;
+            comboBoxStateSelect.Items.AddRange(new object[] { "eSTATE_POST", "eSTATE_SPLASH", "eSTATE_READY_TO_CONNECT", "eSTATE_SELECT_UNITS", "eSTATE_MEASURING", "eSTATE_COMPLETE", "eSTATE_TEST", "eSTATE_ERROR" });
+            comboBoxStateSelect.Location = new Point(6, 74);
+            comboBoxStateSelect.Name = "comboBoxStateSelect";
+            comboBoxStateSelect.Size = new Size(206, 29);
+            comboBoxStateSelect.TabIndex = 9;
+            // 
+            // buttonSetState
+            // 
+            buttonSetState.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonSetState.Location = new Point(6, 109);
+            buttonSetState.Name = "buttonSetState";
+            buttonSetState.Size = new Size(206, 52);
+            buttonSetState.TabIndex = 8;
+            buttonSetState.Text = "Set State";
+            buttonSetState.UseVisualStyleBackColor = true;
+            buttonSetState.Click += buttonSetState_Click;
+            // 
+            // labelSystemState
+            // 
+            labelSystemState.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            labelSystemState.Location = new Point(6, 19);
+            labelSystemState.Name = "labelSystemState";
+            labelSystemState.Size = new Size(206, 39);
+            labelSystemState.TabIndex = 6;
+            labelSystemState.Text = "UNKNOWN";
+            labelSystemState.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // groupBox2
             // 
@@ -684,6 +742,8 @@ namespace CURDiags
             // 
             // groupBox9
             // 
+            groupBox9.Controls.Add(buttonTouchIdle);
+            groupBox9.Controls.Add(buttonTouchDebug);
             groupBox9.Controls.Add(textBoxTouchVendorId);
             groupBox9.Controls.Add(label25);
             groupBox9.Controls.Add(textBoxTouchFirmwareId);
@@ -697,10 +757,32 @@ namespace CURDiags
             groupBox9.Controls.Add(buttonTouchReadAdv);
             groupBox9.Location = new Point(304, 6);
             groupBox9.Name = "groupBox9";
-            groupBox9.Size = new Size(225, 194);
+            groupBox9.Size = new Size(352, 194);
             groupBox9.TabIndex = 2;
             groupBox9.TabStop = false;
             groupBox9.Text = "Advanced";
+            // 
+            // buttonTouchIdle
+            // 
+            buttonTouchIdle.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonTouchIdle.Location = new Point(218, 69);
+            buttonTouchIdle.Name = "buttonTouchIdle";
+            buttonTouchIdle.Size = new Size(128, 46);
+            buttonTouchIdle.TabIndex = 38;
+            buttonTouchIdle.Text = "Idle Mode";
+            buttonTouchIdle.UseVisualStyleBackColor = true;
+            buttonTouchIdle.Click += buttonTouchIdle_Click;
+            // 
+            // buttonTouchDebug
+            // 
+            buttonTouchDebug.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            buttonTouchDebug.Location = new Point(218, 17);
+            buttonTouchDebug.Name = "buttonTouchDebug";
+            buttonTouchDebug.Size = new Size(128, 46);
+            buttonTouchDebug.TabIndex = 37;
+            buttonTouchDebug.Text = "Test Mode";
+            buttonTouchDebug.UseVisualStyleBackColor = true;
+            buttonTouchDebug.Click += buttonTouchDebug_Click;
             // 
             // textBoxTouchVendorId
             // 
@@ -2061,6 +2143,41 @@ namespace CURDiags
             label44.TabIndex = 5;
             label44.Text = "Counts (hex)";
             // 
+            // tabPageBarometric
+            // 
+            tabPageBarometric.Controls.Add(dataGridViewBarometric);
+            tabPageBarometric.Location = new Point(4, 24);
+            tabPageBarometric.Name = "tabPageBarometric";
+            tabPageBarometric.Padding = new Padding(3);
+            tabPageBarometric.Size = new Size(1023, 522);
+            tabPageBarometric.TabIndex = 9;
+            tabPageBarometric.Text = "Barometric";
+            tabPageBarometric.UseVisualStyleBackColor = true;
+            // 
+            // dataGridViewBarometric
+            // 
+            dataGridViewBarometric.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridViewBarometric.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dataGridViewBarometric.Columns.AddRange(new DataGridViewColumn[] { dataGridViewTextBoxColumn3, dataGridViewTextBoxColumn4 });
+            dataGridViewBarometric.Location = new Point(6, 6);
+            dataGridViewBarometric.Name = "dataGridViewBarometric";
+            dataGridViewBarometric.ReadOnly = true;
+            dataGridViewBarometric.RowHeadersVisible = false;
+            dataGridViewBarometric.Size = new Size(422, 307);
+            dataGridViewBarometric.TabIndex = 1;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            dataGridViewTextBoxColumn3.HeaderText = "Parameter";
+            dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            dataGridViewTextBoxColumn3.ReadOnly = true;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            dataGridViewTextBoxColumn4.HeaderText = "Value";
+            dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            dataGridViewTextBoxColumn4.ReadOnly = true;
+            // 
             // labelCOMStatus
             // 
             labelCOMStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -2323,6 +2440,7 @@ namespace CURDiags
             tabControl1.ResumeLayout(false);
             tabPageStatus.ResumeLayout(false);
             tabPageStatus.PerformLayout();
+            groupBox16.ResumeLayout(false);
             groupBox2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridViewStatusMsg).EndInit();
             tabPageDebug.ResumeLayout(false);
@@ -2360,6 +2478,8 @@ namespace CURDiags
             tabPageAdc.ResumeLayout(false);
             groupBox14.ResumeLayout(false);
             groupBox14.PerformLayout();
+            tabPageBarometric.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridViewBarometric).EndInit();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             groupBox1.ResumeLayout(false);
@@ -2560,5 +2680,15 @@ namespace CURDiags
         private ComboBox comboBoxFlashReadSlot;
         private Button buttonFlashRead;
         private TextBox textBoxFlashReadData;
+        private GroupBox groupBox16;
+        private ComboBox comboBoxStateSelect;
+        private Button buttonSetState;
+        private Label labelSystemState;
+        private Button buttonTouchDebug;
+        private Button buttonTouchIdle;
+        private TabPage tabPageBarometric;
+        private DataGridView dataGridViewBarometric;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
     }
 }

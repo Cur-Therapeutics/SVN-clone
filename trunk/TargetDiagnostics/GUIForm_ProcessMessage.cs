@@ -18,6 +18,7 @@
 
 using static CURDiags.Commands;
 using static CURDiags.Enums;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace CURDiags
 {
@@ -32,6 +33,24 @@ namespace CURDiags
         /// </summary>
         DateTime mLastMessageReceived = DateTime.MinValue;
 
+        /// <summary>
+        /// System state strings
+        /// </summary>
+        string[] mStateText = {
+            "eSTATE_POST",
+            "eSTATE_SPLASH",
+            "eSTATE_READY_TO_CONNECT",
+            "eSTATE_SELECT_UNITS",
+            "eSTATE_MEASURING",
+            "eSTATE_COMPLETE_SELECTED",
+            "eSTATE_COMPLETE",
+            "eSTATE_TEST",
+            "eSTATE_ERROR"
+        };
+
+        /// <summary>
+        /// Process a message from the diagnostics
+        /// </summary>
         internal void ProcessIncomingMessage(byte[] data)
         {
             if (data.Length < Commands.Sizeof_sCommandHeader)
@@ -65,7 +84,6 @@ namespace CURDiags
                     Utils.MarshalPtrToStruct(data, out ack);
                     if (ack.status == 1)
                         autoEvent.Set();
-
                         break;
 
                 case eDiagnosticCommands.eDIAG_AD7124_GET_STATUS:
@@ -116,6 +134,12 @@ namespace CURDiags
                     UpdateTouch(touchData);
                     break;
 
+                case eDiagnosticCommands.eDIAG_READ_BAROMETRIC:
+                    Commands.sBarometricData barometricData = new Commands.sBarometricData();
+                    Utils.MarshalPtrToStruct(data, out barometricData);
+                    UpdateBarometric(barometricData);
+                    break;
+
                 default:
                     Logger.LogError($"ProcessIncomingMessage() unhandled message {data[Commands.MessageCommandIndex]}");
                     break;
@@ -142,6 +166,9 @@ namespace CURDiags
             dataGridViewStatusMsg.Rows[r++].Cells[1].Value = status.state;
             dataGridViewStatusMsg.Rows[r++].Cells[1].Value = "0x" + status.errors.ToString("X8");
             dataGridViewStatusMsg.Rows[r++].Cells[1].Value = "0x" + status.health.ToString("X8");
+
+            // Update state label
+            UpdateLabel(labelSystemState, status.state < mStateText.Length ? mStateText[status.state] : "UNKNOWN");
 
             // Update health labels
             UpdateLabelColor(labelSys, ((status.health & 0x1 << ((int)Enums.eSubsystems.eSystemArm)) > 0) ? Color.Green : Color.Red);
@@ -277,6 +304,23 @@ namespace CURDiags
             UpdateTextBox(textBoxTouchYPosition, data.yPos.ToString());
             UpdateTextBox(textBoxTouchXRaw, data.xPosRaw.ToString());
             UpdateTextBox(textBoxTouchYRaw, data.yPosRaw.ToString());
+        }
+
+        /// <summary>
+        /// Update the Barometric data
+        /// </summary>
+        private void UpdateBarometric(Commands.sBarometricData data)
+        {
+            int r = 0;
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = data.lastPressure.ToString("F1");
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = data.lastTemperature.ToString("F1");
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = "0x" + data.prom.ToString();
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = data.sensitivity.ToString();
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = data.offset.ToString();
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = data.tcoeffSens.ToString();
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = data.tcoeffOffset.ToString();
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = data.tref.ToString();
+            dataGridViewBarometric.Rows[r++].Cells[1].Value = data.tempSens.ToString();
         }
 
     }  // end class

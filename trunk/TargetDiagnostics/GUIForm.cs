@@ -16,6 +16,7 @@
 ********************************************************************/
 
 using System.IO.Ports;
+using System.Net;
 using System.Windows.Forms;
 using Utilities;
 using static CURDiags.Enums;
@@ -110,6 +111,15 @@ namespace CURDiags
             dataGridViewFlashIds.Rows.Add("Family", "???");
             dataGridViewFlashIds.Rows.Add("Unique ID", "???? ????");
 
+            dataGridViewBarometric.Rows.Add("Last Pressure (mmHg)", "????");
+            dataGridViewBarometric.Rows.Add("Last Temp (C)", "????");
+            dataGridViewBarometric.Rows.Add("PROG", "????");
+            dataGridViewBarometric.Rows.Add("Sensitivity", "????");
+            dataGridViewBarometric.Rows.Add("Offset", "????");
+            dataGridViewBarometric.Rows.Add("tcoeffSens", "????");
+            dataGridViewBarometric.Rows.Add("tcoeffOffset", "????");
+            dataGridViewBarometric.Rows.Add("tref", "????");
+            dataGridViewBarometric.Rows.Add("tempSens", "????");
         }
 
         /// <summary>
@@ -219,8 +229,9 @@ namespace CURDiags
             // If the com port is open, request status
             if (IsCOMPortOpen)
             {
-                // Send periodic status messages
+                // Send periodic status messages, also battery
                 Commands.SendCommand(eDiagnosticCommands.eDIAG_STATUS);
+                Commands.SendCommand(eDiagnosticCommands.eDIAG_ADC_READ);
 
                 // If we have not received message in a while we must not have good communications
                 if (mLastMessageReceived.CompareTo(DateTime.Now.AddSeconds(-2)) < 0)
@@ -255,7 +266,6 @@ namespace CURDiags
                     Commands.SendCommand(eDiagnosticCommands.eDIAG_ACCEL_READ);
                     break;
                 case "tabPageAdc":
-                    Commands.SendCommand(eDiagnosticCommands.eDIAG_ADC_READ);
                     break;
                 case "tabPageAd7124":
                     Commands.SendCommand(eDiagnosticCommands.eDIAG_AD7124_READ_DATA);
@@ -265,6 +275,9 @@ namespace CURDiags
                     break;
                 case "tabPageTouch":
                     Commands.SendCommand(eDiagnosticCommands.eDIAG_TOUCH_READ);
+                    break;
+                case "tabPageBarometric":
+                    Commands.SendCommand(eDiagnosticCommands.eDIAG_READ_BAROMETRIC);
                     break;
             }
         }
@@ -410,7 +423,7 @@ namespace CURDiags
                 Commands.sRequest burnCmd = new Commands.sRequest(eDiagnosticCommands.eDIAG_FLASH_BURN);
                 burnCmd.AddBytes(BitConverter.GetBytes(ramAddr));
                 burnCmd.AddBytes(BitConverter.GetBytes(burnSlot));
-                burnCmd.AddBytes(BitConverter.GetBytes((UInt32)(320*240*4)));
+                burnCmd.AddBytes(BitConverter.GetBytes((UInt32)(320 * 240 * 4)));
 
                 Commands.SendCommand(burnCmd);
                 if (autoEvent.WaitOne(20000))
@@ -621,6 +634,27 @@ namespace CURDiags
             cmd.AddBytes(BitConverter.GetBytes((UInt32)512));
             Commands.SendCommand(cmd);
 
+        }
+
+        private void buttonSetState_Click(object sender, EventArgs e)
+        {
+            Commands.sRequest cmd = new Commands.sRequest(eDiagnosticCommands.eDIAG_SET_STATE);
+            cmd.AddBytes(BitConverter.GetBytes((UInt32)comboBoxStateSelect.SelectedIndex));
+            Commands.SendCommand(cmd);
+        }
+
+        private void buttonTouchDebug_Click(object sender, EventArgs e)
+        {
+            Commands.sRequest cmd = new Commands.sRequest(eDiagnosticCommands.eDIAG_TOUCH_MODE);
+            cmd.AddByte(2);
+            Commands.SendCommand(cmd);
+        }
+
+        private void buttonTouchIdle_Click(object sender, EventArgs e)
+        {
+            Commands.sRequest cmd = new Commands.sRequest(eDiagnosticCommands.eDIAG_TOUCH_MODE);
+            cmd.AddByte(0);
+            Commands.SendCommand(cmd);
         }
     }  // end class
 }  // end namespace
