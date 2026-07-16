@@ -211,6 +211,20 @@ namespace CURDiags
             dataGridViewBarometric = new DataGridView();
             dataGridViewTextBoxColumn3 = new DataGridViewTextBoxColumn();
             dataGridViewTextBoxColumn4 = new DataGridViewTextBoxColumn();
+            tabPageDataLog = new TabPage();
+            groupBox18 = new GroupBox();
+            labelDownloadStatus = new Label();
+            buttonDownload = new Button();
+            textBoxStartSample = new TextBox();
+            label50 = new Label();
+            groupBox17 = new GroupBox();
+            buttonDataLogReadEventLog = new Button();
+            textBoxDataLogSectorEnd = new TextBox();
+            label47 = new Label();
+            textBoxDataLogSectorBegin = new TextBox();
+            label48 = new Label();
+            textBoxDataLogSamples = new TextBox();
+            label49 = new Label();
             labelCOMStatus = new Label();
             buttonConnect = new Button();
             comboBoxCOMPort = new ComboBox();
@@ -232,6 +246,7 @@ namespace CURDiags
             labelFlash = new Label();
             labelRam = new Label();
             labelSys = new Label();
+            progressBarDataDownload = new ProgressBar();
             tabControl1.SuspendLayout();
             tabPageStatus.SuspendLayout();
             groupBox16.SuspendLayout();
@@ -263,6 +278,9 @@ namespace CURDiags
             groupBox14.SuspendLayout();
             tabPageBarometric.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridViewBarometric).BeginInit();
+            tabPageDataLog.SuspendLayout();
+            groupBox18.SuspendLayout();
+            groupBox17.SuspendLayout();
             statusStrip1.SuspendLayout();
             groupBox1.SuspendLayout();
             SuspendLayout();
@@ -280,6 +298,7 @@ namespace CURDiags
             tabControl1.Controls.Add(tabPageFlash);
             tabControl1.Controls.Add(tabPageAdc);
             tabControl1.Controls.Add(tabPageBarometric);
+            tabControl1.Controls.Add(tabPageDataLog);
             tabControl1.Location = new Point(12, 95);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
@@ -2178,6 +2197,152 @@ namespace CURDiags
             dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
             dataGridViewTextBoxColumn4.ReadOnly = true;
             // 
+            // tabPageDataLog
+            // 
+            tabPageDataLog.Controls.Add(groupBox18);
+            tabPageDataLog.Controls.Add(groupBox17);
+            tabPageDataLog.Location = new Point(4, 24);
+            tabPageDataLog.Name = "tabPageDataLog";
+            tabPageDataLog.Padding = new Padding(3);
+            tabPageDataLog.Size = new Size(1023, 522);
+            tabPageDataLog.TabIndex = 10;
+            tabPageDataLog.Text = "Data Log";
+            tabPageDataLog.UseVisualStyleBackColor = true;
+            // 
+            // groupBox18
+            // 
+            groupBox18.Controls.Add(progressBarDataDownload);
+            groupBox18.Controls.Add(labelDownloadStatus);
+            groupBox18.Controls.Add(buttonDownload);
+            groupBox18.Controls.Add(textBoxStartSample);
+            groupBox18.Controls.Add(label50);
+            groupBox18.Location = new Point(280, 6);
+            groupBox18.Name = "groupBox18";
+            groupBox18.Size = new Size(737, 291);
+            groupBox18.TabIndex = 1;
+            groupBox18.TabStop = false;
+            groupBox18.Text = "Export";
+            // 
+            // labelDownloadStatus
+            // 
+            labelDownloadStatus.AutoSize = true;
+            labelDownloadStatus.Location = new Point(19, 197);
+            labelDownloadStatus.Name = "labelDownloadStatus";
+            labelDownloadStatus.Size = new Size(45, 15);
+            labelDownloadStatus.TabIndex = 20;
+            labelDownloadStatus.Text = "Status: ";
+            // 
+            // buttonDownload
+            // 
+            buttonDownload.Font = new Font("Segoe UI", 12F);
+            buttonDownload.Location = new Point(19, 72);
+            buttonDownload.Name = "buttonDownload";
+            buttonDownload.Size = new Size(263, 63);
+            buttonDownload.TabIndex = 19;
+            buttonDownload.Text = "Download";
+            buttonDownload.UseVisualStyleBackColor = true;
+            buttonDownload.Click += buttonDownload_Click;
+            // 
+            // textBoxStartSample
+            // 
+            textBoxStartSample.Location = new Point(139, 37);
+            textBoxStartSample.Name = "textBoxStartSample";
+            textBoxStartSample.Size = new Size(143, 23);
+            textBoxStartSample.TabIndex = 13;
+            textBoxStartSample.Text = "0";
+            textBoxStartSample.TextAlign = HorizontalAlignment.Center;
+            // 
+            // label50
+            // 
+            label50.AutoSize = true;
+            label50.Font = new Font("Verdana", 12F);
+            label50.Location = new Point(19, 42);
+            label50.Name = "label50";
+            label50.Size = new Size(114, 18);
+            label50.TabIndex = 12;
+            label50.Text = "Start Sample";
+            // 
+            // groupBox17
+            // 
+            groupBox17.Controls.Add(buttonDataLogReadEventLog);
+            groupBox17.Controls.Add(textBoxDataLogSectorEnd);
+            groupBox17.Controls.Add(label47);
+            groupBox17.Controls.Add(textBoxDataLogSectorBegin);
+            groupBox17.Controls.Add(label48);
+            groupBox17.Controls.Add(textBoxDataLogSamples);
+            groupBox17.Controls.Add(label49);
+            groupBox17.Location = new Point(6, 6);
+            groupBox17.Name = "groupBox17";
+            groupBox17.Size = new Size(268, 291);
+            groupBox17.TabIndex = 0;
+            groupBox17.TabStop = false;
+            groupBox17.Text = "Event Log";
+            // 
+            // buttonDataLogReadEventLog
+            // 
+            buttonDataLogReadEventLog.Font = new Font("Segoe UI", 12F);
+            buttonDataLogReadEventLog.Location = new Point(117, 124);
+            buttonDataLogReadEventLog.Name = "buttonDataLogReadEventLog";
+            buttonDataLogReadEventLog.Size = new Size(143, 34);
+            buttonDataLogReadEventLog.TabIndex = 18;
+            buttonDataLogReadEventLog.Text = "READ";
+            buttonDataLogReadEventLog.UseVisualStyleBackColor = true;
+            buttonDataLogReadEventLog.Click += buttonDataLogReadEventLog_Click;
+            // 
+            // textBoxDataLogSectorEnd
+            // 
+            textBoxDataLogSectorEnd.Location = new Point(117, 95);
+            textBoxDataLogSectorEnd.Name = "textBoxDataLogSectorEnd";
+            textBoxDataLogSectorEnd.Size = new Size(143, 23);
+            textBoxDataLogSectorEnd.TabIndex = 15;
+            textBoxDataLogSectorEnd.TextAlign = HorizontalAlignment.Center;
+            // 
+            // label47
+            // 
+            label47.AutoSize = true;
+            label47.Font = new Font("Verdana", 12F);
+            label47.Location = new Point(6, 95);
+            label47.Name = "label47";
+            label47.Size = new Size(95, 18);
+            label47.TabIndex = 14;
+            label47.Text = "Sector End";
+            // 
+            // textBoxDataLogSectorBegin
+            // 
+            textBoxDataLogSectorBegin.Location = new Point(117, 66);
+            textBoxDataLogSectorBegin.Name = "textBoxDataLogSectorBegin";
+            textBoxDataLogSectorBegin.Size = new Size(143, 23);
+            textBoxDataLogSectorBegin.TabIndex = 13;
+            textBoxDataLogSectorBegin.TextAlign = HorizontalAlignment.Center;
+            // 
+            // label48
+            // 
+            label48.AutoSize = true;
+            label48.Font = new Font("Verdana", 12F);
+            label48.Location = new Point(6, 66);
+            label48.Name = "label48";
+            label48.Size = new Size(111, 18);
+            label48.TabIndex = 12;
+            label48.Text = "Sector Begin";
+            // 
+            // textBoxDataLogSamples
+            // 
+            textBoxDataLogSamples.Location = new Point(117, 37);
+            textBoxDataLogSamples.Name = "textBoxDataLogSamples";
+            textBoxDataLogSamples.Size = new Size(143, 23);
+            textBoxDataLogSamples.TabIndex = 11;
+            textBoxDataLogSamples.TextAlign = HorizontalAlignment.Center;
+            // 
+            // label49
+            // 
+            label49.AutoSize = true;
+            label49.Font = new Font("Verdana", 12F);
+            label49.Location = new Point(6, 37);
+            label49.Name = "label49";
+            label49.Size = new Size(77, 18);
+            label49.TabIndex = 10;
+            label49.Text = "Samples";
+            // 
             // labelCOMStatus
             // 
             labelCOMStatus.Anchor = AnchorStyles.Top | AnchorStyles.Right;
@@ -2421,6 +2586,13 @@ namespace CURDiags
             labelSys.Text = "SYS";
             labelSys.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // progressBarDataDownload
+            // 
+            progressBarDataDownload.Location = new Point(19, 141);
+            progressBarDataDownload.Name = "progressBarDataDownload";
+            progressBarDataDownload.Size = new Size(263, 42);
+            progressBarDataDownload.TabIndex = 21;
+            // 
             // GUIForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -2480,6 +2652,11 @@ namespace CURDiags
             groupBox14.PerformLayout();
             tabPageBarometric.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridViewBarometric).EndInit();
+            tabPageDataLog.ResumeLayout(false);
+            groupBox18.ResumeLayout(false);
+            groupBox18.PerformLayout();
+            groupBox17.ResumeLayout(false);
+            groupBox17.PerformLayout();
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             groupBox1.ResumeLayout(false);
@@ -2690,5 +2867,20 @@ namespace CURDiags
         private DataGridView dataGridViewBarometric;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private TabPage tabPageDataLog;
+        private GroupBox groupBox18;
+        private GroupBox groupBox17;
+        private Button buttonDataLogReadEventLog;
+        private TextBox textBoxDataLogSectorEnd;
+        private Label label47;
+        private TextBox textBoxDataLogSectorBegin;
+        private Label label48;
+        private TextBox textBoxDataLogSamples;
+        private Label label49;
+        private Label labelDownloadStatus;
+        private Button buttonDownload;
+        private TextBox textBoxStartSample;
+        private Label label50;
+        private ProgressBar progressBarDataDownload;
     }
 }

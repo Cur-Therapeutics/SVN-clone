@@ -102,6 +102,7 @@ namespace CURDiags
             public byte[] data;
         }
 
+
         /// <summary>
         /// AD7124 Status
         /// </summary>
@@ -233,6 +234,42 @@ namespace CURDiags
             public UInt16 tcoeffOffset;
             public UInt16 tref;
             public UInt16 tempSens;
+        }
+
+        /// <summary>
+        /// Data Log Event Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct sDataLogEventData
+        {
+            public sCommandHeader header;
+            public UInt32 sectorBegin;
+            public UInt32 sectorEnd;
+            public UInt32 numSamples;
+        }
+
+        /// <summary>
+        /// Datalog Data
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public unsafe struct sDataLogRead
+        {
+            public sCommandHeader header;
+            public UInt32 startSample;
+            public UInt32 count;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+            public sDataLogSample[] samples;
+        }
+
+        /// <summary>
+        /// Datalog sample
+        /// </summary>
+        public struct sDataLogSample
+        {
+            public UInt32 sysTick;
+            public UInt32 pressureCounts;
+            public float pressureEng;
+            public float barometricPressure;
         }
 
         /// <summary>

@@ -19,6 +19,6 @@ namespace CURDiags
 {
     internal class Version
     {
-        public static string Value => "0.0.12";
+        public static string Value => "0.0.15";
     }
 }

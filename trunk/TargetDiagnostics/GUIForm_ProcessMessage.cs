@@ -18,6 +18,7 @@
 
 using static CURDiags.Commands;
 using static CURDiags.Enums;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace CURDiags
@@ -140,6 +141,18 @@ namespace CURDiags
                     UpdateBarometric(barometricData);
                     break;
 
+                case eDiagnosticCommands.eDIAG_DATALOG_EVENT_DATA:
+                    Commands.sDataLogEventData eventData = new Commands.sDataLogEventData();
+                    Utils.MarshalPtrToStruct(data, out eventData);
+                    UpdateEvent(eventData);
+                    break;
+
+                case eDiagnosticCommands.eDIAG_DATALOG_DATA:
+                    Commands.sDataLogRead dataLog = new Commands.sDataLogRead();
+                    Utils.MarshalPtrToStruct(data, out dataLog);
+                    DataLogReceived(dataLog);
+                    break;
+
                 default:
                     Logger.LogError($"ProcessIncomingMessage() unhandled message {data[Commands.MessageCommandIndex]}");
                     break;
@@ -192,17 +205,17 @@ namespace CURDiags
         /// </summary>
         private void UpdateAD7124StatusMessage(Commands.sAD7124Status status)
         {
-            UpdateTextBox(textBoxAd7124Status, "0x" + status.status.ToString("X4"));
-            UpdateTextBox(textBoxAd7124Control, "0x" + status.control.ToString("X4"));
+            UpdateTextBox(textBoxAd7124Status, "0x" + status.status.ToString("X2"));
+            UpdateTextBox(textBoxAd7124Control, "0x" + status.control.ToString("X6"));
             UpdateTextBox(textBoxAd7124Io1, "0x" + status.io1.ToString("X4"));
             UpdateTextBox(textBoxAd7124Io2, "0x" + status.io2.ToString("X4"));
             UpdateTextBox(textBoxAd7124Id, "0x" + status.id.ToString("X4"));
-            UpdateTextBox(textBoxAd7124Error, "0x" + status.error.ToString("X4"));
-            UpdateTextBox(textBoxAd7124ErrorEn, "0x" + status.error_en.ToString("X4"));
+            UpdateTextBox(textBoxAd7124Error, "0x" + status.error.ToString("X6"));
+            UpdateTextBox(textBoxAd7124ErrorEn, "0x" + status.error_en.ToString("X6"));
             UpdateTextBox(textBoxAd7124Channel, "0x" + status.channel.ToString("X4"));
             UpdateTextBox(textBoxAd7124Config, "0x" + status.config.ToString("X4"));
-            UpdateTextBox(textBoxAd7124Filter, "0x" + status.filter.ToString("X4"));
-            UpdateTextBox(textBoxAd7124Offset, "0x" + status.offset.ToString("X4"));
+            UpdateTextBox(textBoxAd7124Filter, "0x" + status.filter.ToString("X6"));
+            UpdateTextBox(textBoxAd7124Offset, "0x" + status.offset.ToString("X6"));
         }
 
         /// <summary>
@@ -321,6 +334,42 @@ namespace CURDiags
             dataGridViewBarometric.Rows[r++].Cells[1].Value = data.tcoeffOffset.ToString();
             dataGridViewBarometric.Rows[r++].Cells[1].Value = data.tref.ToString();
             dataGridViewBarometric.Rows[r++].Cells[1].Value = data.tempSens.ToString();
+        }
+
+        /// <summary>
+        /// Update the data log event data
+        /// </summary>
+        private void UpdateEvent(Commands.sDataLogEventData eventData)
+        {
+            UpdateTextBox(textBoxDataLogSamples, eventData.numSamples.ToString());
+            UpdateTextBox(textBoxDataLogSectorBegin, eventData.sectorBegin.ToString());
+            UpdateTextBox(textBoxDataLogSectorEnd, eventData.sectorEnd.ToString());
+        }
+
+        /// <summary>
+        /// Handle a new data log
+        /// </summary>
+        private void DataLogReceived(Commands.sDataLogRead dataLog)
+        {
+            // Write data to file
+            string filename = GetDownloadFileName();
+
+            foreach (sDataLogSample dataLogSample in dataLog.samples)
+            {
+                if (dataLogSample.sysTick == 0) // Skip empty samples at end of download
+                    continue;
+                string str = "" 
+                    + dataLogSample.sysTick.ToString() + ","
+                    + (dataLogSample.sysTick/1000.0f).ToString("F3") + ","
+                    + dataLogSample.pressureCounts.ToString() + ","
+                    + dataLogSample.pressureEng.ToString("F1") + ","
+                    + dataLogSample.barometricPressure.ToString("F1")
+                    + System.Environment.NewLine;
+                File.AppendAllText(filename, str);
+            }
+
+            // Notify waiting thread
+            autoEvent.Set();
         }
 
     }  // end class

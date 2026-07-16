@@ -65,6 +65,8 @@ namespace CURDiags
             eDIAG_ADC_READ,
             eDIAG_SET_STATE,
             eDIAG_READ_BAROMETRIC,
+            eDIAG_DATALOG_EVENT_DATA,
+            eDIAG_DATALOG_DATA,
         }
 
         /// <summary>

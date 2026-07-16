@@ -57,6 +57,11 @@ namespace CURDiags
         string mFileToLoad = "";
 
         /// <summary>
+        /// Filename used for data downloads
+        /// </summary>
+        string mDownloadFileName = "";
+
+        /// <summary>
         /// Event handler for ACKs from the embedded
         /// </summary>
         static AutoResetEvent autoEvent = new AutoResetEvent(false);
@@ -120,6 +125,14 @@ namespace CURDiags
             dataGridViewBarometric.Rows.Add("tcoeffOffset", "????");
             dataGridViewBarometric.Rows.Add("tref", "????");
             dataGridViewBarometric.Rows.Add("tempSens", "????");
+        }
+
+        /// <summary>
+        /// Get the current download file name
+        /// </summary>
+        public string GetDownloadFileName()
+        {
+            return mDownloadFileName;
         }
 
         /// <summary>
@@ -393,7 +406,6 @@ namespace CURDiags
                     Commands.SendCommand(cmd);
 
                     // Wait for an ACK
-
                     for (int i = 0; i < 5; i++)
                     {
                         // Resend on Timeout
@@ -656,5 +668,90 @@ namespace CURDiags
             cmd.AddByte(0);
             Commands.SendCommand(cmd);
         }
+
+        private void buttonDataLogReadEventLog_Click(object sender, EventArgs e)
+        {
+            Commands.SendCommand(eDiagnosticCommands.eDIAG_DATALOG_EVENT_DATA);
+        }
+
+        private void buttonDownload_Click(object sender, EventArgs e)
+        {
+            // Setup download
+            UInt32 startSample;
+            bool dataGood = UInt32.TryParse(textBoxStartSample.Text, out startSample);
+            if (!dataGood)
+            {
+                MessageBox.Show("Bad start sample.");
+                return;
+            }
+
+            UInt32 numSamples;
+            dataGood = UInt32.TryParse(textBoxDataLogSamples.Text, out numSamples);
+            if (!dataGood)
+            {
+                MessageBox.Show("Bad sample count.");
+                return;
+            }
+
+            // Setup variables
+            UInt32 currentSample = startSample;
+            UInt32 samplesRemaining = numSamples;
+
+            // Setup write file, write headers
+            DateTime now = DateTime.Now;
+            mDownloadFileName = "" + now.Year.ToString() + "" + now.Month.ToString() + "" + now.Day.ToString() + "_"
+                + now.Hour.ToString() + "" + now.Minute.ToString() + "" + now.Second.ToString()
+                + "_CUR_Data.csv";
+            string headStr = "System Ticks, Time (ms), Pressure (counts), Pressure (mmHg), Barometric Pressure (mmHg)" + System.Environment.NewLine;
+            File.WriteAllText(mDownloadFileName, headStr);
+
+            // Start download
+            System.Threading.ThreadPool.QueueUserWorkItem(delegate
+            {
+                // Download all samples
+                while (samplesRemaining > 0)
+                {
+                    // Setup request and send
+                    UInt32 requestCount = samplesRemaining;
+                    if (requestCount > 32)
+                        requestCount = 32;
+
+                    Commands.sRequest cmd = new Commands.sRequest(eDiagnosticCommands.eDIAG_DATALOG_DATA);
+                    cmd.AddBytes(BitConverter.GetBytes(currentSample));
+                    cmd.AddBytes(BitConverter.GetBytes(requestCount));
+                    Commands.SendCommand(cmd);
+
+                    UpdateLabel(labelDownloadStatus, "Requesting Sample " + currentSample.ToString());
+
+                    // Wait for reply
+                    bool isAcked = false;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        // Resend on Timeout
+                        if (autoEvent.WaitOne(500))
+                        {
+                            isAcked = true;
+                            break;
+                        }
+                        Commands.SendCommand(cmd);
+                    }
+                    if (!isAcked)
+                    {
+                        // Fail on too many timeouts
+                        UpdateLabel(labelDownloadStatus, "Failed on too many retries! Sample: " + currentSample);
+                        return;
+                    }
+
+                    // Setup for next loop, update progress
+                    samplesRemaining -= requestCount;
+                    currentSample += requestCount;
+                    UpdateProgressBar(progressBarDataDownload, (int)currentSample, (int)numSamples);
+                }
+
+                // All done!
+                UpdateLabel(labelDownloadStatus, "Download Complete " + numSamples.ToString());
+
+            });  // end thread
+        } // end ButtonDownload_Click
     }  // end class
 }  // end namespace
