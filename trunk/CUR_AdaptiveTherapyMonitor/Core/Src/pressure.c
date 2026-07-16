@@ -4,7 +4,7 @@
 *
 *   Description:    Pressure sensor accessor
 *
-*   Copyright PPMD, Inc. 2026 -- All rights reserved.
+*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
@@ -23,9 +23,9 @@
  * @brief Get the baseline pressure from the barometric sensor
  * @return The ambient pressure in mmHg
  */
-uint32_t GetBaselinePressure()
+float GetBaselinePressure()
 {
-	return 0;
+	return BarometricGetLastFilt(&mBarometricSensor);
 }
 
 /**
@@ -33,7 +33,7 @@ uint32_t GetBaselinePressure()
  * @param units The desired units
  * @return The pressure in the requested units
  */
-uint32_t GetPressure(ePressureUnits units)
+float GetPressure(ePressureUnits units)
 {
 	float pressure = AD7124_GetLastEng(&ad7124);
 	switch (units)

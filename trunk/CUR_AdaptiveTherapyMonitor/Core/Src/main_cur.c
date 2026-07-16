@@ -34,6 +34,8 @@
 #include "touch.h"
 #include "i2c.h"
 #include "barometric.h"
+#include "datalog.h"
+#include "timer.h"
 
 /**
  * System tick
@@ -78,7 +80,11 @@ void main_cur()
 	TOUCH_Init();
 	StateInit();
 	BarometricInit();
+	DataLogInit();
 	DisplayInit();
+
+	// Start timer for data logging
+    HAL_TIM_Base_Start_IT(&htim2);
 
 	// Begin loop on start of system tick
 	gSystemTick = HAL_GetTick();
@@ -99,6 +105,7 @@ void main_cur()
 		AccelDrive();
 		TOUCH_Drive();
 		BarometricDrive();
+		DataLogDrive();
 
 		// Update state and display
 		StateDrive();

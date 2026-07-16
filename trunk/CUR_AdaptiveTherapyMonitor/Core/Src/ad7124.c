@@ -25,6 +25,7 @@
 #include "faulthandler.h"
 #include "health.h"
 #include "datalog.h"
+#include "pressure.h"
 
 /**
  * AD7124 Device Instance
@@ -108,8 +109,19 @@ sAD7124Register mRegisters [] =
 /**
  * Acquisition timer
  */
-uint16_t mTimer = 0;
+uint16_t mAD7124Timer = 0;
 
+/**
+ * Filters
+ */
+#define FILTER_ADC_SIZE	10
+float filterAdcValues [FILTER_ADC_SIZE];
+float filterAdcSum = 0;
+uint16_t filterAdcHead = 0;
+
+void __InitAdcFilter(void);
+float __FilterAdcAdd(float newValue, float values [], uint16_t * head, float * sum);
+void __FilterAdcPrime(float newValue, float values []);
 /**
  * Internal functions
  */
@@ -130,6 +142,9 @@ void AD7124_Init()
 	// Perform setup on each ADC
 	if (AD7124_InitInternal(&ad7124) == HAL_OK)
 		HealthSubsystemGood(eSystem7124);
+
+	// Init filter
+	__InitAdcFilter();
 }
 
 /**
@@ -163,7 +178,7 @@ uint32_t AD7124_InitInternal(sAd7124 * ad7124)
 	AD7124_Write(ad7124, AD7124_CONFIG_00, setup);
 
 	// Configure Filter setting to FS 5, Sinc4
-	filter = AD7124_FILTER_SINC4_FAST + (1);
+	filter = AD7124_FILTER_SINC4 + (5);
 	AD7124_Write(ad7124, AD7124_FILTER_00, filter);
 
 	// Start conversions, continuous mode
@@ -178,15 +193,15 @@ uint32_t AD7124_InitInternal(sAd7124 * ad7124)
  */
 void AD7124_Drive()
 {
-	mTimer++;	// Increment our timer no matter what to keep the acquisition sequence on time
+	mAD7124Timer++;	// Increment our timer no matter what to keep the acquisition sequence on time
 	switch (mAD7124State)
 	{
 		case eAD7124_States_WAIT:
 
-			if (mTimer < AD7124_SAMPLE_PERIOD)
+			if (mAD7124Timer < AD7124_SAMPLE_PERIOD)
 				return;
 			mAD7124State = eAD7124_States_ACQUIRE;
-			mTimer = 0;
+			mAD7124Timer = 0;
 
 			break;
 
@@ -194,7 +209,7 @@ void AD7124_Drive()
 			AD7124_DriveBridge(&ad7124);
 
 			// If all acquisition is complete, return to wait state. Force if overtime to rekick off acquisition
-			if (AD7124_IsAcqDone(&ad7124) || (mTimer > AD7124_SAMPLE_PERIOD))
+			if (AD7124_IsAcqDone(&ad7124) || (mAD7124Timer > AD7124_SAMPLE_PERIOD))
 			{
 				mAD7124State = eAD7124_States_WAIT;
 			}
@@ -221,13 +236,11 @@ void AD7124_DriveBridge(sAd7124 * ad7124)
 	ad7124->lastCounts = counts;
 	int32_t temp = counts;	// Allow negative values
 	ad7124->lastVoltage = (temp - AD7124_OFFSET) * AD7124_SCALE;
-	ad7124->lastEng = (ad7124->lastVoltage * 1000.0f * AD7124_SCALE_MMHG) + AD7124_OFFSET_MMHG;
+	ad7124->lastEng = (ad7124->lastVoltage * 1000.0f * AD7124_SCALE_MMHG) + GetBaselinePressure();
+
+	ad7124->lastEng = __FilterAdcAdd(ad7124->lastEng, filterAdcValues, &filterAdcHead, &filterAdcSum);
 
 	ad7124->lastChannel = channel;
-
-	// Save data to log
-	sDataSample sample = { HAL_GetTick(), ad7124->lastCounts, ad7124->lastEng};
-	DataLogSaveSample(sample);
 }
 
 /**
@@ -399,4 +412,48 @@ uint8_t AD7124_TriggerAcq(sAd7124 * ad7124)
 	uint16_t config = AD7124_CTRL_MODE_CONT | AD7124_CTRL_PWR_MODE_FULL;
 	AD7124_Write(ad7124, AD7124_ADC_CTRL, config);
 	return HAL_OK;
+}
+
+/**
+ * @brief Initialize filters
+ * @return None
+ */
+void __InitAdcFilter()
+{
+	memset(filterAdcValues, 0, FILTER_ADC_SIZE*sizeof(filterAdcValues[0]));
+
+	filterAdcSum = 0;
+	filterAdcHead = 0;
+}
+
+/**
+ * @brief Add a value to a filter
+ * @param newValue The value to add to the filter
+ * @param values Filter values
+ * @param head Pointer tot he head of the filter data
+ * @param sum filter sum
+ * @return The filtered value
+ */
+float __FilterAdcAdd(float newValue, float values [], uint16_t * head, float * sum)
+{
+	// Replace
+	*sum -= values[*head];
+	values[*head] = newValue;
+	*sum += newValue;
+
+	// Increment head
+	((*head)++);
+	if (*head >= FILTER_ADC_SIZE)
+		*head = 0;
+
+	return *sum / FILTER_ADC_SIZE;
+}
+
+/**
+ * @brief Prime the filter with the first reading
+ * @param
+ */
+void __FilterAdcPrime(float newValue, float values [])
+{
+
 }

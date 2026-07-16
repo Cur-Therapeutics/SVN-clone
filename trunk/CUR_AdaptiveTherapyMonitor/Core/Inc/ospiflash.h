@@ -166,6 +166,9 @@ void OctalWriteEnable(void);
 uint8_t OctalSpiFlashErase4KSector(uint32_t addr);
 uint8_t OctalSpiFlashErase256KSector(uint32_t addr);
 
+uint8_t OctalSpiFlashErase4KSectorIT(uint32_t addr);
+uint8_t OctalSpiFlashErase256KSectorIT(uint32_t addr);
+
 /**
  * Core functions
  */

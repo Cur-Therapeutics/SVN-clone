@@ -993,6 +993,75 @@ uint8_t OctalSpiFlashErase256KSector(uint32_t addr)
 }
 
 /**
+ * @brief Erase a 4K sector at the provided address
+ * Sector addresses and sizes (4K/256K) are dependent on register settings!
+ */
+uint8_t OctalSpiFlashErase4KSectorIT(uint32_t addr)
+{
+	// Set write enable
+	OctalWriteEnable();
+
+	OSPI_RegularCmdTypeDef cmd = {0};
+
+	cmd.OperationType      = HAL_OSPI_OPTYPE_COMMON_CFG;
+	cmd.InstructionMode    = HAL_OSPI_INSTRUCTION_8_LINES;
+	cmd.InstructionSize    = HAL_OSPI_INSTRUCTION_16_BITS;
+	cmd.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
+	cmd.Instruction        = 0x2121;
+
+	cmd.AddressMode        = HAL_OSPI_ADDRESS_8_LINES;
+	cmd.AddressSize        = HAL_OSPI_ADDRESS_32_BITS;
+	cmd.InstructionDtrMode = HAL_OSPI_ADDRESS_DTR_DISABLE;
+	cmd.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
+	cmd.DummyCycles        = 0;
+	cmd.DataMode           = HAL_OSPI_DATA_NONE;
+	cmd.Address            = addr;
+
+	if (HAL_OSPI_Command(phospiflash, &cmd, OCTOSPIFLASH_TIMEOUT_MS) != HAL_OK)
+	{
+		mOspiErrors++;
+		return HAL_ERROR;
+	}
+
+	return HAL_OK;
+}
+
+/**
+ * @brief Erase a 256K sector at the provided address
+ * Sector addresses and sizes (4K/256K) are dependent on register settings!
+ */
+uint8_t OctalSpiFlashErase256KSectorIT(uint32_t addr)
+{
+	// Set write enable
+	OctalWriteEnable();
+
+	OSPI_RegularCmdTypeDef cmd = {0};
+
+	cmd.OperationType      = HAL_OSPI_OPTYPE_COMMON_CFG;
+	cmd.InstructionMode    = HAL_OSPI_INSTRUCTION_8_LINES;
+	cmd.InstructionSize   = HAL_OSPI_INSTRUCTION_16_BITS;
+	cmd.InstructionDtrMode = HAL_OSPI_INSTRUCTION_DTR_DISABLE;
+	cmd.Instruction        = 0xDCDC;
+
+	cmd.AddressMode        = HAL_OSPI_ADDRESS_8_LINES;
+	cmd.AddressSize       = HAL_OSPI_ADDRESS_32_BITS;
+	cmd.AddressDtrMode     = HAL_OSPI_ADDRESS_DTR_DISABLE;
+	cmd.AlternateBytesMode = HAL_OSPI_ALTERNATE_BYTES_NONE;
+	cmd.DummyCycles        = 0;
+	cmd.DataMode           = HAL_OSPI_DATA_NONE;
+	cmd.Address            = addr;
+
+	if (HAL_OSPI_Command(phospiflash, &cmd, OCTOSPIFLASH_TIMEOUT_MS) != HAL_OK)
+	{
+		mOspiErrors++;
+		FaultHandler(ERR_FLASH_ERASE);
+		return HAL_ERROR;
+	}
+
+	return HAL_OK;
+}
+
+/**
  * @brief Read data from the flash
  * @param addr The address to read
  * @param data Location to place the read data

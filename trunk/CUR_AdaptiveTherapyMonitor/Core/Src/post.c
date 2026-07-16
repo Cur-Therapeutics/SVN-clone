@@ -39,7 +39,7 @@ void PostDrive()
  */
 uint8_t PostIsComplete()
 {
-
+	return 1;
 }
 
 /**
@@ -47,5 +47,5 @@ uint8_t PostIsComplete()
  */
 uint32_t PostGetResult()
 {
-
+	return 1;
 }

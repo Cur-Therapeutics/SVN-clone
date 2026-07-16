@@ -43,7 +43,7 @@ typedef enum
 /**
  * Sample period
  */
-#define AD7124_SAMPLE_PERIOD	(500)
+#define AD7124_SAMPLE_PERIOD	(10)
 
 /**
  * Bipolar offset value
@@ -61,7 +61,6 @@ typedef enum
  * Details of calculations based on Millar datasheet, 5uV/V/mmHg
  */
 #define AD7124_SCALE_MMHG	(60.606061f)
-#define AD7124_OFFSET_MMHG	(760)	// Add back in 1 atm, sensor is zero trimmed
 
 /**
  * Support for multiple ADCs

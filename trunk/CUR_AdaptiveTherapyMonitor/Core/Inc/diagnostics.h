@@ -22,6 +22,7 @@
 #include "rtc.h"
 #include "ospiflash.h"
 #include "barometric.h"
+#include "datalog.h"
 
 /**
  * From main, used in Arm Status message
@@ -100,6 +101,8 @@ typedef enum
 		eDIAG_ADC_READ,
 		eDIAG_SET_STATE,
 		eDIAG_READ_BAROMETRIC,
+		eDIAG_DATALOG_EVENT_DATA,
+		eDIAG_DATALOG_DATA,
 	eDIAG_Count
 } eDIAG_Commands;
 
@@ -404,6 +407,25 @@ typedef struct __attribute__((packed, aligned(1)))
 }sDIAG_BarometricData;
 
 /**
+ * Datalog Request
+ */
+typedef struct __attribute__((packed, aligned(1)))
+{
+	uint32_t startSample;
+	uint32_t count;
+}sDIAG_DataLogRequest;
+
+/**
+ * Datalog Data
+ */
+typedef struct __attribute__((packed, aligned(1)))
+{
+	uint32_t startSample;
+	uint32_t count;
+	sDataSample dataSamples [32];
+}sDIAG_DataLogData;
+
+/**
  * Command Message
  */
 typedef struct
@@ -436,6 +458,8 @@ typedef struct
 		sDIAG_FlashBurnData		burnFlashData;
 		sDIAG_ChangeState		changeState;
 		sDIAG_BarometricData	barometricData;
+		sEventHeader			eventHeader;
+		sDIAG_DataLogData		dataLogData;
 	};
 } sDIAG_Command;
 

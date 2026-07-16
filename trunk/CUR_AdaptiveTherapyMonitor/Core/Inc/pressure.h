@@ -33,7 +33,7 @@ typedef enum
 	ePressureUnits_psi
 } ePressureUnits;
 
-uint32_t GetBaselinePressure(void);
-uint32_t GetPressure(ePressureUnits units);
+float GetBaselinePressure(void);
+float GetPressure(ePressureUnits units);
 
 #endif /* INC_PRESSURE_H_ */

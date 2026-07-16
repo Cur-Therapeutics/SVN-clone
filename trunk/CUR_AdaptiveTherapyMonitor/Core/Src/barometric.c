@@ -225,6 +225,7 @@ void BarometricReset(sPressureSensor * sensor)
 	{
 		i2CErrorCnt++;
 	}
+	HAL_Delay(50);	// Need to wait for reset to complete, hold here...
 }
 
 /**

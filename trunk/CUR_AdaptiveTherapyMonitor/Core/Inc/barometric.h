@@ -133,7 +133,6 @@ void BarometricDrive();
 void BarometricReset(sPressureSensor * sensor);
 void BarometricReadProm(sPressureSensor * sensor);
 void BarometricRead(sPressureSensor * sensor);
-void BarometricReadOld(sPressureSensor * sensor);
 void BarometricCopyProm(sPressureProm * dst, sPressureProm * src);
 
 float BarometricGetLast(sPressureSensor * sensor);
@@ -152,7 +151,5 @@ extern uint32_t i2cOverflow;
 extern uint32_t i2cTxDefault;
 extern uint32_t i2cRxDefault;
 extern uint32_t i2cTimeout;
-
-extern TIM_HandleTypeDef htim1;
 
 #endif /* INC_BAROMETRIC_H_ */

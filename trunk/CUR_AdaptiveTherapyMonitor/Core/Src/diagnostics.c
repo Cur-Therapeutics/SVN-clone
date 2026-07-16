@@ -34,6 +34,7 @@
 #include "accel.h"
 #include "adc.h"
 #include "barometric.h"
+#include "datalog.h"
 
 /**
  * Reference to the uart instance
@@ -405,6 +406,7 @@ void DIAG_Process(uint8_t * data)
 		break;
 
 	case eDIAG_AD7124_GET_STATUS:
+		gDiagReply.ad7124Status.chipId = 0;
 		AD7124_GetStatus(&ad7124, &gDiagReply.ad7124Status);
 		DIAG_Send(cmd, &gDiagReply);
 		break;
@@ -451,6 +453,21 @@ void DIAG_Process(uint8_t * data)
 		gDiagReply.barometricData.lastPressure = BarometricGetLast(&mBarometricSensor);
 		gDiagReply.barometricData.lastTemperature = BarometricGetLastTemp(&mBarometricSensor);
 		BarometricCopyProm(&gDiagReply.barometricData.prom, &mBarometricSensor.prom);
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_DATALOG_EVENT_DATA:
+		gDiagReply.eventHeader = DataLogGetEventHeader();
+		DIAG_Send(cmd, &gDiagReply);
+		break;
+
+	case eDIAG_DATALOG_DATA:
+		gDiagReply.dataLogData.startSample = cmd->dataLogData.startSample;
+		gDiagReply.dataLogData.count = cmd->dataLogData.count;
+		memset((uint8_t*)&gDiagReply.dataLogData, 0, sizeof(sDIAG_DataLogData));
+		memcpy( (uint8_t*)&gDiagReply.dataLogData.dataSamples[0],
+				(uint8_t*)DataLogGetAddress(cmd->dataLogData.startSample),
+				cmd->dataLogData.count * sizeof(sDataSample));
 		DIAG_Send(cmd, &gDiagReply);
 		break;
 
@@ -656,6 +673,14 @@ void DIAG_Send(sDIAG_Command * rx, sDIAG_Command * tx)
 
 		case eDIAG_READ_BAROMETRIC:
 			tx->head.size += sizeof(sDIAG_BarometricData);
+			break;
+
+		case eDIAG_DATALOG_EVENT_DATA:
+			tx->head.size += sizeof(sEventHeader);
+			break;
+
+		case eDIAG_DATALOG_DATA:
+			tx->head.size += sizeof(sDIAG_DataLogData);
 			break;
 
 		default:
