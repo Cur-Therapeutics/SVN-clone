@@ -94,8 +94,8 @@ void DataLogDrive()
 			// Transition to first buffer when we begin measuring
 			if (GetCurrentState() == eSTATE_MEASURING)
 			{
-				mDataLogEventHeader.numSamples = 0;
-				mBufferIndex = 0;
+				//mDataLogEventHeader.numSamples = 0;	// APPEND
+				//mBufferIndex = 0;						// APPEND
 				mDataLogState = eDataLogState_LOGGING_FIRST_BUFFER;
 			}
 			break;
