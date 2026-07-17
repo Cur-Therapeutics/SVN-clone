@@ -172,7 +172,7 @@ uint32_t AD7124_InitInternal(sAd7124 * ad7124)
 	AD7124_Write(ad7124, AD7124_CH_00, ad7124->channelConfig);
 
 	// Configure reference and buffers
-	setup = AD7124_CONFIG_BIPOLOR | AD7124_CONFIG_REFSEL_1 | AD7124_CONFIG_GAIN_1 |
+	setup = AD7124_CONFIG_BIPOLOR | AD7124_CONFIG_REFSEL_1 | AD7124_CONFIG_GAIN_64 |
 			AD7124_CONFIG_AINP_BUF_EN | AD7124_CONFIG_AINN_BUF_EN |
 			AD7124_CONFIG_REFP_BUF_EN | AD7124_CONFIG_REFN_BUF_EN;
 	AD7124_Write(ad7124, AD7124_CONFIG_00, setup);
@@ -235,11 +235,10 @@ void AD7124_DriveBridge(sAd7124 * ad7124)
 
 	ad7124->lastCounts = counts;
 	int32_t temp = counts;	// Allow negative values
-	ad7124->lastVoltage = (temp - AD7124_OFFSET) * AD7124_SCALE;
-	ad7124->lastEng = (ad7124->lastVoltage * 1000.0f * AD7124_SCALE_MMHG) + GetBaselinePressure();
-
-	ad7124->lastEng = __FilterAdcAdd(ad7124->lastEng, filterAdcValues, &filterAdcHead, &filterAdcSum);
-
+	//ad7124->lastVoltage = (temp - AD7124_OFFSET) * AD7124_SCALE / AD7124_GAIN;	// DEPRECATED
+	ad7124->lastVoltage = 0;
+	ad7124->lastEng = ( (temp - AD7124_OFFSET) * AD7124_SCALE_RATIOMETRIC / AD7124_GAIN) + GetBaselinePressure();
+	//ad7124->lastEng = __FilterAdcAdd(ad7124->lastEng, filterAdcValues, &filterAdcHead, &filterAdcSum);
 	ad7124->lastChannel = channel;
 }
 

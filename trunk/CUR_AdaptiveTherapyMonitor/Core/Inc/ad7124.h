@@ -57,10 +57,22 @@ typedef enum
 #define AD7124_SCALE	(0.00000038028f)
 
 /**
+ * Ratiometric scale
+ * 1 / (2^23 * Gain * Sensitivity * 10^-6)
+ * Gain is left OUT of this equation to be applied separately so it is modifiable
+ */
+#define AD7124_SCALE_RATIOMETRIC	(0.02384186f)
+
+/**
  * Scale from mV to mmHg
  * Details of calculations based on Millar datasheet, 5uV/V/mmHg
  */
 #define AD7124_SCALE_MMHG	(60.606061f)
+
+/**
+ * AD7124 Gain Setting, make sure it matches the value programmed during AD7124_Init
+ */
+#define AD7124_GAIN	(64.0f)
 
 /**
  * Support for multiple ADCs
@@ -200,9 +212,13 @@ typedef enum
 #define AD7124_CTRL_PWR_MODE_MID	0x40
 #define AD7124_CTRL_PWR_MODE_LO		0x00
 
-#define AD7124_CTRL_MODE_CONT		0x00
-#define AD7124_CTRL_MODE_SNGL		0x04
-#define AD7124_CTRL_MODE_STANDBY	0x08
+#define AD7124_CTRL_MODE_CONT			0x00
+#define AD7124_CTRL_MODE_SNGL			0x04
+#define AD7124_CTRL_MODE_STANDBY		0x08
+#define AD7124_CTRL_MODE_IDLE			0x10
+#define AD7124_CTRL_MODE_INT_ZERO_CAL	0x14
+#define AD7124_CTRL_MODE_INT_FULL_CAL	0x18
+
 #define AD7124_CTRL_REF_ENABLE		0x100
 
 #define AD7124_CTRL_DATA_STATUS		0x400

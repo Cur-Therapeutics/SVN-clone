@@ -37,10 +37,11 @@ sPressureSensor mBarometricSensor;
 /**
  * Filters
  */
-#define FILTER_PRESS_SIZE	100
+#define FILTER_PRESS_SIZE	10
 float filterValues [FILTER_PRESS_SIZE];
 float filterSum = 0;
 uint16_t filterHead = 0;
+uint8_t firstSample = 1;
 
 /**
  * Internal functions
@@ -463,6 +464,7 @@ void __InitPressFilter(void)
 
 	filterSum = 0;
 	filterHead = 0;
+	firstSample = 1;
 }
 
 /**
@@ -473,6 +475,17 @@ void __InitPressFilter(void)
  */
 float __FilterPressAdd(float newValue, float values [], uint16_t * head, float * sum)
 {
+	// Pre-load on first sample
+	if (firstSample == 1)
+	{
+		for (int i = 0; i < FILTER_PRESS_SIZE; i++)
+		{
+			values[i] = newValue;
+			*sum += newValue;
+		}
+		firstSample = 0;
+	}
+
 	// Replace
 	*sum -= values[*head];
 	values[*head] = newValue;
