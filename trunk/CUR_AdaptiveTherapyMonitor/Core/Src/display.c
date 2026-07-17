@@ -349,6 +349,10 @@ void _DisplayRenderPressure(uint32_t press)
 		tens = (press / 10);
 		ones = (press % 10);
 	}
+	else
+	{
+		ones = press;
+	}
 
 	uint16_t xOffset = objNumLargeZero.shape.width + 5;	// 5 pixels of spacing
 	_DisplayRenderLargeNumber(ones, 0, 0);
