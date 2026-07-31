@@ -19,6 +19,7 @@
 #include "statemachine.h"
 #include "display.h"
 #include "touch.h"
+#include "pressure.h"
 
 /**
  * Our system state
@@ -65,6 +66,9 @@ void StateDrive()
 			// Advance on touch
 			if (TOUCH_Event() && TOUCH_TargetActive(sTargetBottomButton))
 			{
+				// Automatically zero the pressure sensor before measuring begins
+				Pressure_Zero();
+				
 				ChangeState(eSTATE_MEASURING);
 			}
 			break;
