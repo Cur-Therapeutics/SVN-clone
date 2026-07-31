@@ -4,20 +4,22 @@
 *
 *   Description:    Pressure sensor accessor
 *
-*   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
-*
 *--------------------------------------------------------------------
 *
 *   Revision History:
 *
 *   Rev.    | Date      | Name              | Description
-*   1       | 06/15/26  | Brian Compter     | Created.
+*   2       | 07/31/26  | WJ                | Fixed.
 *
 ********************************************************************/
 
 #include "main.h"
 #include "pressure.h"
 #include "ad7124.h"
+#include "barometric.h" // Added to access BarometricGetLastFilt and mBarometricSensor
+
+// Store the zeroing offset
+static float user_pressure_offset_mmHg = 0.0f;
 
 /**
  * @brief Get the baseline pressure from the barometric sensor
@@ -29,13 +31,41 @@ float GetBaselinePressure()
 }
 
 /**
+ * @brief Zeros out the pressure reading to the current ambient conditions.
+ * Call this prior to starting a measurement.
+ */
+void Pressure_Zero(void)
+{
+	// Temporarily clear offset to get the true gauge pressure
+	user_pressure_offset_mmHg = 0.0f;
+	
+	// Read the absolute pressure from the ADC
+	float absolute_pressure = AD7124_GetLastEng(&ad7124);
+	
+	// Read the current barometric pressure
+	float barometric_pressure = GetBaselinePressure();
+	
+	// Set the offset to the current uncompensated gauge pressure
+	user_pressure_offset_mmHg = absolute_pressure - barometric_pressure;
+}
+
+/**
  * @brief Get the current pressure reading
  * @param units The desired units
  * @return The pressure in the requested units
  */
 float GetPressure(ePressureUnits units)
 {
-	float pressure = AD7124_GetLastEng(&ad7124);
+	// 1. Get the absolute pressure from the ADC
+	float absolute_pressure = AD7124_GetLastEng(&ad7124);
+	
+	// 2. Get the ambient barometric pressure
+	float barometric_pressure = GetBaselinePressure();
+	
+	// 3. Calculate true gauge pressure (Absolute - Barometric - Offset)
+	float pressure = absolute_pressure - barometric_pressure - user_pressure_offset_mmHg;
+
+	// 4. Convert to the requested units
 	switch (units)
 	{
 		case ePressureUnits_mmHg:
