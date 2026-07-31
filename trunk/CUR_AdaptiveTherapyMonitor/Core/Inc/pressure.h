@@ -4,14 +4,12 @@
 *
 *   Description:    Pressure sensor accessor
 *
-*   Copyright PPMD, Inc. 2026 -- All rights reserved.
-*
 *--------------------------------------------------------------------
 *
 *   Revision History:
 *
 *   Rev.    | Date      | Name              | Description
-*   1       | 06/15/26  | Brian Compter     | Created.
+*   2       | 07/31/26  | Whitney Jackson     | Fixed.
 *
 ********************************************************************/
 #ifndef INC_PRESSURE_H_
@@ -28,10 +26,13 @@
  */
 typedef enum
 {
-	ePressureUnits_mmHg,
-	ePressureUnits_kPa,
-	ePressureUnits_psi
+    ePressureUnits_mmHg,
+    ePressureUnits_kPa,
+    ePressureUnits_psi
 } ePressureUnits;
+
+// Added Zeroing Function Prototype
+void Pressure_Zero(void);
 
 float GetBaselinePressure(void);
 float GetPressure(ePressureUnits units);
