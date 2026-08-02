@@ -4,15 +4,13 @@
  *
  *   Description:    Provides diagnostics communication over UART
  *
- *   Copyright NextPhase Medical, Inc. 2026 -- All rights reserved.
- *
  *--------------------------------------------------------------------
  *
  *   Revision History:
  *
  *   Rev.    | Date      | Name              | Description
  *   1       | 08/14/19  | Brian Compter     | Created.
- *
+ *   2         08/02/26    Whitney Jackson     Revised
  ********************************************************************/
 
 #include <string.h>
