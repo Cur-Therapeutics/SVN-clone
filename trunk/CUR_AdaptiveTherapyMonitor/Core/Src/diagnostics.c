@@ -39,6 +39,9 @@
  */
 extern UART_HandleTypeDef huart4;		// Diagnostics
 
+// 0 = mmHg (default), 1 = PSI
+uint8_t gPressureUnit = 0;
+
 /**
  * Tracks the current Rx state
  */
@@ -432,6 +435,10 @@ void DIAG_Process(uint8_t * data)
 		gDiagReply.ad7124Read.engValue = AD7124_GetLastEng(&ad7124);
 		DIAG_Send(cmd, &gDiagReply);
 		break;
+
+		case eDIAG_SET_PRESSURE_UNIT:
+        gPressureUnit = cmd->setPressureUnit.unit; // 0 = mmHg, 1 = PSI
+        break;
 
 	case eDIAG_ACCEL_READ:
 		// Return dummy values since the accelerometer is disabled
