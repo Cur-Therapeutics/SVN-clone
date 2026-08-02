@@ -4,7 +4,6 @@
 *
 *   Description:    Manages the backlight through a PWM timer
 *
-*   Copyright NextPhase Medical, Inc. 2023 -- All rights reserved.
 *
 *--------------------------------------------------------------------
 *
