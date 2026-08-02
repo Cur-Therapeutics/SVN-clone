@@ -76,7 +76,7 @@ void main_cur()
 	I2C_Init();
 	AD7124_Init();
 	AdcInit();
-	AccelInit();
+	// AccelInit();
 	TOUCH_Init();
 	StateInit();
 	BarometricInit();
@@ -102,7 +102,7 @@ void main_cur()
 		RTC_Drive();
 		AdcDrive();
 		LCD_Drive();
-		AccelDrive();
+		// AccelDrive();
 		TOUCH_Drive();
 		BarometricDrive();
 		DataLogDrive();
