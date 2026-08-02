@@ -21,7 +21,7 @@
 /**
  * Backlight values
  */
-#define BACKLIGHT_FULL	4000
+#define BACKLIGHT_FULL	300
 #define BACKLIGHT_DIM	250 /* 750 */
 #define BACKLIGHT_SPEED	100
 
