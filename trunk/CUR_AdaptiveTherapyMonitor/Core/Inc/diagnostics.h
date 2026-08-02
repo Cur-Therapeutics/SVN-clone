@@ -103,6 +103,7 @@ typedef enum
 		eDIAG_READ_BAROMETRIC,
 		eDIAG_DATALOG_EVENT_DATA,
 		eDIAG_DATALOG_DATA,
+eDIAG_SET_PRESSURE_UNIT,
 	eDIAG_Count
 } eDIAG_Commands;
 
@@ -126,6 +127,14 @@ typedef struct __attribute__((packed, aligned(1)))
 {
 	uint32_t newState;
 }sDIAG_ChangeState;
+
+/**
+ * Set pressure unit (0 = mmHg, 1 = PSI)
+ */
+typedef struct __attribute__((packed, aligned(1)))
+{
+    uint8_t unit; // 0 for mmHg, 1 for PSI
+} sDIAG_SetPressureUnit;
 
 /**
  * RTC status and write
@@ -460,6 +469,7 @@ typedef struct
 		sDIAG_BarometricData	barometricData;
 		sEventHeader			eventHeader;
 		sDIAG_DataLogData		dataLogData;
+sDIAG_SetPressureUnit   setPressureUnit;
 	};
 } sDIAG_Command;
 
