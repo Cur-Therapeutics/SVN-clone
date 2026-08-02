@@ -436,9 +436,10 @@ void DIAG_Process(uint8_t * data)
 		break;
 
 	case eDIAG_ACCEL_READ:
-		gDiagReply.accelRead.x = AccelReadX();
-		gDiagReply.accelRead.y = AccelReadY();
-		gDiagReply.accelRead.z = AccelReadZ();
+		// Return dummy values since the accelerometer is disabled
+		gDiagReply.accelRead.x = 0;
+		gDiagReply.accelRead.y = 0;
+		gDiagReply.accelRead.z = 0;
 		DIAG_Send(cmd, &gDiagReply);
 		break;
 
