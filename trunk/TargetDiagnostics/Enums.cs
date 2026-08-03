@@ -61,6 +61,7 @@ namespace CURDiags
             eDIAG_AD7124_INIT,
             eDIAG_AD7124_RESET,
             eDIAG_AD7124_READ_DATA,
+            eDIAG_SET_PRESSURE_UNIT,
             eDIAG_ACCEL_READ,
             eDIAG_ADC_READ,
             eDIAG_SET_STATE,
