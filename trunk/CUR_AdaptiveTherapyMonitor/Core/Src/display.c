@@ -22,6 +22,7 @@
 #include "ospiflash.h"
 #include "lcd.h"
 #include "gpio.h"
+#include "diagnostics.h"
 
 /**
  * Display Object Queue
@@ -162,13 +163,15 @@ void DisplayUpdate()
 			LCD_FillWindow(mBufferState, colorCurBlue);
 			ObjectDraw(objSelectPressureUnits, mBufferState, 0, 0);
 
-			objMmHgBlock.state = eUnitBlockState_Selected;
+			// Highlight mmHg if gPressureUnit is 0
+			objMmHgBlock.state = (gPressureUnit == 0) ? eUnitBlockState_Selected : eUnitBlockState_Default;
 			ObjectDraw(objMmHgBlock, mBufferState, 0, 0);
 
 			objKpaBlock.state = eUnitBlockState_Default;
 			ObjectDraw(objKpaBlock, mBufferState, 0, 0);
 
-			objPsiBlock.state = eUnitBlockState_Default;
+			// Highlight PSI if gPressureUnit is 1
+			objPsiBlock.state = (gPressureUnit == 1) ? eUnitBlockState_Selected : eUnitBlockState_Default;
 			ObjectDraw(objPsiBlock, mBufferState, 0, 0);
 
 			objStartFinishBar.state = eObjStartFinishBarState_StartMeasureingActive;
