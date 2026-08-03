@@ -45,7 +45,7 @@ void StateInit()
 */
 sTouchTarget sTargetMmHg = {0, 81, 107, 104};
 sTouchTarget sTargetPsi = {213, 81, 107, 104};
-uint8_t gPressureUnit = 0; // 0=mmHg, 1=PSI
+extern uint8_t gPressureUnit;
 
 /**
  * @brief Perform state machine behavior
