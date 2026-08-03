@@ -21,6 +21,7 @@
 #include "gpio.h"
 #include "string.h"
 #include "statemachine.h"
+#include "diagnostics.h"
 
 // Error counter
 uint32_t i2CErrorCnt = 0;
@@ -193,6 +194,12 @@ void _PressureDriveHandler(sPressureSensor * sensor)
 
 			// Convert to mmHg
 			sensor->lastPressure *= 0.750062f;
+
+			// Convert to PSI if the GUI requested it
+			if (gPressureUnit == 1) 
+			{
+				sensor->lastPressure /= 51.7149f;
+			}
 
 			// Filter
 			sensor->lastPressureFilt = __FilterPressAdd(sensor->lastPressure, filterValues, &filterHead, &filterSum);
