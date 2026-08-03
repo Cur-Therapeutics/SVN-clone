@@ -20,6 +20,11 @@
 #include "display.h"
 #include "touch.h"
 #include "pressure.h"
+#include "diagnostics.h"
+
+
+sTouchTarget sTargetMmHg = {0, 81, 107, 104};
+sTouchTarget sTargetPsi = {213, 81, 107, 104};
 
 /**
  * Our system state
@@ -63,13 +68,24 @@ void StateDrive()
 
 		case eSTATE_SELECT_UNITS:
 
-			// Advance on touch
-			if (TOUCH_Event() && TOUCH_TargetActive(sTargetBottomButton))
+			// Check for any touch event
+			if (TOUCH_Event())
 			{
-				// Automatically zero the pressure sensor before measuring begins
-				Pressure_Zero();
-				
-				ChangeState(eSTATE_MEASURING);
+				if (TOUCH_TargetActive(sTargetMmHg))
+				{
+					gPressureUnit = 0; // Switch to mmHg
+				}
+				else if (TOUCH_TargetActive(sTargetPsi))
+				{
+					gPressureUnit = 1; // Switch to PSI
+				}
+				else if (TOUCH_TargetActive(sTargetBottomButton))
+				{
+					// Automatically zero the pressure sensor before measuring begins
+					Pressure_Zero();
+					
+					ChangeState(eSTATE_MEASURING);
+				}
 			}
 			break;
 
