@@ -24,6 +24,8 @@
 #include "gpio.h"
 #include "diagnostics.h"
 
+extern uint8_t gPressureUnit;
+
 /**
  * Display Object Queue
  */
@@ -163,32 +165,42 @@ void DisplayUpdate()
 			LCD_FillWindow(mBufferState, colorCurBlue);
 			ObjectDraw(objSelectPressureUnits, mBufferState, 0, 0);
 
-			// Highlight mmHg if gPressureUnit is 0
+			// Highlight mmHg if selected
 			objMmHgBlock.state = (gPressureUnit == 0) ? eUnitBlockState_Selected : eUnitBlockState_Default;
 			ObjectDraw(objMmHgBlock, mBufferState, 0, 0);
 
 			objKpaBlock.state = eUnitBlockState_Default;
 			ObjectDraw(objKpaBlock, mBufferState, 0, 0);
 
-			// Highlight PSI if gPressureUnit is 1
+			// Highlight PSI if selected
 			objPsiBlock.state = (gPressureUnit == 1) ? eUnitBlockState_Selected : eUnitBlockState_Default;
 			ObjectDraw(objPsiBlock, mBufferState, 0, 0);
 
 			objStartFinishBar.state = eObjStartFinishBarState_StartMeasureingActive;
 			ObjectDraw(objStartFinishBar, mBufferState, 0, 0);
-
 			break;
 
 		case eSTATE_MEASURING:
 		case eSTATE_COMPLETE_SELECTED:
 			LCD_FillWindow(mBufferState, colorCurBlue);
+			
+			// Swap the visual units icon (State 0 = mmHg, State 2 = PSI)
+			objUnitsLarge.state = (gPressureUnit == 1) ? 2 : 0; 
 			ObjectDraw(objUnitsLarge, mBufferState, 0, 0);
+			
 			//ObjectDraw(objElapsed, mBufferState, 0, 0);
 			objStartFinishBar.state = (state == eSTATE_MEASURING) ? 1 : 0;
 			ObjectDraw(objStartFinishBar, mBufferState, 0, 0);
-			_DisplayRenderPressure(GetPressure(ePressureUnits_mmHg));
+			
+			// Grab raw mmHg from the sensor, convert ONLY for the screen
+			uint32_t press = GetPressure(ePressureUnits_mmHg);
+			if (gPressureUnit == 1) 
+			{
+				press = (uint32_t)((float)press / 51.7149f);
+			}
+			
+			_DisplayRenderPressure(press);
 			break;
-
 
 		case eSTATE_COMPLETE:
 			LCD_FillWindow(mBufferState, colorCurBlue);
