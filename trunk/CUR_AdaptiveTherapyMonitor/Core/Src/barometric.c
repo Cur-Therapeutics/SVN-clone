@@ -195,12 +195,6 @@ void _PressureDriveHandler(sPressureSensor * sensor)
 			// Convert to mmHg
 			sensor->lastPressure *= 0.750062f;
 
-			// Convert to PSI if the GUI requested it
-			if (gPressureUnit == 1) 
-			{
-				sensor->lastPressure /= 51.7149f;
-			}
-
 			// Filter
 			sensor->lastPressureFilt = __FilterPressAdd(sensor->lastPressure, filterValues, &filterHead, &filterSum);
 
