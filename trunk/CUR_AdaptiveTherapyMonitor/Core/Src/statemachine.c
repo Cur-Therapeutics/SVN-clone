@@ -22,10 +22,6 @@
 #include "pressure.h"
 #include "diagnostics.h"
 
-
-sTouchTarget sTargetMmHg = {0, 81, 107, 104};
-sTouchTarget sTargetPsi = {213, 81, 107, 104};
-
 /**
  * Our system state
  */
@@ -45,6 +41,11 @@ void StateInit()
 {
 	mSystemState = eSTATE_POST;
 }
+/**
+*/
+sTouchTarget sTargetMmHg = {0, 81, 107, 104};
+sTouchTarget sTargetPsi = {213, 81, 107, 104};
+uint8_t gPressureUnit = 0; // 0=mmHg, 1=PSI
 
 /**
  * @brief Perform state machine behavior
@@ -74,10 +75,12 @@ void StateDrive()
 				if (TOUCH_TargetActive(sTargetMmHg))
 				{
 					gPressureUnit = 0; // Switch to mmHg
+					DisplayUpdate();   // Force instant visual redraw
 				}
 				else if (TOUCH_TargetActive(sTargetPsi))
 				{
 					gPressureUnit = 1; // Switch to PSI
+					DisplayUpdate();   // Force instant visual redraw
 				}
 				else if (TOUCH_TargetActive(sTargetBottomButton))
 				{
