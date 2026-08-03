@@ -31,6 +31,7 @@ extern uint32_t gLastIdleTicks;
 extern uint32_t gMinIdleTicks;
 extern uint32_t gMaxIdleTicks;
 extern uint32_t gSkippedTicks;
+extern uint8_t gPressureUnit;
 
 /**
  * The start byte is always the first byte of any communication
